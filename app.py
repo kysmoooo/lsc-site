@@ -98,27 +98,27 @@ def is_user_in_guild(user_id):
 # ========== ROUTES PAGES STATIQUES ==========
 @app.route("/")
 def index():
-    return render_template('templates', 'index.html.html')
+    return render_template('index.html.html')
 
 @app.route("/personnel.html")
 def staff_page():
-    return render_template('templates', 'personnel.html')
+    return render_template('personnel.html')
 
 @app.route("/recrutement.html")
 def recruitment_page():
-    return render_template('templates', 'recrutement.html')
+    return render_template('recrutement.html')
 
 @app.route("/pricing.html")
 def pricing_page():
-    return render_template('templates', 'pricing.html')
+    return render_template('pricing.html')
 
 @app.route("/direction.html")
 def direction_page():
-    return render_template('templates', 'direction.html')
+    return render_template('direction.html')
 
 @app.route("/commande.html")
 def clickcollect_page():
-    return render_template('templates', 'commande.html')
+    return render_template('commande.html')
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
@@ -583,7 +583,7 @@ def api_pricing():
 # ========== GESTION DES ERREURS ==========
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('templates', '404.html') if os.path.exists('templates/404.html') else "Page non trouvée", 404
+    return render_template('404.html') if os.path.exists('templates/404.html') else "Page non trouvée", 404
 
 @app.errorhandler(Exception)
 def handle_exception(e):
