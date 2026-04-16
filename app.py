@@ -513,7 +513,7 @@ def direction_login():
     
     if user:
         session['direction_id'] = user['id']
-        return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['name'], "role": user['role']}})
+        return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
     return jsonify({"success": False}), 401
 
 @app.route("/direction/logout", methods=["POST"])
