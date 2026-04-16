@@ -616,6 +616,138 @@
         .status-badge.accepted { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
         .status-badge.rejected { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
         .status-badge.closed { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
+
+        /* Styles pour les annonces */
+        .annonces-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .annonce-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        .annonce-card:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .annonce-titre {
+            color: #ffd700;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .annonce-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .annonce-texte {
+            color: #ccc;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+        }
+
+        .annonce-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-edit {
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(10, 10, 20, 0.95);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: #ffd700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
     </style>
 </head>
 <body>
@@ -691,11 +823,33 @@
         const translations = {
             fr: {
                 nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
-                direction: { title: "Espace direction", select: "Connexion panel Direction", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures", absences: "📅 Absences" }
+                direction: {
+                    title: "Espace direction", select: "Connexion panel Direction", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures", absences: "📅 Absences", annonces: "📢 Annonces",
+                    nouvelleAnnonce: "➕ Nouvelle annonce",
+                    titre: "Titre",
+                    imageUrl: "Image URL",
+                    texte: "Texte",
+                    enregistrer: "Enregistrer",
+                    annuler: "Annuler",
+                    modifier: "Modifier",
+                    supprimer: "Supprimer",
+                    aucuneAnnonce: "Aucune annonce pour le moment"
+                }
             },
             en: {
                 nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
-                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications", absences: "📅 Absences" }
+                direction: { 
+                    title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications", absences: "📅 Absences", annonces: "📢 Announcements",
+                    nouvelleAnnonce: "➕ New announcement",
+                    titre: "Title",
+                    imageUrl: "Image URL",
+                    texte: "Text",
+                    enregistrer: "Save",
+                    annuler: "Cancel",
+                    modifier: "Edit",
+                    supprimer: "Delete",
+                    aucuneAnnonce: "No announcements at the moment" 
+                }
             }
         };
 
@@ -706,6 +860,7 @@
         let selectedApplicationId = null;
         let currentTab = 'candidature';
         let absences = [];
+        let annonces = [];
 
         // Données de test pour les absences
         const demoAbsences = [
@@ -742,6 +897,7 @@
                         if (currentDirectionUser) {
                             if (currentTab === 'candidature') loadApplications();
                             else if (currentTab === 'absences') loadAbsences();
+                            else if (currentTab === 'annonces') loadAnnonces();
                         }
                     }
                 });
@@ -835,6 +991,7 @@
                     <div class="direction-tabs">
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
                         <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
+                        <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
                     </div>
                     <div id="direction-content">
                         <div class="loader">⏳ Chargement...</div>
@@ -1049,25 +1206,6 @@
                             `).join('')}
                         </div>
                     </div>
-                    <div class="add-absence-form">
-                        <h3 style="color: #ffd700; margin-bottom: 1rem;">➕ Déclarer une absence</h3>
-                        <form id="new-absence-form">
-                            <div class="form-group">
-                                <label>👤 Nom du personnel</label>
-                                <input type="text" id="absence-name" required placeholder="Nom complet">
-                            </div>
-                            <div class="form-group">
-                                <label>📅 Date de début</label>
-                                <input type="date" id="absence-start" required>
-                            </div>
-                            <div class="form-group">
-                                <label>📅 Date de fin</label>
-                                <input type="date" id="absence-end" required>
-                            </div>
-                            <button type="submit" class="primary" style="width: 100%;">✅ Enregistrer l'absence</button>
-                        </form>
-                        <div id="absence-form-message" class="form-message" style="display: none;"></div>
-                    </div>
                 </div>
             `;
             
@@ -1168,6 +1306,157 @@
                 if (m === '>') return '&gt;';
                 return m;
             });
+        }
+
+        // ========== GESTION DES ANNONCES ==========
+        function loadAnnonces() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loader">⏳ Chargement des annonces...</div>';
+            
+            fetch(`${API_BASE}/api/annonces`, { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    annonces = data;
+                    displayAnnonces();
+                })
+                .catch(error => {
+                    console.error('Erreur chargement annonces:', error);
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des annonces</p>';
+                });
+        }
+
+        function displayAnnonces() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            const t = translations[currentLang].direction;
+            
+            container.innerHTML = `
+                <div>
+                    <div class="annonces-header">
+                        <h3 style="color: #ffd700;">📢 Gérer les annonces</h3>
+                        <button class="btn-create" id="btn-create-annonce">➕ ${t.nouvelleAnnonce}</button>
+                    </div>
+                    <div class="applications-scroll">
+                        ${annonces.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 ${t.aucuneAnnonce}</p>` : annonces.map(annonce => `
+                            <div class="annonce-card" data-id="${annonce.id}">
+                                <div class="annonce-titre">📌 ${escapeHtml(annonce.titre)}</div>
+                                ${annonce.image_url ? `<img class="annonce-image" src="${escapeHtml(annonce.image_url)}" alt="Image" style="max-width: 200px;">` : ''}
+                                <div class="annonce-texte">${escapeHtml(annonce.texte)}</div>
+                                <div class="annonce-actions">
+                                    <button class="btn-edit" data-id="${annonce.id}">✏️ ${t.modifier}</button>
+                                    <button class="btn-delete" data-id="${annonce.id}">🗑 ${t.supprimer}</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('btn-create-annonce')?.addEventListener('click', () => openAnnonceModal());
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    const annonce = annonces.find(a => a.id === id);
+                    if (annonce) openAnnonceModal(annonce);
+                });
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteAnnonce(parseInt(btn.dataset.id)));
+            });
+        }
+
+        // Modal HTML
+        function openAnnonceModal(annonce = null) {
+            const t = translations[currentLang].direction;
+            const modalHtml = `
+                <div id="annonce-modal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>${annonce ? '✏️ ' + t.modifier : '➕ ' + t.nouvelleAnnonce}</h2>
+                            <button class="modal-close" onclick="closeAnnonceModal()">✕</button>
+                        </div>
+                        <form id="annonce-form">
+                            <div class="form-group">
+                                <label>${t.titre}</label>
+                                <input type="text" id="annonce-titre" value="${annonce ? escapeHtml(annonce.titre) : ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>${t.imageUrl}</label>
+                                <input type="url" id="annonce-image" value="${annonce ? escapeHtml(annonce.image_url || '') : ''}" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>${t.texte}</label>
+                                <textarea id="annonce-texte" rows="4" required>${annonce ? escapeHtml(annonce.texte) : ''}</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="ghost" onclick="closeAnnonceModal()">${t.annuler}</button>
+                                <button type="submit" class="primary">${t.enregistrer}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            const form = document.getElementById('annonce-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveAnnonce(annonce?.id);
+            });
+        }
+
+        function closeAnnonceModal() {
+            const modal = document.getElementById('annonce-modal');
+            if (modal) modal.remove();
+        }
+
+        function saveAnnonce(id = null) {
+            const titre = document.getElementById('annonce-titre').value.trim();
+            const image_url = document.getElementById('annonce-image').value.trim();
+            const texte = document.getElementById('annonce-texte').value.trim();
+            
+            const url = id ? `${API_BASE}/api/annonces/${id}` : `${API_BASE}/api/annonces`;
+            const method = id ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ titre, image_url, texte })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeAnnonceModal();
+                    loadAnnonces();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Une erreur est survenue'));
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'enregistrement');
+            });
+        }
+
+        function deleteAnnonce(id) {
+            if (confirm('Supprimer cette annonce ?')) {
+                fetch(`${API_BASE}/api/annonces/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadAnnonces();
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

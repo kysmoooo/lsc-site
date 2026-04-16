@@ -683,6 +683,96 @@ def api_pricing():
     }
     return jsonify(pricing_data)
 
+# ========== API GESTION DES ANNONCES ==========
+@app.route("/api/annonces", methods=["GET"])
+@require_direction
+def get_annonces():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+        
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, titre, image_url, texte, updated_at FROM annonces ORDER BY updated_at DESC")
+        annonces = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return jsonify(annonces)
+    except Exception as e:
+        print(f"❌ Erreur GET annonces: {e}")
+        return jsonify([])
+
+@app.route("/api/annonces", methods=["POST"])
+@require_direction
+def create_annonce():
+    try:
+        data = request.get_json()
+        titre = data.get('titre')
+        image_url = data.get('image_url')
+        texte = data.get('texte')
+        
+        if not titre or not texte:
+            return jsonify({"success": False, "error": "Titre et texte requis"}), 400
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("INSERT INTO annonces (titre, image_url, texte) VALUES (%s, %s, %s)", (titre, image_url, texte))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"❌ Erreur POST annonce: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/annonces/<int:annonce_id>", methods=["PUT"])
+@require_direction
+def update_annonce(annonce_id):
+    try:
+        data = request.get_json()
+        titre = data.get('titre')
+        image_url = data.get('image_url')
+        texte = data.get('texte')
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("UPDATE annonces SET titre=%s, image_url=%s, texte=%s WHERE id=%s", (titre, image_url, texte, annonce_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"❌ Erreur PUT annonce: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/annonces/<int:annonce_id>", methods=["DELETE"])
+@require_direction
+def delete_annonce(annonce_id):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("DELETE FROM annonces WHERE id = %s", (annonce_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"❌ Erreur DELETE annonce: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ========== GESTION DES ERREURS ==========
 @app.errorhandler(404)
 def page_not_found(e):
