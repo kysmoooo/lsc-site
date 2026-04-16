@@ -337,7 +337,7 @@
     <div class="page">
         <div class="layout">
             <header class="topbar">
-                <a class="brand brand-link" href="index.html">
+                <a class="brand brand-link" href="/">
                     <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
                     <span class="brand-text">LS Customs</span>
                 </a>
@@ -347,7 +347,8 @@
                     <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
                     <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
                     <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
-                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>                </nav>
+                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>
+                </nav>
                 <div class="nav-actions">
                     <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
                     <div class="lang-toggle">
@@ -362,7 +363,7 @@
                     <section class="page-header animate-in">
                         <div>
                             <h1 data-key="recruit.title">Recrutement</h1>
-                            <p data-key="recruit.intro">Postule en quelques minutes. Les candidatures sont envoyees aux membres de la direction.</p>
+                            <p data-key="recruit.intro">Postule en quelques minutes. Les candidatures sont envoyées aux membres de la direction.</p>
                         </div>
                     </section>
 
@@ -374,7 +375,7 @@
                         <form id="application-form" class="form" style="display: none;">
                             <div class="form-grid">
                                 <label>
-                                    <span data-key="form.fullName">NOM Prenom (Ex: Nash Dawkins)</span>
+                                    <span data-key="form.fullName">NOM Prénom (Ex: Nash Dawkins)</span>
                                     <input name="fullName" id="fullName" required>
                                 </label>
                                 <label>
@@ -386,7 +387,7 @@
                                     <input name="birthDate" type="date" id="birthDate" required>
                                 </label>
                                 <label>
-                                    <span data-key="form.phone">Numero de Telephone (Ex: 555-12345)</span>
+                                    <span data-key="form.phone">Numéro de Téléphone (Ex: 555-12345)</span>
                                     <input name="phone" id="phone" required>
                                 </label>
                                 <label>
@@ -394,12 +395,12 @@
                                     <input name="rib" id="rib" required>
                                 </label>
                                 <label>
-                                    <span data-key="form.experience">Experience</span>
+                                    <span data-key="form.experience">Expérience</span>
                                     <input name="experience" id="experience" required>
                                 </label>
                             </div>
                             <label>
-                                <span data-key="form.availability">Disponibilite</span>
+                                <span data-key="form.availability">Disponibilité</span>
                                 <input name="availability" id="availability" required>
                             </label>
                             <label>
@@ -409,8 +410,8 @@
                             <button class="primary" type="submit" id="submit-application">
                                 <span data-key="recruit.submit">Envoyer la candidature</span>
                             </button>
-                            <div id="submit-success" class="form-message success" style="display: none;" data-key="recruit.success">Merci, ta candidature a bien ete envoyee</div>
-                            <div id="submit-error" class="form-message error" style="display: none;" data-key="recruit.error">Une erreur est survenue. Reessaie.</div>
+                            <div id="submit-success" class="form-message success" style="display: none;" data-key="recruit.success">Merci, ta candidature a bien été envoyée</div>
+                            <div id="submit-error" class="form-message error" style="display: none;" data-key="recruit.error">Une erreur est survenue. Réessaie.</div>
                         </form>
                     </section>
                 </div>
@@ -432,7 +433,7 @@
     <!-- Modal de confirmation -->
     <div id="submit-modal" class="modal-backdrop" style="display: none;">
         <div class="modal-card">
-            <p class="modal-eyebrow">Envois de la Candidature</p>
+            <p class="modal-eyebrow">Envoi de la Candidature</p>
             <h3>Votre candidature a bien été envoyée</h3>
             <p class="modal-body">
                 Transmettez le numéro <strong id="submit-id">ID indisponible</strong> à la Secrétaire Carla.
@@ -445,18 +446,19 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:4000';
+        // Détection automatique de l'URL de base
+        const API_BASE = window.location.origin;
         
         const translations = {
             fr: {
                 nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
-                recruit: { title: "Recrutement", intro: "Postule en quelques minutes. Les candidatures sont envoyees aux membres de la direction.", loginRequired: "Connecte-toi avec Discord pour postuler.", loginButton: "Connexion Avec Discord", submit: "Envoyer la candidature", success: "Merci, ta candidature a bien ete envoyee", error: "Une erreur est survenue. Reessaie." },
-                form: { fullName: "NOM Prenom (Ex: Nash Dawkins)", discordTag: "ID DISCORD (Ex: 123456789012345678)", birthDate: "Date de naissance", phone: "Numero de Telephone (Ex: 555-12345)", rib: "RIB", experience: "Experience", availability: "Disponibilite", motivation: "Motivation" }
+                recruit: { title: "Recrutement", intro: "Postule en quelques minutes. Les candidatures sont envoyées aux membres de la direction.", loginRequired: "Connecte-toi avec Discord pour postuler.", loginButton: "Connexion Avec Discord", submit: "Envoyer la candidature", success: "Merci, ta candidature a bien été envoyée", error: "Une erreur est survenue. Réessaie." },
+                form: { fullName: "NOM Prénom (Ex: Nash Dawkins)", discordTag: "ID DISCORD (Ex: 123456789012345678)", birthDate: "Date de naissance", phone: "Numéro de Téléphone (Ex: 555-12345)", rib: "RIB", experience: "Expérience", availability: "Disponibilité", motivation: "Motivation" }
             },
             en: {
                 nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
                 recruit: { title: "Recruitment", intro: "Apply in a few minutes. Applications are sent to the management team.", loginRequired: "Log in with Discord to apply.", loginButton: "Discord login", submit: "Submit Application", success: "Thank you, your application has been successfully submitted", error: "An error occurred. Please try again." },
-                form: { fullName: "NOM Prenom (Ex: Nash Dawkins)", discordTag: "ID DISCORD (Ex: 123456789012345678)", birthDate: "Date of birth", phone: "Numero de Telephone (Ex: 555-12345)", rib: "RIB", experience: "Experience", availability: "Availability", motivation: "Motivation" }
+                form: { fullName: "Full Name (Ex: Nash Dawkins)", discordTag: "DISCORD ID (Ex: 123456789012345678)", birthDate: "Date of birth", phone: "Phone Number (Ex: 555-12345)", rib: "RIB", experience: "Experience", availability: "Availability", motivation: "Motivation" }
             }
         };
 
@@ -476,8 +478,10 @@
                 }
                 if (value && typeof value === 'string') {
                     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = value;
-                    } else {
+                        if (!el.id || (el.id !== 'discordTag')) {
+                            el.placeholder = value;
+                        }
+                    } else if (el.tagName !== 'A') {
                         el.textContent = value;
                     }
                 }
@@ -555,7 +559,10 @@
                         body: JSON.stringify(formData)
                     });
                     
-                    if (!response.ok) throw new Error('Submit failed');
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Submit failed');
+                    }
                     
                     const data = await response.json();
                     const modal = document.getElementById('submit-modal');
@@ -568,7 +575,9 @@
                     if (discordUser) document.getElementById('discordTag').value = discordUser.id;
                     
                 } catch (error) {
+                    console.error('Submit error:', error);
                     errorDiv.style.display = 'block';
+                    errorDiv.textContent = error.message || 'Une erreur est survenue';
                 } finally {
                     submitBtn.disabled = false;
                 }
