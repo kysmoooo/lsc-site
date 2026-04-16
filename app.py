@@ -42,7 +42,7 @@ login_manager.login_view = 'auth_discord'
 
 # Classe User
 class User(UserMixin):
-    def __init__(self, id, username, discord_id):
+    def __init__(self, id, username, discord_id, avatar):
         self.id = id
         self.username = username
         self.discord_id = discord_id
@@ -60,7 +60,7 @@ def load_user(user_id):
         user = cur.fetchone()
         cur.close()
         if user:
-            return User(user['id'], user['username'], user['discord_id'])
+            return User(user['id'], user['username'], user['discord_id'], user.get('avatar_url'))
         return None
     except Exception as e:
         print(f"❌ Erreur load_user: {e}")
@@ -463,7 +463,7 @@ def callback():
         conn.close()
         
         # Créer session
-        user = User(user_id, discord_user["username"], discord_user["id"])
+        user = User(user_id, discord_user["username"], discord_user["id"], discord_user.get("avatar"))
         login_user(user)
         session["user_id"] = user_id
         
