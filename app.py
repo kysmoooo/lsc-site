@@ -15,7 +15,7 @@ def now_paris():
     return datetime.now(PARIS_TZ)
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "ez70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
 
 # Configuration MySQL
 DB_CONFIG = {
@@ -29,11 +29,11 @@ DB_CONFIG = {
 }
 
 # Configuration Discord
-DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "1481295358431727616")
-DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "")
-DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://votre-site.com/callback")
-DISCORD_GUILD_ID = "1477019441815359540"
-BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
+DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "814277691981168680")
+DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIfPcdAT0Cacn2nSL4rF")
+DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app//callback")
+DISCORD_GUILD_ID = "925525617863184445"
+BOT_TOKEN = os.environ.get("DISCORD_TOKEN", "ODE0Mjc3NjkxOTgxMTY4Njgw.GhuT1H.uBgbog6m7_pPjw0I5jIfisF7R22rOzRCCHeOFg")
 
 # Login manager
 login_manager = LoginManager()
