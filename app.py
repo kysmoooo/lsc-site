@@ -98,27 +98,27 @@ def is_user_in_guild(user_id):
 # ========== ROUTES PAGES STATIQUES ==========
 @app.route("/")
 def index():
-    return render_template('index.html.html', active_page='index')
+    return render_template('templates', 'index.html.html')
 
 @app.route("/personnel.html")
 def staff_page():
-    return render_template('personnel.html', active_page='personnel')
+    return render_template('templates', 'personnel.html')
 
 @app.route("/recrutement.html")
 def recruitment_page():
-    return render_template('recrutement.html', active_page='recrutement')
+    return render_template('templates', 'recrutement.html')
 
 @app.route("/pricing.html")
 def pricing_page():
-    return render_template('pricing.html', active_page='pricing')
+    return render_template('templates', 'pricing.html')
 
 @app.route("/direction.html")
 def direction_page():
-    return render_template('direction.html', active_page='direction')
+    return render_template('templates', 'direction.html')
 
 @app.route("/commande.html")
 def clickcollect_page():
-    return render_template('commande.html', active_page='commande')
+    return render_template('templates', 'commande.html')
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
