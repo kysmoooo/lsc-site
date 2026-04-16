@@ -487,11 +487,12 @@ def direction_me():
         conn = get_db_connection()
         if conn:
             cur = conn.cursor(dictionary=True)
-            cur.execute("SELECT id, username, name, role FROM staff_profiles WHERE id=%s", (session['direction_id'],))
+            cur.execute("SELECT id, username, display_name, role FROM direction_users WHERE id=%s", (session['direction_id'],))
             user = cur.fetchone()
             cur.close()
             conn.close()
             if user:
+                session['direction_id'] = user['id']
                 return jsonify({"user": {"id": user['id'], "displayName": user['name'], "role": user['role']}})
     return jsonify({"user": None})
 
