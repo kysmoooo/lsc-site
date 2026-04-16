@@ -31,7 +31,6 @@
             min-height: 100vh;
         }
 
-        /* Topbar améliorée */
         .topbar {
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(10px);
@@ -203,7 +202,6 @@
             margin-bottom: 4rem;
         }
 
-        /* Panel direction amélioré */
         .direction-panel {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
@@ -241,7 +239,7 @@
             font-weight: 500;
         }
 
-        .form input {
+        .form input, .form select, .form textarea {
             width: 100%;
             padding: 0.75rem 1rem;
             background: rgba(255, 255, 255, 0.08);
@@ -252,7 +250,7 @@
             transition: all 0.2s;
         }
 
-        .form input:focus {
+        .form input:focus, .form select:focus, .form textarea:focus {
             outline: none;
             border-color: #ffd700;
             background: rgba(255, 255, 255, 0.12);
@@ -270,6 +268,12 @@
             background: rgba(231, 76, 60, 0.2);
             border: 1px solid #e74c3c;
             color: #e74c3c;
+        }
+
+        .form-message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
         }
 
         .direction-header {
@@ -321,7 +325,6 @@
             gap: 1.5rem;
         }
 
-        /* Liste des candidatures améliorée */
         .application-list {
             background: rgba(0, 0, 0, 0.35);
             border-radius: 1rem;
@@ -442,7 +445,6 @@
         .status-dot.status-rejected { background: #e74c3c; box-shadow: 0 0 4px #e74c3c; }
         .status-dot.status-closed { background: #95a5a6; }
 
-        /* Détail candidature amélioré */
         .application-detail {
             background: rgba(0, 0, 0, 0.35);
             border-radius: 1rem;
@@ -484,6 +486,82 @@
             gap: 0.75rem;
             margin-top: 1.5rem;
             flex-wrap: wrap;
+        }
+
+        /* Styles pour la section des absences */
+        .absence-list {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .absence-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 0.65rem;
+        }
+
+        .absence-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .absence-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .absence-dates {
+            font-size: 0.75rem;
+            color: #ffd700;
+            margin-top: 0.2rem;
+        }
+
+        .absence-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .delete-absence {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+
+        .delete-absence:hover {
+            background: rgba(231, 76, 60, 0.4);
+        }
+
+        .add-absence-form {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.875rem;
         }
 
         .footer {
@@ -529,14 +607,12 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Loader */
         .loader {
             text-align: center;
             padding: 2rem;
             color: #ffd700;
         }
 
-        /* Badge status */
         .status-badge {
             display: inline-block;
             padding: 0.2rem 0.6rem;
@@ -559,14 +635,14 @@
                     <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
                     <span class="brand-text">LS Customs</span>
                 </a>
-                    <nav class="nav-links">
-                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
-                        <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
-                        <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
-                        <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
-                        <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
-                        <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>
-                    </nav>
+                <nav class="nav-links">
+                    <a class="nav-link" href="#" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link" href="#" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="#" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="#">Click & Collect</a>
+                    <a class="nav-link" href="#" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link active" href="#" data-key="nav.direction">Direction</a>
+                </nav>
                 <div class="nav-actions">
                     <div class="lang-toggle">
                         <button class="active" data-lang="fr">FR</button>
@@ -586,15 +662,15 @@
                     <section class="section animate-in">
                         <div id="direction-panel">
                             <div class="direction-login">
-                                <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                                <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction</p>
                                 <form class="form" id="direction-login-form">
                                     <label>
                                         <span data-key="direction.username">Identifiant</span>
-                                        <input name="username" id="direction-username" required placeholder="ex: nash.direction">
+                                        <input name="username" id="direction-username" required placeholder="Identifiant">
                                     </label>
                                     <label>
                                         <span data-key="direction.password">Mot de passe</span>
-                                        <input name="password" type="password" id="direction-password" required placeholder="••••••••">
+                                        <input name="password" type="password" id="direction-password" required placeholder="Mot de passe">
                                     </label>
                                     <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
                                     <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
@@ -624,11 +700,11 @@
         const translations = {
             fr: {
                 nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
-                direction: { title: "Espace direction", select: "Connexion panel Direction (Voir avec Nash pour identifiant)", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures" }
+                direction: { title: "Espace direction", select: "Connexion panel Direction", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures", absences: "📅 Absences" }
             },
             en: {
                 nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
-                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications" }
+                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications", absences: "📅 Absences" }
             }
         };
 
@@ -637,6 +713,15 @@
         let applications = [];
         let currentStatusFilter = 'pending';
         let selectedApplicationId = null;
+        let currentTab = 'candidature';
+        let absences = [];
+
+        // Données de test pour les absences
+        const demoAbsences = [
+            { id: 1, name: "Dialo Fatou", startDate: "2026-04-11", endDate: "2026-04-20" },
+            { id: 2, name: "Jean Dupont", startDate: "2026-04-15", endDate: "2026-04-18" },
+            { id: 3, name: "Marie Lambert", startDate: "2026-04-20", endDate: "2026-04-25" }
+        ];
 
         function updatePageText() {
             const t = translations[currentLang];
@@ -664,7 +749,8 @@
                         btn.classList.add('active');
                         updatePageText();
                         if (currentDirectionUser) {
-                            loadApplications();
+                            if (currentTab === 'candidature') loadApplications();
+                            else if (currentTab === 'absences') loadAbsences();
                         }
                     }
                 });
@@ -694,15 +780,15 @@
             
             panel.innerHTML = `
                 <div class="direction-login">
-                    <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                    <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction</p>
                     <form class="form" id="direction-login-form">
                         <label>
                             <span data-key="direction.username">Identifiant</span>
-                            <input name="username" id="direction-username" required placeholder="ex: nash.direction">
+                            <input name="username" id="direction-username" required placeholder="Identifiant">
                         </label>
                         <label>
                             <span data-key="direction.password">Mot de passe</span>
-                            <input name="password" type="password" id="direction-password" required placeholder="••••••••">
+                            <input name="password" type="password" id="direction-password" required placeholder="Mot de passe">
                         </label>
                         <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
                         <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
@@ -751,15 +837,16 @@
                     <div class="direction-header">
                         <div>
                             <p class="direction-user">👑 ${currentDirectionUser?.displayName || 'Direction'}</p>
-                            <p class="direction-hint" data-key="direction.select">Gestion des candidatures • Panel Administratif</p>
+                            <p class="direction-hint">Panel Administratif</p>
                         </div>
                         <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
                     </div>
                     <div class="direction-tabs">
-                        <button type="button" class="tab active" data-section="candidature" data-key="direction.candidature">📋 Candidatures</button>
+                        <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
+                        <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
                     </div>
                     <div id="direction-content">
-                        <div class="loader">⏳ Chargement des candidatures...</div>
+                        <div class="loader">⏳ Chargement...</div>
                     </div>
                 </div>
             `;
@@ -767,7 +854,26 @@
             updatePageText();
             
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
-            loadApplications();
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    currentTab = tab.dataset.tab;
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    if (currentTab === 'candidature') {
+                        loadApplications();
+                    } else if (currentTab === 'absences') {
+                        loadAbsences();
+                    }
+                });
+            });
+            
+            if (currentTab === 'candidature') {
+                loadApplications();
+            } else {
+                loadAbsences();
+            }
         }
 
         async function handleDirectionLogout() {
@@ -775,6 +881,7 @@
             window.location.reload();
         }
 
+        // ========== GESTION DES CANDIDATURES ==========
         async function loadApplications() {
             const container = document.getElementById('direction-content');
             if (!container) return;
@@ -826,7 +933,6 @@
                 </div>
             `;
             
-            // Attach filter handlers
             document.querySelectorAll('.status-filter').forEach(filter => {
                 filter.addEventListener('click', () => {
                     currentStatusFilter = filter.dataset.status;
@@ -835,7 +941,6 @@
                 });
             });
             
-            // Attach application click handlers
             document.querySelectorAll('.application-item').forEach(item => {
                 item.addEventListener('click', async () => {
                     const id = parseInt(item.dataset.id);
@@ -892,16 +997,6 @@
                 detailContainer.innerHTML = '<p style="color:#e74c3c;">❌ Erreur lors du chargement des détails</p>';
             }
         }
-        
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
 
         async function updateApplicationStatus(id, status) {
             try {
@@ -918,6 +1013,147 @@
             } catch (error) {
                 console.error('Error updating status:', error);
             }
+        }
+
+        // ========== GESTION DES ABSENCES ==========
+        function loadAbsences() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            // Charger les absences depuis localStorage ou utiliser les données de démo
+            const savedAbsences = localStorage.getItem('absences');
+            if (savedAbsences) {
+                absences = JSON.parse(savedAbsences);
+            } else {
+                absences = demoAbsences;
+                localStorage.setItem('absences', JSON.stringify(absences));
+            }
+            
+            displayAbsences();
+        }
+
+        function displayAbsences() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="direction-grid">
+                    <div class="absence-list">
+                        <div style="margin-bottom: 1rem;">
+                            <h3 style="color: #ffd700;">📅 Absences déclarées</h3>
+                        </div>
+                        <div class="applications-scroll">
+                            ${absences.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 Aucune absence déclarée</p>` : absences.map(absence => `
+                                <div class="absence-item">
+                                    <div class="absence-info">
+                                        <span class="absence-name">${escapeHtml(absence.name)}</span>
+                                        <span class="absence-dates">📅 Du ${formatDate(absence.startDate)} au ${formatDate(absence.endDate)}</span>
+                                    </div>
+                                    <div class="absence-actions">
+                                        <button class="delete-absence" data-id="${absence.id}">🗑 Supprimer</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="add-absence-form">
+                        <h3 style="color: #ffd700; margin-bottom: 1rem;">➕ Déclarer une absence</h3>
+                        <form id="new-absence-form">
+                            <div class="form-group">
+                                <label>👤 Nom du personnel</label>
+                                <input type="text" id="absence-name" required placeholder="Nom complet">
+                            </div>
+                            <div class="form-group">
+                                <label>📅 Date de début</label>
+                                <input type="date" id="absence-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label>📅 Date de fin</label>
+                                <input type="date" id="absence-end" required>
+                            </div>
+                            <button type="submit" class="primary" style="width: 100%;">✅ Enregistrer l'absence</button>
+                        </form>
+                        <div id="absence-form-message" class="form-message" style="display: none;"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Attacher les événements
+            document.querySelectorAll('.delete-absence').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    deleteAbsence(id);
+                });
+            });
+            
+            const form = document.getElementById('new-absence-form');
+            form.addEventListener('submit', handleAddAbsence);
+        }
+
+        function handleAddAbsence(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('absence-name').value.trim();
+            const startDate = document.getElementById('absence-start').value;
+            const endDate = document.getElementById('absence-end').value;
+            const messageDiv = document.getElementById('absence-form-message');
+            
+            if (!name || !startDate || !endDate) {
+                messageDiv.textContent = 'Veuillez remplir tous les champs';
+                messageDiv.className = 'form-message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                messageDiv.textContent = 'La date de fin doit être postérieure à la date de début';
+                messageDiv.className = 'form-message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+            
+            const newAbsence = {
+                id: Date.now(),
+                name: name,
+                startDate: startDate,
+                endDate: endDate
+            };
+            
+            absences.push(newAbsence);
+            localStorage.setItem('absences', JSON.stringify(absences));
+            
+            messageDiv.textContent = 'Absence enregistrée avec succès !';
+            messageDiv.className = 'form-message success';
+            messageDiv.style.display = 'block';
+            
+            document.getElementById('new-absence-form').reset();
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+            
+            displayAbsences();
+        }
+
+        function deleteAbsence(id) {
+            absences = absences.filter(a => a.id !== id);
+            localStorage.setItem('absences', JSON.stringify(absences));
+            displayAbsences();
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {

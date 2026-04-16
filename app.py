@@ -98,12 +98,10 @@ def is_user_in_guild(user_id):
 
 @app.context_processor
 def inject_discord_status():
-
     if current_user.is_authenticated:
         status = is_user_in_guild(current_user.discord_id)
     else:
         status = False
-
     return dict(discord_status=status)
 
 # ========== ROUTES PAGES STATIQUES ==========
@@ -118,9 +116,7 @@ def staff_page():
 @app.route("/recrutement.html")
 @login_required
 def recruitment_page():
-
     discord_status = is_user_in_guild(current_user.discord_id)
-
     return render_template(
         "recrutement.html",
         discord_status=discord_status
@@ -137,9 +133,7 @@ def direction_page():
 @app.route("/commande.html")
 @login_required
 def clickcollect_page():
-
     discord_status = is_user_in_guild(current_user.discord_id)
-    
     return render_template(
         "commande.html",
         discord_status=discord_status
@@ -240,16 +234,14 @@ def submit_staff_review():
 
 # ========== API RECRUTEMENT ==========
 @app.route("/api/applications", methods=["POST"])
-@login_required  # ← Juste besoin d'être connecté Discord
+@login_required
 def post_application():
     try:
         data = request.get_json()
         
-        # Récupérer l'utilisateur Discord depuis la session
         if not current_user.is_authenticated:
             return jsonify({"success": False, "error": "Non authentifié"}), 401
         
-        # Vérifier si l'utilisateur est dans le serveur Discord
         if not is_user_in_guild(current_user.discord_id):
             return jsonify({"success": False, "error": "Vous devez être sur le Discord pour postuler"}), 403
         
@@ -279,7 +271,6 @@ def post_application():
         cur.close()
         conn.close()
         
-        # Webhook Discord pour notification
         webhook = os.environ.get("APPLICATION_WEBHOOK", "")
         if webhook:
             embed = {
@@ -302,9 +293,8 @@ def post_application():
         print(f"❌ Erreur POST application: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-
 @app.route("/api/applications", methods=["GET"])
-@require_direction  # ← Exige d'être connecté direction
+@require_direction
 def get_applications():
     try:
         conn = get_db_connection()
@@ -330,9 +320,6 @@ def get_applications():
 @app.route("/api/applications/<int:app_id>")
 @require_direction
 def get_application_detail(app_id):
-    if 'direction_id' not in session:
-        return jsonify({"error": "Non autorisé"}), 401
-    
     try:
         conn = get_db_connection()
         if not conn:
@@ -358,10 +345,8 @@ def get_application_detail(app_id):
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/applications/<int:app_id>/status", methods=["PATCH"])
+@require_direction
 def update_application_status(app_id):
-    if 'direction_id' not in session:
-        return jsonify({"error": "Non autorisé"}), 401
-    
     try:
         data = request.get_json()
         new_status = data.get('status')
@@ -389,6 +374,90 @@ def update_application_status(app_id):
         print(f"❌ Erreur PATCH application status: {e}")
         return jsonify({"error": str(e)}), 500
 
+# ========== API GESTION DES ABSENCES ==========
+@app.route("/api/absences", methods=["GET"])
+@require_direction
+def get_absences():
+    """Récupère la liste de toutes les absences"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+        
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT id, name, start_date, end_date, created_at
+            FROM absences
+            ORDER BY start_date DESC
+        """)
+        absences = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return jsonify(absences)
+    
+    except Exception as e:
+        print(f"❌ Erreur GET absences: {e}")
+        return jsonify([])
+
+@app.route("/api/absences", methods=["POST"])
+@require_direction
+def create_absence():
+    """Crée une nouvelle absence"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+        
+        if not all([name, start_date, end_date]):
+            return jsonify({"success": False, "error": "Champs manquants"}), 400
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO absences (name, start_date, end_date, created_at)
+            VALUES (%s, %s, %s, %s)
+        """, (name, start_date, end_date, now_paris()))
+        conn.commit()
+        absence_id = cur.lastrowid
+        cur.close()
+        conn.close()
+        
+        return jsonify({"success": True, "id": absence_id})
+    
+    except Exception as e:
+        print(f"❌ Erreur POST absence: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/absences/<int:absence_id>", methods=["DELETE"])
+@require_direction
+def delete_absence(absence_id):
+    """Supprime une absence"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("DELETE FROM absences WHERE id = %s", (absence_id,))
+        conn.commit()
+        rows_affected = cur.rowcount
+        cur.close()
+        conn.close()
+        
+        if rows_affected == 0:
+            return jsonify({"success": False, "error": "Absence non trouvée"}), 404
+        
+        return jsonify({"success": True})
+    
+    except Exception as e:
+        print(f"❌ Erreur DELETE absence: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ========== API AUTH ==========
 @app.route("/auth/me")
 def auth_me():
@@ -414,7 +483,6 @@ def auth_discord():
 def callback():
     code = request.args.get("code")
     
-    # Échange du code contre un token
     data = {
         "client_id": DISCORD_CLIENT_ID,
         "client_secret": DISCORD_CLIENT_SECRET,
@@ -425,33 +493,29 @@ def callback():
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     
     try:
-        # Récupération du token
         r = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers, timeout=10)
         if r.status_code != 200:
             return "Erreur d'authentification Discord", 400
         
         token = r.json()["access_token"]
         
-        # Récupération des infos utilisateur
         user_req = requests.get("https://discord.com/api/users/@me", 
                                headers={"Authorization": f"Bearer {token}"}, 
                                timeout=10)
         discord_user = user_req.json()
         
-        # Connexion/inscription en base
         conn = get_db_connection()
         if not conn:
             return "Erreur DB", 500
         
         cur = conn.cursor(dictionary=True)
         
-        # Vérifier si l'utilisateur existe
         cur.execute("SELECT id FROM users WHERE discord_id=%s", (discord_user["id"],))
         existing = cur.fetchone()
         
         if existing:
             user_id = existing["id"]
-            cur.execute("UPDATE users SET avatar_url=(%s) WHERE id=%s", 
+            cur.execute("UPDATE users SET avatar_url=%s WHERE id=%s", 
                         (discord_user.get("avatar"), user_id))
         else:
             cur.execute("INSERT INTO users(username, discord_id, avatar_url) VALUES (%s, %s, %s)", 
@@ -462,7 +526,6 @@ def callback():
         cur.close()
         conn.close()
         
-        # Créer session
         user = User(user_id, discord_user["username"], discord_user["id"], discord_user.get("avatar"))
         login_user(user)
         session["user_id"] = user_id
@@ -492,7 +555,6 @@ def direction_me():
             cur.close()
             conn.close()
             if user:
-                session['direction_id'] = user['id']
                 return jsonify({"user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
     return jsonify({"user": None})
 
@@ -507,7 +569,6 @@ def direction_login():
         return jsonify({"error": "Erreur DB"}), 500
     
     cur = conn.cursor(dictionary=True)
-    # Compare directement en clair
     cur.execute("SELECT id, username, display_name, role FROM direction_users WHERE username=%s AND password_hash=%s AND active=1", (username, password))
     user = cur.fetchone()
     cur.close()
@@ -566,7 +627,6 @@ def submit_order():
         if len(products_text) > 3500:
             products_text = products_text[:3500] + "\n... (liste tronquée)"
         
-        # Webhook Discord pour les commandes
         order_webhook = os.environ.get("ORDER_WEBHOOK", "https://discord.com/api/webhooks/1494093063801405531/6lxcbLMfO4NhnHfUPLIKblQb4OBJxQ9Hku3QPzLGPmpY3WDUzH7quxHlPp0Ob4eKPNmC")
         
         embed = {
@@ -589,7 +649,7 @@ def submit_order():
         traceback.print_exc()
         return jsonify({"success": False, "error": str(e)}), 500
 
-# ========== API PRICING (optionnel pour plus tard) ==========
+# ========== API PRICING ==========
 @app.route("/api/pricing")
 def api_pricing():
     pricing_data = {
