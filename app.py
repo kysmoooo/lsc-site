@@ -98,7 +98,7 @@ def is_user_in_guild(user_id):
 # ========== ROUTES PAGES STATIQUES ==========
 @app.route("/")
 def index():
-    return render_template('index.html.html')
+    return render_template('index.html')
 
 @app.route("/personnel.html")
 def staff_page():
