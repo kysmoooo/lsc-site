@@ -412,13 +412,12 @@
                     <span class="brand-text">LS Customs</span>
                 </a>
                 <nav class="nav-links">
-                    <a class="nav-link" href="/" data-key="nav.about">LS Customs</a>
-                    <a class="nav-link active" href="personnel.html" data-key="nav.staff">Personnel</a>
-                    <a class="nav-link" href="recrutement.html" data-key="nav.recruit">Recrutement</a>
-                    <a class="nav-link" href="commande.html">Click & Collect</a>
-                    <a class="nav-link" href="pricing.html" data-key="nav.pricing">Tarification</a>
-                    <a class="nav-link" href="direction.html" data-key="nav.direction">Direction</a>
-                </nav>
+                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
+                    <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>                </nav>
                 <div class="nav-actions">
                     <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
                     <div class="lang-toggle">
