@@ -578,7 +578,8 @@
                     html += '<p class="direction-hint">Aucun profil dans cette catégorie.</p>';
                 } else {
                     for (const member of members) {
-                        const rating = member.avg_rating ? member.avg_rating.toFixed(1) : '0';
+                        // CORRECTION ICI - Ajout de parseFloat()
+                        const rating = member.avg_rating ? parseFloat(member.avg_rating).toFixed(1) : '0';
                         const reviewText = member.review_count ? `⭐ ${rating} (${member.review_count} avis)` : 'Pas encore d\'avis';
                         
                         html += `<div class="staff-card" data-staff-id="${member.id}" data-staff-name="${member.name}">
@@ -602,7 +603,6 @@
             
             container.innerHTML = html;
             
-            // Attach review button handlers
             document.querySelectorAll('.staff-review-button').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const card = btn.closest('.staff-card');
