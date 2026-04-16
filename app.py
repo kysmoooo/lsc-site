@@ -95,6 +95,16 @@ def is_user_in_guild(user_id):
     except:
         return False
 
+@app.context_processor
+def inject_discord_status():
+
+    if current_user.is_authenticated:
+        status = is_user_in_guild(current_user.discord_id)
+    else:
+        status = False
+
+    return dict(discord_status=status)
+
 # ========== ROUTES PAGES STATIQUES ==========
 @app.route("/")
 def index():
@@ -106,7 +116,13 @@ def staff_page():
 
 @app.route("/recrutement.html")
 def recruitment_page():
-    return render_template('recrutement.html')
+
+    discord_status = is_user_in_guild(current_user.discord_id)
+
+    return render_template(
+        "recrutement.html",
+        discord_status=discord_status
+    )
 
 @app.route("/pricing.html")
 def pricing_page():
@@ -118,7 +134,13 @@ def direction_page():
 
 @app.route("/commande.html")
 def clickcollect_page():
-    return render_template('commande.html')
+
+    discord_status = is_user_in_guild(current_user.discord_id)
+    
+    return render_template(
+        "commande.html",
+        discord_status=discord_status
+    )
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
