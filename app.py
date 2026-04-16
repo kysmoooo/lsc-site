@@ -46,6 +46,7 @@ class User(UserMixin):
         self.id = id
         self.username = username
         self.discord_id = discord_id
+        self.avatar = avatar
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -55,7 +56,7 @@ def load_user(user_id):
         if not conn:
             return None
         cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT id, username, discord_id FROM users WHERE id=%s", (int(user_id),))
+        cur.execute("SELECT id, username, discord_id, avatar_url FROM users WHERE id=%s", (int(user_id),))
         user = cur.fetchone()
         cur.close()
         if user:
@@ -392,10 +393,14 @@ def update_application_status(app_id):
 @app.route("/auth/me")
 def auth_me():
     if current_user.is_authenticated:
+        avatar_url = None
+        if current_user.avatar:
+            avatar_url = f"https://cdn.discordapp.com/avatars/{current_user.discord_id}/{current_user.avatar}.png"
         return jsonify({
             "user": {
                 "id": current_user.discord_id,
-                "username": current_user.username
+                "username": current_user.username,
+                "avatar": avatar_url
             }
         })
     return jsonify({"user": None})
@@ -446,10 +451,11 @@ def callback():
         
         if existing:
             user_id = existing["id"]
+            cur.execute("UPDATE users SET avatar=(%s) WHERE id=%s", 
+                        (discord_user.get("avatar"), user_id))
         else:
-            # Créer nouvel utilisateur
-            cur.execute("INSERT INTO users(username, discord_id) VALUES (%s, %s)", 
-                        (discord_user["username"], discord_user["id"]))
+            cur.execute("INSERT INTO users(username, discord_id, avatar) VALUES (%s, %s, %s)", 
+                        (discord_user["username"], discord_user["id"], discord_user.get("avatar")))
             conn.commit()
             user_id = cur.lastrowid
         
