@@ -1013,14 +1013,18 @@
                         loadApplications();
                     } else if (currentTab === 'absences') {
                         loadAbsences();
+                    } else if (currentTab === 'annonces') {
+                        loadAnnonces();
                     }
                 });
             });
             
             if (currentTab === 'candidature') {
                 loadApplications();
-            } else {
+            } else if (currentTab === 'absences') {
                 loadAbsences();
+            } else if (currentTab === 'annonces') {
+                loadAnnonces();
             }
         }
 
@@ -1215,65 +1219,6 @@
                     const id = parseInt(btn.dataset.id);
                     deleteAbsence(id);
                 });
-            });
-            
-            const form = document.getElementById('new-absence-form');
-            form.addEventListener('submit', handleAddAbsence);
-        }
-
-        function handleAddAbsence(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('absence-name').value.trim();
-            const startDate = document.getElementById('absence-start').value;
-            const endDate = document.getElementById('absence-end').value;
-            const messageDiv = document.getElementById('absence-form-message');
-            
-            if (!name || !startDate || !endDate) {
-                messageDiv.textContent = 'Veuillez remplir tous les champs';
-                messageDiv.className = 'form-message error';
-                messageDiv.style.display = 'block';
-                return;
-            }
-            
-            if (new Date(startDate) > new Date(endDate)) {
-                messageDiv.textContent = 'La date de fin doit être postérieure à la date de début';
-                messageDiv.className = 'form-message error';
-                messageDiv.style.display = 'block';
-                return;
-            }
-            
-            fetch(`${API_BASE}/api/absences`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ name, startDate, endDate })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    messageDiv.textContent = 'Absence enregistrée avec succès !';
-                    messageDiv.className = 'form-message success';
-                    messageDiv.style.display = 'block';
-                    
-                    document.getElementById('new-absence-form').reset();
-                    
-                    setTimeout(() => {
-                        messageDiv.style.display = 'none';
-                    }, 3000);
-                    
-                    loadAbsences(); // Recharger la liste
-                } else {
-                    messageDiv.textContent = data.error || 'Erreur lors de l\'enregistrement';
-                    messageDiv.className = 'form-message error';
-                    messageDiv.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                messageDiv.textContent = 'Erreur lors de l\'enregistrement';
-                messageDiv.className = 'form-message error';
-                messageDiv.style.display = 'block';
             });
         }
 
