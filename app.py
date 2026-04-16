@@ -266,7 +266,7 @@ def handle_applications():
             """, (
                 data.get('fullName'),
                 data.get('discordTag'),
-                data.get('avatar_url'),
+                data.get('avatarUrl'),
                 data.get('birthDate'),
                 data.get('phone'),
                 data.get('rib'),
