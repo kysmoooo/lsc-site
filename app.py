@@ -240,7 +240,7 @@ def submit_staff_review():
 
 # ========== API RECRUTEMENT ==========
 @app.route("/api/applications", methods=["GET", "POST"])
-@login_required
+@require_direction
 def handle_applications():
     if request.method == "POST":
         try:
