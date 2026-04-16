@@ -260,11 +260,12 @@ def handle_applications():
             cur = conn.cursor()
             cur.execute("""
                 INSERT INTO applications 
-                (full_name, discord_tag, birth_date, phone, rib, experience, availability, motivation, status, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
+                (full_name, discord_tag, avatar_url birth_date, phone, rib, experience, availability, motivation, status, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
             """, (
                 data.get('fullName'),
                 data.get('discordTag'),
+                data.get('avatar_url'),
                 data.get('birthDate'),
                 data.get('phone'),
                 data.get('rib'),

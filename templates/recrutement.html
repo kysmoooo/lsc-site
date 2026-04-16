@@ -514,6 +514,7 @@
                     document.getElementById('recruitment-login').style.display = 'none';
                     document.getElementById('application-form').style.display = 'block';
                     document.getElementById('discordTag').value = discordUser.id;
+                    document.getElementById('avatarUrl').value = discordUser.avatar;
                 } else {
                     document.getElementById('recruitment-login').style.display = 'block';
                     document.getElementById('application-form').style.display = 'none';
@@ -536,6 +537,7 @@
                     fullName: document.getElementById('fullName').value,
                     discordTag: document.getElementById('discordTag').value,
                     birthDate: document.getElementById('birthDate').value,
+                    avatarUrl: document.getElementById('avatarUrl').value,
                     phone: document.getElementById('phone').value,
                     rib: document.getElementById('rib').value,
                     experience: document.getElementById('experience').value,
