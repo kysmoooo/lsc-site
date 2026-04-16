@@ -98,35 +98,35 @@ def is_user_in_guild(user_id):
 # ========== ROUTES PAGES STATIQUES ==========
 @app.route("/")
 def index():
-    return send_from_directory('templates', 'index.html')
+    return render_template('templates', active_page='index.html')
 
 @app.route("/personnel.html")
 def staff_page():
-    return send_from_directory('templates', 'personnel.html')
+    return render_template('templates', active_page='personnel.html')
 
 @app.route("/recrutement.html")
 def recruitment_page():
-    return send_from_directory('templates', 'recrutement.html')
+    return render_template('templates', active_page='recrutement.html')
 
 @app.route("/pricing.html")
 def pricing_page():
-    return send_from_directory('templates', 'pricing.html')
+    return render_template('templates', active_page='pricing.html')
 
 @app.route("/direction.html")
 def direction_page():
-    return send_from_directory('templates', 'direction.html')
+    return render_template('templates', active_page='direction.html')
 
 @app.route("/commande.html")
 def clickcollect_page():
-    return send_from_directory('templates', 'commande.html')
+    return render_template('templates', active_page='commande.html')
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
-    return send_from_directory('css', filename)
+    return render_template('css', filename)
 
 @app.route("/js/<path:filename>")
 def serve_js(filename):
-    return send_from_directory('js', filename)
+    return render_template('js', filename)
 
 # ========== API STAFF ==========
 @app.route("/api/staff")
@@ -583,7 +583,7 @@ def api_pricing():
 # ========== GESTION DES ERREURS ==========
 @app.errorhandler(404)
 def page_not_found(e):
-    return send_from_directory('templates', '404.html') if os.path.exists('templates/404.html') else "Page non trouvée", 404
+    return render_template('templates', '404.html') if os.path.exists('templates/404.html') else "Page non trouvée", 404
 
 @app.errorhandler(Exception)
 def handle_exception(e):
