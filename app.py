@@ -239,74 +239,73 @@ def submit_staff_review():
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ========== API RECRUTEMENT ==========
-@app.route("/api/applications", methods=["GET", "POST"])
-@require_direction
-def handle_applications():
-    if request.method == "POST":
-        try:
-            data = request.get_json()
-            
-            # Récupérer l'utilisateur Discord depuis la session
-            if not current_user.is_authenticated:
-                return jsonify({"success": False, "error": "Non authentifié"}), 401
-            
-            # Vérifier si l'utilisateur est dans le serveur Discord
-            if not is_user_in_guild(current_user.discord_id):
-                return jsonify({"success": False, "error": "Vous devez être sur le Discord pour postuler"}), 403
-            
-            conn = get_db_connection()
-            if not conn:
-                return jsonify({"success": False, "error": "Erreur DB"}), 500
-            
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO applications 
-                (full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
-            """, (
-                data.get('fullName'),
-                data.get('discordTag'),
-                data.get('avatarUrl'),
-                data.get('birthDate'),
-                data.get('phone'),
-                data.get('rib'),
-                data.get('experience'),
-                data.get('availability'),
-                data.get('motivation'),
-                now_paris()
-            ))
-            conn.commit()
-            application_id = cur.lastrowid
-            cur.close()
-            conn.close()
-            
-            # Webhook Discord pour notification
-            webhook = os.environ.get("APPLICATION_WEBHOOK", "")
-            if webhook:
-                embed = {
-                    "title": "📝 Nouvelle candidature reçue",
-                    "color": 3066993,
-                    "fields": [
-                        {"name": "Nom complet", "value": data.get('fullName'), "inline": True},
-                        {"name": "Discord", "value": data.get('discordTag'), "inline": True},
-                        {"name": "Téléphone", "value": data.get('phone'), "inline": True}
-                    ]
-                }
-                try:
-                    requests.post(webhook, json={"embeds": [embed]}, timeout=2)
-                except:
-                    pass
-            
-            return jsonify({"success": True, "id": application_id})
+@app.route("/api/applications", methods=["POST"])
+@login_required  # ← Juste besoin d'être connecté Discord
+def post_application():
+    try:
+        data = request.get_json()
         
-        except Exception as e:
-            print(f"❌ Erreur POST application: {e}")
-            return jsonify({"success": False, "error": str(e)}), 500
+        # Récupérer l'utilisateur Discord depuis la session
+        if not current_user.is_authenticated:
+            return jsonify({"success": False, "error": "Non authentifié"}), 401
+        
+        # Vérifier si l'utilisateur est dans le serveur Discord
+        if not is_user_in_guild(current_user.discord_id):
+            return jsonify({"success": False, "error": "Vous devez être sur le Discord pour postuler"}), 403
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO applications 
+            (full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
+        """, (
+            data.get('fullName'),
+            data.get('discordTag'),
+            data.get('avatarUrl'),
+            data.get('birthDate'),
+            data.get('phone'),
+            data.get('rib'),
+            data.get('experience'),
+            data.get('availability'),
+            data.get('motivation'),
+            now_paris()
+        ))
+        conn.commit()
+        application_id = cur.lastrowid
+        cur.close()
+        conn.close()
+        
+        # Webhook Discord pour notification
+        webhook = os.environ.get("APPLICATION_WEBHOOK", "")
+        if webhook:
+            embed = {
+                "title": "📝 Nouvelle candidature reçue",
+                "color": 3066993,
+                "fields": [
+                    {"name": "Nom complet", "value": data.get('fullName'), "inline": True},
+                    {"name": "Discord", "value": data.get('discordTag'), "inline": True},
+                    {"name": "Téléphone", "value": data.get('phone'), "inline": True}
+                ]
+            }
+            try:
+                requests.post(webhook, json={"embeds": [embed]}, timeout=2)
+            except:
+                pass
+        
+        return jsonify({"success": True, "id": application_id})
     
-    # GET - Récupérer toutes les candidatures (pour la direction)
-    if 'direction_id' not in session:
-        return jsonify({"error": "Non autorisé"}), 401
-    
+    except Exception as e:
+        print(f"❌ Erreur POST application: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/applications", methods=["GET"])
+@require_direction  # ← Exige d'être connecté direction
+def get_applications():
     try:
         conn = get_db_connection()
         if not conn:
@@ -329,6 +328,7 @@ def handle_applications():
         return jsonify([])
 
 @app.route("/api/applications/<int:app_id>")
+@require_direction
 def get_application_detail(app_id):
     if 'direction_id' not in session:
         return jsonify({"error": "Non autorisé"}), 401
