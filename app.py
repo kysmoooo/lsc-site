@@ -31,7 +31,7 @@ DB_CONFIG = {
 # Configuration Discord
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "814277691981168680")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIfPcdAT0Cacn2nSL4rF")
-DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app//callback")
+DISCORD_REDIRECT_URL = os.environ.get("DISCORD_REDIRECT_URL", "https://lsc-site-production-e2c1.up.railway.app/callback")
 DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 
@@ -376,7 +376,7 @@ def auth_me():
 
 @app.route("/auth/discord")
 def auth_discord():
-    discord_auth_url = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope=identify"
+    discord_auth_url = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URL}&response_type=code&scope=identify"
     return redirect(discord_auth_url)
 
 @app.route("/callback")
@@ -388,7 +388,7 @@ def callback():
         "client_secret": DISCORD_CLIENT_SECRET,
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": DISCORD_REDIRECT_URI
+        "redirect_uri": DISCORD_REDIRECT_URL
     }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     
