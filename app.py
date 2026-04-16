@@ -451,10 +451,10 @@ def callback():
         
         if existing:
             user_id = existing["id"]
-            cur.execute("UPDATE users SET avatar=(%s) WHERE id=%s", 
+            cur.execute("UPDATE users SET avatar_url=(%s) WHERE id=%s", 
                         (discord_user.get("avatar"), user_id))
         else:
-            cur.execute("INSERT INTO users(username, discord_id, avatar) VALUES (%s, %s, %s)", 
+            cur.execute("INSERT INTO users(username, discord_id, avatar_url) VALUES (%s, %s, %s)", 
                         (discord_user["username"], discord_user["id"], discord_user.get("avatar")))
             conn.commit()
             user_id = cur.lastrowid
