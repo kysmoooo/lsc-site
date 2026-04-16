@@ -31,7 +31,7 @@ DB_CONFIG = {
 # Configuration Discord
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "814277691981168680")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIfPcdAT0Cacn2nSL4rF")
-DISCORD_REDIRECT_URL = os.environ.get("DISCORD_REDIRECT_URL", "https://lsc-site-production-e2c1.up.railway.app/callback")
+DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app/callback")
 DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 
@@ -376,45 +376,52 @@ def auth_me():
 
 @app.route("/auth/discord")
 def auth_discord():
-    discord_auth_url = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URL}&response_type=code&scope=identify"
+    discord_auth_url = f"https://discord.com/api/oauth2/authorize?client_id={DISCORD_CLIENT_ID}&redirect_uri={DISCORD_REDIRECT_URI}&response_type=code&scope=identify"
     return redirect(discord_auth_url)
 
 @app.route("/callback")
 def callback():
     code = request.args.get("code")
     
+    # Échange du code contre un token
     data = {
         "client_id": DISCORD_CLIENT_ID,
         "client_secret": DISCORD_CLIENT_SECRET,
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": DISCORD_REDIRECT_URL
+        "redirect_uri": DISCORD_REDIRECT_URI
     }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     
     try:
+        # Récupération du token
         r = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers, timeout=10)
         if r.status_code != 200:
             return "Erreur d'authentification Discord", 400
         
         token = r.json()["access_token"]
         
+        # Récupération des infos utilisateur
         user_req = requests.get("https://discord.com/api/users/@me", 
                                headers={"Authorization": f"Bearer {token}"}, 
                                timeout=10)
         discord_user = user_req.json()
         
+        # Connexion/inscription en base
         conn = get_db_connection()
         if not conn:
             return "Erreur DB", 500
         
         cur = conn.cursor(dictionary=True)
+        
+        # Vérifier si l'utilisateur existe
         cur.execute("SELECT id FROM users WHERE discord_id=%s", (discord_user["id"],))
         existing = cur.fetchone()
         
         if existing:
             user_id = existing["id"]
         else:
+            # Créer nouvel utilisateur
             cur.execute("INSERT INTO users(username, discord_id) VALUES (%s, %s)", 
                         (discord_user["username"], discord_user["id"]))
             conn.commit()
@@ -423,6 +430,7 @@ def callback():
         cur.close()
         conn.close()
         
+        # Créer session
         user = User(user_id, discord_user["username"], discord_user["id"])
         login_user(user)
         session["user_id"] = user_id
