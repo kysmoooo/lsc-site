@@ -100,13 +100,13 @@ def is_user_in_guild(user_id):
 def index():
     return send_from_directory('templates', 'index.html')
 
-@app.route("/staff.html")
+@app.route("/personnel.html")
 def staff_page():
-    return send_from_directory('templates', 'staff.html')
+    return send_from_directory('templates', 'personnel.html')
 
-@app.route("/recruitment.html")
+@app.route("/recrutement.html")
 def recruitment_page():
-    return send_from_directory('templates', 'recruitment.html')
+    return send_from_directory('templates', 'recrutement.html')
 
 @app.route("/pricing.html")
 def pricing_page():
@@ -116,9 +116,9 @@ def pricing_page():
 def direction_page():
     return send_from_directory('templates', 'direction.html')
 
-@app.route("/clickcollect.html")
+@app.route("/commande.html")
 def clickcollect_page():
-    return send_from_directory('templates', 'clickcollect.html')
+    return send_from_directory('templates', 'commande.html')
 
 @app.route("/css/<path:filename>")
 def serve_css(filename):
