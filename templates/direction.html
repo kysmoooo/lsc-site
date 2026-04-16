@@ -544,15 +544,6 @@
         .delete-absence:hover {
             background: rgba(231, 76, 60, 0.4);
         }
-
-        .add-absence-form {
-            background: rgba(0, 0, 0, 0.35);
-            border-radius: 1rem;
-            padding: 1.25rem;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
         .form-group {
             margin-bottom: 1rem;
         }
@@ -1055,25 +1046,6 @@
                                 </div>
                             `).join('')}
                         </div>
-                    </div>
-                    <div class="add-absence-form">
-                        <h3 style="color: #ffd700; margin-bottom: 1rem;">➕ Déclarer une absence</h3>
-                        <form id="new-absence-form">
-                            <div class="form-group">
-                                <label>👤 Nom du personnel</label>
-                                <input type="text" id="absence-name" required placeholder="Nom complet">
-                            </div>
-                            <div class="form-group">
-                                <label>📅 Date de début</label>
-                                <input type="date" id="absence-start" required>
-                            </div>
-                            <div class="form-group">
-                                <label>📅 Date de fin</label>
-                                <input type="date" id="absence-end" required>
-                            </div>
-                            <button type="submit" class="primary" style="width: 100%;">✅ Enregistrer l'absence</button>
-                        </form>
-                        <div id="absence-form-message" class="form-message" style="display: none;"></div>
                     </div>
                 </div>
             `;
