@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             color: #e0e0e0;
             line-height: 1.5;
+            min-height: 100vh;
         }
 
         .page {
@@ -30,6 +31,7 @@
             min-height: 100vh;
         }
 
+        /* Topbar améliorée */
         .topbar {
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(10px);
@@ -53,11 +55,17 @@
             color: #ffd700;
             font-weight: bold;
             font-size: 1.25rem;
+            transition: transform 0.2s ease;
+        }
+
+        .brand:hover {
+            transform: scale(1.02);
         }
 
         .brand-logo {
             height: 40px;
             width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
 
         .brand-text {
@@ -77,8 +85,25 @@
         .nav-link {
             color: #ccc;
             text-decoration: none;
-            transition: color 0.2s;
+            transition: all 0.2s;
             font-weight: 500;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -121,6 +146,7 @@
 
         .ghost:hover {
             background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-1px);
         }
 
         .lang-toggle button {
@@ -155,7 +181,7 @@
         }
 
         .page-shell {
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
 
         .page-header {
@@ -170,35 +196,41 @@
             background-clip: text;
             color: transparent;
             margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
         }
 
         .section {
             margin-bottom: 4rem;
         }
 
+        /* Panel direction amélioré */
         .direction-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
             padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
         .direction-login {
-            max-width: 400px;
+            max-width: 420px;
             margin: 0 auto;
         }
 
         .form {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            backdrop-filter: blur(4px);
         }
 
         .form label {
             display: block;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         .form label span {
@@ -206,21 +238,25 @@
             margin-bottom: 0.5rem;
             color: #ffd700;
             font-size: 0.875rem;
+            font-weight: 500;
         }
 
         .form input {
             width: 100%;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
             color: #fff;
             font-size: 0.875rem;
+            transition: all 0.2s;
         }
 
         .form input:focus {
             outline: none;
             border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
         }
 
         .form-message {
@@ -241,23 +277,27 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
         }
 
         .direction-user {
             font-weight: bold;
             color: #ffd700;
+            font-size: 1.1rem;
         }
 
         .direction-hint {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: #888;
+            margin-top: 0.25rem;
         }
 
         .direction-tabs {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
         }
 
         .tab {
@@ -267,6 +307,7 @@
             color: #ccc;
             cursor: pointer;
             transition: all 0.2s;
+            font-weight: 500;
         }
 
         .tab.active {
@@ -280,36 +321,70 @@
             gap: 1.5rem;
         }
 
+        /* Liste des candidatures améliorée */
         .application-list {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 0.75rem;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
             padding: 1rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .status-filters {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .status-filter-label {
             font-size: 0.875rem;
             color: #ffd700;
+            margin-right: 0.5rem;
         }
 
         .status-filter {
-            padding: 0.25rem 0.75rem;
+            padding: 0.3rem 0.9rem;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             color: #ccc;
             cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .status-filter:hover {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
         }
 
         .status-filter.active {
             background: #ffd700;
             color: #1a1a2e;
+            border-color: #ffd700;
+        }
+
+        .applications-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .applications-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .applications-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .applications-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
         }
 
         .application-item {
@@ -317,39 +392,70 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.85rem 1rem;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            margin-bottom: 0.65rem;
             cursor: pointer;
             text-align: left;
+            transition: all 0.2s;
+        }
+
+        .application-item:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.2);
+            transform: translateX(4px);
         }
 
         .application-item.active {
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 215, 0, 0.12);
             border-color: #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+        }
+
+        .application-info {
+            display: flex;
+            flex-direction: column;
         }
 
         .application-name {
-            font-weight: 500;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .application-discord {
+            font-size: 0.7rem;
+            color: #999;
         }
 
         .status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
         }
 
-        .status-dot.status-pending { background: #f39c12; }
-        .status-dot.status-accepted { background: #2ecc71; }
-        .status-dot.status-rejected { background: #e74c3c; }
+        .status-dot.status-pending { background: #f39c12; box-shadow: 0 0 4px #f39c12; }
+        .status-dot.status-accepted { background: #2ecc71; box-shadow: 0 0 4px #2ecc71; }
+        .status-dot.status-rejected { background: #e74c3c; box-shadow: 0 0 4px #e74c3c; }
         .status-dot.status-closed { background: #95a5a6; }
 
+        /* Détail candidature amélioré */
         .application-detail {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 0.75rem;
-            padding: 1rem;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .applicant-detail h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
 
         .detail-grid {
@@ -359,10 +465,25 @@
             margin: 1rem 0;
         }
 
+        .detail-grid div {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            border-left: 2px solid #ffd700;
+        }
+
+        .detail-grid strong {
+            color: #ffd700;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
         .detail-actions {
             display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .footer {
@@ -386,6 +507,11 @@
         .footer-logo {
             height: 24px;
             width: auto;
+            transition: transform 0.2s;
+        }
+
+        .footer-logo:hover {
+            transform: scale(1.05);
         }
 
         @keyframes fadeIn {
@@ -402,6 +528,27 @@
         .animate-in {
             animation: fadeIn 0.5s ease-out;
         }
+
+        /* Loader */
+        .loader {
+            text-align: center;
+            padding: 2rem;
+            color: #ffd700;
+        }
+
+        /* Badge status */
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .status-badge.accepted { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.rejected { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .status-badge.closed { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
     </style>
 </head>
 <body>
@@ -413,12 +560,13 @@
                     <span class="brand-text">LS Customs</span>
                 </a>
                 <nav class="nav-links">
-                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
-                    <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
-                    <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
-                    <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
-                    <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
-                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>                </nav>
+                    <a class="nav-link" href="#" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link" href="#" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="#" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="#">Click & Collect</a>
+                    <a class="nav-link" href="#" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link active" href="#" data-key="nav.direction">Direction</a>
+                </nav>
                 <div class="nav-actions">
                     <div class="lang-toggle">
                         <button class="active" data-lang="fr">FR</button>
@@ -438,17 +586,17 @@
                     <section class="section animate-in">
                         <div id="direction-panel">
                             <div class="direction-login">
-                                <p data-key="direction.select">Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                                <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction (Voir avec Nash pour identifiant)</p>
                                 <form class="form" id="direction-login-form">
                                     <label>
                                         <span data-key="direction.username">Identifiant</span>
-                                        <input name="username" id="direction-username" required>
+                                        <input name="username" id="direction-username" required placeholder="ex: nash.direction">
                                     </label>
                                     <label>
                                         <span data-key="direction.password">Mot de passe</span>
-                                        <input name="password" type="password" id="direction-password" required>
+                                        <input name="password" type="password" id="direction-password" required placeholder="••••••••">
                                     </label>
-                                    <button class="primary" type="submit" data-key="direction.loginButton">Se connecter</button>
+                                    <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
                                     <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
                                 </form>
                             </div>
@@ -476,11 +624,11 @@
         const translations = {
             fr: {
                 nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
-                direction: { title: "Espace direction", select: "Connexion panel Direction (Voir avec Nash pour identifiant)", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se deconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette categorie.", accept: "Accepter", reject: "Refuser", close: "Cloturer", pending: "En attente", accepted: "Acceptee", rejected: "Refusee", closed: "Cloturee" }
+                direction: { title: "Espace direction", select: "Connexion panel Direction (Voir avec Nash pour identifiant)", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures" }
             },
             en: {
                 nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
-                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "Accept", reject: "Reject", close: "Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed" }
+                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications" }
             }
         };
 
@@ -546,17 +694,17 @@
             
             panel.innerHTML = `
                 <div class="direction-login">
-                    <p data-key="direction.select">Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                    <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction (Voir avec Nash pour identifiant)</p>
                     <form class="form" id="direction-login-form">
                         <label>
                             <span data-key="direction.username">Identifiant</span>
-                            <input name="username" id="direction-username" required>
+                            <input name="username" id="direction-username" required placeholder="ex: nash.direction">
                         </label>
                         <label>
                             <span data-key="direction.password">Mot de passe</span>
-                            <input name="password" type="password" id="direction-password" required>
+                            <input name="password" type="password" id="direction-password" required placeholder="••••••••">
                         </label>
-                        <button class="primary" type="submit" data-key="direction.loginButton">Se connecter</button>
+                        <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
                         <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
                     </form>
                 </div>
@@ -602,16 +750,16 @@
                 <div class="direction-panel">
                     <div class="direction-header">
                         <div>
-                            <p class="direction-user">${currentDirectionUser?.displayName || 'Direction'}</p>
-                            <p class="direction-hint" data-key="direction.select">Gestion des candidatures</p>
+                            <p class="direction-user">👑 ${currentDirectionUser?.displayName || 'Direction'}</p>
+                            <p class="direction-hint" data-key="direction.select">Gestion des candidatures • Panel Administratif</p>
                         </div>
-                        <button class="ghost" id="direction-logout" data-key="direction.logout">Se deconnecter</button>
+                        <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
                     </div>
                     <div class="direction-tabs">
-                        <button type="button" class="tab active" data-section="candidature" data-key="direction.candidature">Candidature</button>
+                        <button type="button" class="tab active" data-section="candidature" data-key="direction.candidature">📋 Candidatures</button>
                     </div>
                     <div id="direction-content">
-                        <p>Chargement...</p>
+                        <div class="loader">⏳ Chargement des candidatures...</div>
                     </div>
                 </div>
             `;
@@ -639,7 +787,7 @@
                 displayApplications();
             } catch (error) {
                 console.error('Error loading applications:', error);
-                container.innerHTML = '<p>Erreur lors du chargement des candidatures</p>';
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des candidatures</p>';
             }
         }
 
@@ -654,24 +802,26 @@
                 <div class="direction-grid">
                     <div class="application-list">
                         <div class="status-filters">
-                            <span class="status-filter-label" data-key="direction.category">Catégorie</span>
-                            <button type="button" class="status-filter ${currentStatusFilter === 'pending' ? 'active' : ''}" data-status="pending">${t.pending}</button>
-                            <button type="button" class="status-filter ${currentStatusFilter === 'accepted' ? 'active' : ''}" data-status="accepted">${t.accepted}</button>
-                            <button type="button" class="status-filter ${currentStatusFilter === 'rejected' ? 'active' : ''}" data-status="rejected">${t.rejected}</button>
-                            <button type="button" class="status-filter ${currentStatusFilter === 'closed' ? 'active' : ''}" data-status="closed">${t.closed}</button>
+                            <span class="status-filter-label">📌 ${t.category}</span>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'pending' ? 'active' : ''}" data-status="pending">⏳ ${t.pending}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'accepted' ? 'active' : ''}" data-status="accepted">✅ ${t.accepted}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'rejected' ? 'active' : ''}" data-status="rejected">❌ ${t.rejected}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'closed' ? 'active' : ''}" data-status="closed">🔒 ${t.closed}</button>
                         </div>
-                        <div id="applications-list">
-                            ${filtered.length === 0 ? `<p>${t.emptyCategory}</p>` : filtered.map(app => `
+                        <div class="applications-scroll">
+                            ${filtered.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 ${t.emptyCategory}</p>` : filtered.map(app => `
                                 <button class="application-item ${selectedApplicationId === app.id ? 'active' : ''}" data-id="${app.id}">
-                                    <span class="application-name">${app.full_name}</span>
-                                    <small>${app.discord_tag}</small>
+                                    <div class="application-info">
+                                        <span class="application-name">${escapeHtml(app.full_name)}</span>
+                                        <span class="application-discord">${escapeHtml(app.discord_tag)}</span>
+                                    </div>
                                     <span class="status-dot status-${app.status}"></span>
                                 </button>
                             `).join('')}
                         </div>
                     </div>
                     <div class="application-detail" id="application-detail">
-                        <p>Sélectionnez une candidature</p>
+                        <p style="text-align:center; opacity:0.7;">✨ Sélectionnez une candidature pour voir les détails</p>
                     </div>
                 </div>
             `;
@@ -706,27 +856,28 @@
                 
                 const detail = await response.json();
                 const t = translations[currentLang].direction;
+                const statusText = { pending: t.pending, accepted: t.accepted, rejected: t.rejected, closed: t.closed }[detail.status];
                 
                 detailContainer.innerHTML = `
                     <div class="applicant-detail">
-                        <h3>${detail.full_name}</h3>
+                        <h3>👤 ${escapeHtml(detail.full_name)} <span class="status-badge ${detail.status}">${statusText}</span></h3>
                         <div class="detail-grid">
-                            <div><strong>Discord:</strong> ${detail.discord_tag}</div>
-                            <div><strong>Date de naissance:</strong> ${detail.birth_date || 'Non renseignée'}</div>
-                            <div><strong>Téléphone:</strong> ${detail.phone}</div>
-                            <div><strong>RIB:</strong> ${detail.rib || 'Non renseigné'}</div>
-                            <div><strong>Expérience:</strong> ${detail.experience}</div>
-                            <div><strong>Disponibilité:</strong> ${detail.availability}</div>
+                            <div><strong>🎮 Discord</strong> ${escapeHtml(detail.discord_tag)}</div>
+                            <div><strong>🎂 Date naissance</strong> ${detail.birth_date || 'Non renseignée'}</div>
+                            <div><strong>📱 Téléphone</strong> ${detail.phone || 'Non renseigné'}</div>
+                            <div><strong>🏦 RIB</strong> ${detail.rib || 'Non renseigné'}</div>
+                            <div><strong>💼 Expérience</strong> ${detail.experience || 'Aucune'}</div>
+                            <div><strong>⏰ Disponibilité</strong> ${detail.availability || 'Non spécifiée'}</div>
                         </div>
-                        <div><strong>Motivation:</strong></div>
-                        <p>${detail.motivation}</p>
+                        <div><strong>💬 Motivation :</strong></div>
+                        <p style="background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 10px; margin-top: 0.5rem;">${escapeHtml(detail.motivation)}</p>
                         <div class="detail-actions">
                             ${detail.status === 'pending' ? `
-                                <button class="primary" id="accept-app">${t.accept}</button>
-                                <button class="ghost" id="reject-app">${t.reject}</button>
+                                <button class="primary" id="accept-app">✅ ${t.accept}</button>
+                                <button class="ghost" id="reject-app">❌ ${t.reject}</button>
                             ` : ''}
                             ${detail.status !== 'closed' ? `
-                                <button class="ghost" id="close-app">${t.close}</button>
+                                <button class="ghost" id="close-app">🔒 ${t.close}</button>
                             ` : ''}
                         </div>
                     </div>
@@ -738,8 +889,18 @@
                 
             } catch (error) {
                 console.error('Error loading detail:', error);
-                detailContainer.innerHTML = '<p>Erreur lors du chargement des détails</p>';
+                detailContainer.innerHTML = '<p style="color:#e74c3c;">❌ Erreur lors du chargement des détails</p>';
             }
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
 
         async function updateApplicationStatus(id, status) {
