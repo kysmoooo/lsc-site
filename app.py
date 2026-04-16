@@ -493,7 +493,7 @@ def direction_me():
             conn.close()
             if user:
                 session['direction_id'] = user['id']
-                return jsonify({"user": {"id": user['id'], "displayName": user['name'], "role": user['role']}})
+                return jsonify({"user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
     return jsonify({"user": None})
 
 @app.route("/direction/login", methods=["POST"])
