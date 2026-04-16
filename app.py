@@ -141,7 +141,7 @@ def api_staff():
         cur.execute("""
             SELECT id, name, role, specialty, photo_url, sort_order, active,
                    (SELECT COUNT(*) FROM staff_reviews WHERE staff_profile_id = staff_profiles.id) as review_count,
-                   (SELECT AVG(stars) FROM staff_reviews WHERE staff_profile_id = staff_profiles.id) as avg_rating
+                   (SELECT AVG(rating) FROM staff_reviews WHERE staff_profile_id = staff_profiles.id) as avg_rating
             FROM staff_profiles
             WHERE active = 1
             ORDER BY sort_order ASC
@@ -234,7 +234,7 @@ def handle_applications():
             
             cur = conn.cursor()
             cur.execute("""
-                INSERT INTO recruitment_applications 
+                INSERT INTO applications 
                 (full_name, discord_tag, birth_date, phone, rib, experience, availability, motivation, status, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
             """, (
@@ -288,7 +288,7 @@ def handle_applications():
         cur = conn.cursor(dictionary=True)
         cur.execute("""
             SELECT id, full_name, discord_tag, status, created_at
-            FROM recruitment_applications
+            FROM applications
             ORDER BY created_at DESC
         """)
         applications = cur.fetchall()
@@ -314,7 +314,7 @@ def get_application_detail(app_id):
         cur = conn.cursor(dictionary=True)
         cur.execute("""
             SELECT id, full_name, discord_tag, birth_date, phone, rib, experience, availability, motivation, status, created_at
-            FROM recruitment_applications
+            FROM applications
             WHERE id = %s
         """, (app_id,))
         application = cur.fetchone()
@@ -348,7 +348,7 @@ def update_application_status(app_id):
         
         cur = conn.cursor()
         cur.execute("""
-            UPDATE recruitment_applications
+            UPDATE applications
             SET status = %s, updated_at = %s
             WHERE id = %s
         """, (new_status, now_paris(), app_id))
@@ -446,7 +446,7 @@ def direction_me():
         conn = get_db_connection()
         if conn:
             cur = conn.cursor(dictionary=True)
-            cur.execute("SELECT id, username, name, role FROM personnel WHERE id=%s", (session['direction_id'],))
+            cur.execute("SELECT id, username, name, role FROM staff_profiles WHERE id=%s", (session['direction_id'],))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -465,7 +465,7 @@ def direction_login():
         return jsonify({"error": "Erreur DB"}), 500
     
     cur = conn.cursor(dictionary=True)
-    cur.execute("SELECT id, username, name, role FROM personnel WHERE username=%s AND password=%s AND active=1", (username, password))
+    cur.execute("SELECT id, username, name, role FROM staff_profiles WHERE username=%s AND password=%s AND active=1", (username, password))
     user = cur.fetchone()
     cur.close()
     conn.close()
