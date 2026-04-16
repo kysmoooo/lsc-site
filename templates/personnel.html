@@ -568,7 +568,7 @@
             let html = '';
             
             for (const category of categories) {
-                const members = staff.filter(m => normalizeCategory(m.category || m.role) === category);
+                const members = staff.filter(m => normalizeCategory(m.category) === category);
                 
                 html += `<div class="staff-rank-section">
                     <h3 class="staff-rank-title">${category}</h3>

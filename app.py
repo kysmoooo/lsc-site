@@ -139,7 +139,7 @@ def api_staff():
         
         cur = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT id, name, role, specialty, photo_url, sort_order, active,
+            SELECT id, name, role, specialty, photo_url, sort_order, active, category,
                    (SELECT COUNT(*) FROM staff_reviews WHERE staff_profile_id = staff_profiles.id) as review_count,
                    (SELECT AVG(rating) FROM staff_reviews WHERE staff_profile_id = staff_profiles.id) as avg_rating
             FROM staff_profiles
