@@ -565,7 +565,7 @@ def submit_order():
             products_text = products_text[:3500] + "\n... (liste tronquée)"
         
         # Webhook Discord pour les commandes
-        order_webhook = os.environ.get("ORDER_WEBHOOK", "https://discord.com/api/webhooks/1490703932937474208/Icjx9IWSqEEtMHyIsWaKsGfjjd15wnI5UDWI4-r3naqRQ53y1TrVn_7ewpjAfEH6hef3")
+        order_webhook = os.environ.get("ORDER_WEBHOOK", "https://discord.com/api/webhooks/1494093063801405531/6lxcbLMfO4NhnHfUPLIKblQb4OBJxQ9Hku3QPzLGPmpY3WDUzH7quxHlPp0Ob4eKPNmC")
         
         embed = {
             "title": "🛒 NOUVEAU Click & Collect",
