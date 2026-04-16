@@ -8,7 +8,6 @@ import traceback
 from datetime import datetime
 import pytz
 from functools import wraps
-import bcrypt
 
 PARIS_TZ = pytz.timezone("Europe/Paris")
 
@@ -507,18 +506,15 @@ def direction_login():
         return jsonify({"error": "Erreur DB"}), 500
     
     cur = conn.cursor(dictionary=True)
-    # Récupère le hash stocké
-    cur.execute("SELECT id, username, display_name, role, password_hash FROM direction_users WHERE username=%s AND active=1", (username,))
+    # Compare directement en clair
+    cur.execute("SELECT id, username, display_name, role FROM direction_users WHERE username=%s AND password_hash=%s AND active=1", (username, password))
     user = cur.fetchone()
     cur.close()
     conn.close()
     
     if user:
-        # Compare le mot de passe entré avec le hash stocké
-        if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
-            session['direction_id'] = user['id']
-            return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
-    
+        session['direction_id'] = user['id']
+        return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
     return jsonify({"success": False}), 401
 
 @app.route("/direction/logout", methods=["POST"])
