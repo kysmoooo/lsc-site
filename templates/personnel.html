@@ -538,9 +538,9 @@
 
         function normalizeCategory(value) {
             const normalized = (value || '').trim().toLowerCase();
-            if (normalized.includes('Direction')) return 'Direction';
-            if (normalized.includes('Supervision')) return 'Supervision';
-            if (normalized.includes('Mecanicien')) return 'Mecanicien';
+            if (normalized.includes('direction')) return 'Direction';
+            if (normalized.includes('supervision')) return 'Supervision';
+            if (normalized.includes('mecanicien')) return 'Mecanicien';
             return 'Autres';
         }
 
