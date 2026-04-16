@@ -506,7 +506,7 @@ def direction_login():
         return jsonify({"error": "Erreur DB"}), 500
     
     cur = conn.cursor(dictionary=True)
-    cur.execute("SELECT id, username, name, role FROM staff_profiles WHERE username=%s AND password=%s AND active=1", (username, password))
+    cur.execute("SELECT id, username, display_name, role FROM direction_users WHERE username=%s AND password_hash=%s AND active=1", (username, password))
     user = cur.fetchone()
     cur.close()
     conn.close()
