@@ -260,7 +260,7 @@ def handle_applications():
             cur = conn.cursor()
             cur.execute("""
                 INSERT INTO applications 
-                (full_name, discord_tag, avatar_url birth_date, phone, rib, experience, availability, motivation, status, created_at)
+                (full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
             """, (
                 data.get('fullName'),
@@ -339,7 +339,7 @@ def get_application_detail(app_id):
         
         cur = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT id, full_name, discord_tag, birth_date, phone, rib, experience, availability, motivation, status, created_at
+            SELECT id, full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at
             FROM applications
             WHERE id = %s
         """, (app_id,))
