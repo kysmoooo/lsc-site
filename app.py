@@ -115,6 +115,7 @@ def staff_page():
     return render_template('personnel.html')
 
 @app.route("/recrutement.html")
+@login_required
 def recruitment_page():
 
     discord_status = is_user_in_guild(current_user.discord_id)
@@ -133,6 +134,7 @@ def direction_page():
     return render_template('direction.html')
 
 @app.route("/commande.html")
+@login_required
 def clickcollect_page():
 
     discord_status = is_user_in_guild(current_user.discord_id)
@@ -237,6 +239,7 @@ def submit_staff_review():
 
 # ========== API RECRUTEMENT ==========
 @app.route("/api/applications", methods=["GET", "POST"])
+@login_required
 def handle_applications():
     if request.method == "POST":
         try:
@@ -464,6 +467,7 @@ def callback():
         return f"Erreur: {str(e)}", 500
 
 @app.route("/auth/logout", methods=["POST"])
+@login_required
 def auth_logout():
     logout_user()
     session.clear()
