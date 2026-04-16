@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direction - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .direction-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .direction-login {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .form label {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .form label span {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.875rem;
+        }
+
+        .form input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.875rem;
+        }
+
+        .form input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .form-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .form-message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .direction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .direction-user {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .direction-hint {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .direction-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .direction-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+
+        .application-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .status-filter-label {
+            font-size: 0.875rem;
+            color: #ffd700;
+        }
+
+        .status-filter {
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .status-filter.active {
+            background: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .application-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .application-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #ffd700;
+        }
+
+        .application-name {
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.status-pending { background: #f39c12; }
+        .status-dot.status-accepted { background: #2ecc71; }
+        .status-dot.status-rejected { background: #e74c3c; }
+        .status-dot.status-closed { background: #95a5a6; }
+
+        .application-detail {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="index.html">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link" href="index.html" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link" href="staff.html" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="recruitment.html" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="clickcollect.html">Click & Collect</a>
+                    <a class="nav-link" href="pricing.html" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link active" href="direction.html" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="page-header animate-in">
+                        <div>
+                            <h1 data-key="direction.title">Espace direction</h1>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in">
+                        <div id="direction-panel">
+                            <div class="direction-login">
+                                <p data-key="direction.select">Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                                <form class="form" id="direction-login-form">
+                                    <label>
+                                        <span data-key="direction.username">Identifiant</span>
+                                        <input name="username" id="direction-username" required>
+                                    </label>
+                                    <label>
+                                        <span data-key="direction.password">Mot de passe</span>
+                                        <input name="password" type="password" id="direction-password" required>
+                                    </label>
+                                    <button class="primary" type="submit" data-key="direction.loginButton">Se connecter</button>
+                                    <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser </span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000';
+        
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                direction: { title: "Espace direction", select: "Connexion panel Direction (Voir avec Nash pour identifiant)", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se deconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette categorie.", accept: "Accepter", reject: "Refuser", close: "Cloturer", pending: "En attente", accepted: "Acceptee", rejected: "Refusee", closed: "Cloturee" }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                direction: { title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "Accept", reject: "Reject", close: "Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed" }
+            }
+        };
+
+        let currentLang = 'fr';
+        let currentDirectionUser = null;
+        let applications = [];
+        let currentStatusFilter = 'pending';
+        let selectedApplicationId = null;
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') el.textContent = value;
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                        if (currentDirectionUser) {
+                            loadApplications();
+                        }
+                    }
+                });
+            });
+        }
+
+        async function checkDirectionAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/direction/me`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.user) {
+                    currentDirectionUser = data.user;
+                    showDirectionPanel();
+                } else {
+                    showDirectionLogin();
+                }
+            } catch (error) {
+                console.error('Error checking direction auth:', error);
+                showDirectionLogin();
+            }
+        }
+
+        function showDirectionLogin() {
+            const panel = document.getElementById('direction-panel');
+            if (!panel) return;
+            
+            panel.innerHTML = `
+                <div class="direction-login">
+                    <p data-key="direction.select">Connexion panel Direction (Voir avec Nash pour identifiant)</p>
+                    <form class="form" id="direction-login-form">
+                        <label>
+                            <span data-key="direction.username">Identifiant</span>
+                            <input name="username" id="direction-username" required>
+                        </label>
+                        <label>
+                            <span data-key="direction.password">Mot de passe</span>
+                            <input name="password" type="password" id="direction-password" required>
+                        </label>
+                        <button class="primary" type="submit" data-key="direction.loginButton">Se connecter</button>
+                        <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
+                    </form>
+                </div>
+            `;
+            
+            updatePageText();
+            
+            const form = document.getElementById('direction-login-form');
+            form.addEventListener('submit', handleDirectionLogin);
+        }
+
+        async function handleDirectionLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('direction-username').value;
+            const password = document.getElementById('direction-password').value;
+            const errorDiv = document.getElementById('direction-login-error');
+            
+            try {
+                const response = await fetch(`${API_BASE}/direction/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (!response.ok) {
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                window.location.reload();
+            } catch (error) {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showDirectionPanel() {
+            const panel = document.getElementById('direction-panel');
+            if (!panel) return;
+            
+            panel.innerHTML = `
+                <div class="direction-panel">
+                    <div class="direction-header">
+                        <div>
+                            <p class="direction-user">${currentDirectionUser?.displayName || 'Direction'}</p>
+                            <p class="direction-hint" data-key="direction.select">Gestion des candidatures</p>
+                        </div>
+                        <button class="ghost" id="direction-logout" data-key="direction.logout">Se deconnecter</button>
+                    </div>
+                    <div class="direction-tabs">
+                        <button type="button" class="tab active" data-section="candidature" data-key="direction.candidature">Candidature</button>
+                    </div>
+                    <div id="direction-content">
+                        <p>Chargement...</p>
+                    </div>
+                </div>
+            `;
+            
+            updatePageText();
+            
+            document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
+            loadApplications();
+        }
+
+        async function handleDirectionLogout() {
+            await fetch(`${API_BASE}/direction/logout`, { method: 'POST', credentials: 'include' });
+            window.location.reload();
+        }
+
+        async function loadApplications() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/applications`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load applications');
+                
+                applications = await response.json();
+                displayApplications();
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                container.innerHTML = '<p>Erreur lors du chargement des candidatures</p>';
+            }
+        }
+
+        function displayApplications() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            const t = translations[currentLang].direction;
+            const filtered = applications.filter(a => a.status === currentStatusFilter);
+            
+            container.innerHTML = `
+                <div class="direction-grid">
+                    <div class="application-list">
+                        <div class="status-filters">
+                            <span class="status-filter-label" data-key="direction.category">Catégorie</span>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'pending' ? 'active' : ''}" data-status="pending">${t.pending}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'accepted' ? 'active' : ''}" data-status="accepted">${t.accepted}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'rejected' ? 'active' : ''}" data-status="rejected">${t.rejected}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'closed' ? 'active' : ''}" data-status="closed">${t.closed}</button>
+                        </div>
+                        <div id="applications-list">
+                            ${filtered.length === 0 ? `<p>${t.emptyCategory}</p>` : filtered.map(app => `
+                                <button class="application-item ${selectedApplicationId === app.id ? 'active' : ''}" data-id="${app.id}">
+                                    <span class="application-name">${app.full_name}</span>
+                                    <small>${app.discord_tag}</small>
+                                    <span class="status-dot status-${app.status}"></span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="application-detail" id="application-detail">
+                        <p>Sélectionnez une candidature</p>
+                    </div>
+                </div>
+            `;
+            
+            // Attach filter handlers
+            document.querySelectorAll('.status-filter').forEach(filter => {
+                filter.addEventListener('click', () => {
+                    currentStatusFilter = filter.dataset.status;
+                    selectedApplicationId = null;
+                    displayApplications();
+                });
+            });
+            
+            // Attach application click handlers
+            document.querySelectorAll('.application-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const id = parseInt(item.dataset.id);
+                    selectedApplicationId = id;
+                    displayApplications();
+                    await loadApplicationDetail(id);
+                });
+            });
+        }
+
+        async function loadApplicationDetail(id) {
+            const detailContainer = document.getElementById('application-detail');
+            if (!detailContainer) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/applications/${id}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load detail');
+                
+                const detail = await response.json();
+                const t = translations[currentLang].direction;
+                
+                detailContainer.innerHTML = `
+                    <div class="applicant-detail">
+                        <h3>${detail.full_name}</h3>
+                        <div class="detail-grid">
+                            <div><strong>Discord:</strong> ${detail.discord_tag}</div>
+                            <div><strong>Date de naissance:</strong> ${detail.birth_date || 'Non renseignée'}</div>
+                            <div><strong>Téléphone:</strong> ${detail.phone}</div>
+                            <div><strong>RIB:</strong> ${detail.rib || 'Non renseigné'}</div>
+                            <div><strong>Expérience:</strong> ${detail.experience}</div>
+                            <div><strong>Disponibilité:</strong> ${detail.availability}</div>
+                        </div>
+                        <div><strong>Motivation:</strong></div>
+                        <p>${detail.motivation}</p>
+                        <div class="detail-actions">
+                            ${detail.status === 'pending' ? `
+                                <button class="primary" id="accept-app">${t.accept}</button>
+                                <button class="ghost" id="reject-app">${t.reject}</button>
+                            ` : ''}
+                            ${detail.status !== 'closed' ? `
+                                <button class="ghost" id="close-app">${t.close}</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('accept-app')?.addEventListener('click', () => updateApplicationStatus(id, 'accepted'));
+                document.getElementById('reject-app')?.addEventListener('click', () => updateApplicationStatus(id, 'rejected'));
+                document.getElementById('close-app')?.addEventListener('click', () => updateApplicationStatus(id, 'closed'));
+                
+            } catch (error) {
+                console.error('Error loading detail:', error);
+                detailContainer.innerHTML = '<p>Erreur lors du chargement des détails</p>';
+            }
+        }
+
+        async function updateApplicationStatus(id, status) {
+            try {
+                const response = await fetch(`${API_BASE}/api/applications/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update status');
+                
+                await loadApplications();
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            checkDirectionAuth();
+        });
+    </script>
+</body>
+</html>

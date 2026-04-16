@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personnel - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .staff-rank-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .staff-rank-title {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .staff-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .staff-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .staff-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin-bottom: 1rem;
+        }
+
+        .staff-role {
+            color: #ffd700;
+            font-size: 0.875rem;
+            margin: 0.25rem 0;
+        }
+
+        .staff-specialty {
+            color: #aaa;
+            font-size: 0.875rem;
+        }
+
+        .staff-rating {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .staff-review-button {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a0a);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-eyebrow {
+            color: #ffd700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-card h3 {
+            margin: 0.5rem 0 1rem;
+        }
+
+        .review-form label {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .review-form label span {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.875rem;
+        }
+
+        .review-form input, .review-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        .review-stars {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .review-star {
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            transition: color 0.2s;
+        }
+
+        .review-star.active {
+            color: #ffd700;
+        }
+
+        .form-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .form-message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        .form-message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .direction-hint {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .stagger > *:nth-child(1) { animation-delay: 0s; }
+        .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+        .stagger > *:nth-child(3) { animation-delay: 0.2s; }
+        .stagger > *:nth-child(4) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="index.html">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link" href="index.html" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link active" href="staff.html" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="recruitment.html" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="clickcollect.html">Click & Collect</a>
+                    <a class="nav-link" href="pricing.html" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link" href="direction.html" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="page-header animate-in">
+                        <div>
+                            <h1 data-key="staff.title">Personnel</h1>
+                            <p data-key="staff.subtitle">Une equipe stable, experimentee et disponible</p>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in" id="staff-section">
+                        <div id="staff-loading">Chargement...</div>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser </span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal d'avis -->
+    <div id="review-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <p class="modal-eyebrow">Avis personnel</p>
+            <h3 id="review-modal-title">Noter un membre</h3>
+            <div class="review-form">
+                <label>
+                    Nom et prenom <span class="required-mark">*</span>
+                    <input type="text" id="review-author-name" placeholder="Ex: Jean Dupont">
+                </label>
+                <div class="review-stars" id="review-stars">
+                    <button type="button" data-star="1" class="review-star">★</button>
+                    <button type="button" data-star="2" class="review-star">★</button>
+                    <button type="button" data-star="3" class="review-star">★</button>
+                    <button type="button" data-star="4" class="review-star">★</button>
+                    <button type="button" data-star="5" class="review-star">★</button>
+                </div>
+                <label>
+                    Commentaire <span class="required-mark">*</span>
+                    <textarea id="review-comment" rows="4" placeholder="Ton avis sur ce membre..."></textarea>
+                </label>
+                <div id="review-error" class="form-message error" style="display: none;"></div>
+                <div id="review-success" class="form-message success" style="display: none;"></div>
+                <div class="modal-actions">
+                    <button class="primary" id="submit-review">Envoyer l'avis</button>
+                    <button class="ghost" id="close-review-modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000';
+        
+        // Traductions
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                staff: { title: "Personnel", subtitle: "Une equipe stable, experimentee et disponible", staffEmpty: "Aucun profil pour le moment." }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                staff: { title: "Staff", subtitle: "A stable, experienced, and available team", staffEmpty: "No profiles yet." }
+            }
+        };
+
+        let currentLang = 'fr';
+        let currentReviewTarget = null;
+        let currentStars = 0;
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') el.textContent = value;
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                        loadStaffProfiles();
+                    }
+                });
+            });
+        }
+
+        function normalizeCategory(value) {
+            const normalized = (value || '').trim().toLowerCase();
+            if (normalized.includes('direction')) return 'Direction';
+            if (normalized.includes('supervis')) return 'Supervision';
+            if (normalized.includes('meca')) return 'Mecanicien';
+            return 'Autres';
+        }
+
+        async function loadStaffProfiles() {
+            const container = document.getElementById('staff-section');
+            if (!container) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/staff`);
+                if (!response.ok) throw new Error('Failed to load staff');
+                
+                const staff = await response.json();
+                displayStaffProfiles(staff);
+            } catch (error) {
+                console.error('Error loading staff:', error);
+                container.innerHTML = '<p>Erreur lors du chargement du personnel</p>';
+            }
+        }
+
+        function displayStaffProfiles(staff) {
+            const container = document.getElementById('staff-section');
+            if (!container) return;
+            
+            const categories = ['Direction', 'Supervision', 'Mecanicien', 'Autres'];
+            let html = '';
+            
+            for (const category of categories) {
+                const members = staff.filter(m => normalizeCategory(m.category || m.role) === category);
+                
+                html += `<div class="staff-rank-section">
+                    <h3 class="staff-rank-title">${category}</h3>
+                    <div class="staff-grid stagger">`;
+                
+                if (members.length === 0) {
+                    html += '<p class="direction-hint">Aucun profil dans cette catégorie.</p>';
+                } else {
+                    for (const member of members) {
+                        const rating = member.avg_rating ? member.avg_rating.toFixed(1) : '0';
+                        const reviewText = member.review_count ? `⭐ ${rating} (${member.review_count} avis)` : 'Pas encore d\'avis';
+                        
+                        html += `<div class="staff-card" data-staff-id="${member.id}" data-staff-name="${member.name}">
+                            ${member.photo_url ? 
+                                `<img class="staff-photo" src="${member.photo_url}" alt="${member.name}">` :
+                                `<div class="staff-avatar">${member.name.charAt(0)}</div>`
+                            }
+                            <div>
+                                <h3>${member.name}</h3>
+                                <p class="staff-role">${member.role}</p>
+                                <p class="staff-specialty">${member.specialty}</p>
+                                <p class="staff-rating">${reviewText}</p>
+                            </div>
+                            <button class="ghost staff-review-button" data-review-id="${member.id}">Mettre un avis</button>
+                        </div>`;
+                    }
+                }
+                
+                html += `</div></div>`;
+            }
+            
+            container.innerHTML = html;
+            
+            // Attach review button handlers
+            document.querySelectorAll('.staff-review-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const card = btn.closest('.staff-card');
+                    const staffId = card?.dataset.staffId;
+                    const staffName = card?.dataset.staffName;
+                    openReviewModal(staffId, staffName);
+                });
+            });
+        }
+
+        function openReviewModal(staffId, staffName) {
+            currentReviewTarget = { id: parseInt(staffId), name: staffName };
+            currentStars = 0;
+            updateStarsDisplay();
+            
+            document.getElementById('review-author-name').value = '';
+            document.getElementById('review-comment').value = '';
+            document.getElementById('review-error').style.display = 'none';
+            document.getElementById('review-success').style.display = 'none';
+            document.getElementById('review-modal-title').textContent = `Noter ${staffName}`;
+            document.getElementById('review-modal').style.display = 'flex';
+        }
+
+        function updateStarsDisplay() {
+            const stars = document.querySelectorAll('#review-stars .review-star');
+            stars.forEach((star, index) => {
+                if (index < currentStars) {
+                    star.classList.add('active');
+                    star.style.color = '#ffd700';
+                } else {
+                    star.classList.remove('active');
+                    star.style.color = '#555';
+                }
+            });
+        }
+
+        async function submitReview() {
+            const authorName = document.getElementById('review-author-name').value.trim();
+            const comment = document.getElementById('review-comment').value.trim();
+            const errorDiv = document.getElementById('review-error');
+            const successDiv = document.getElementById('review-success');
+            
+            if (currentStars < 1) {
+                errorDiv.textContent = 'Merci de selectionner au moins 1 etoile.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (!comment) {
+                errorDiv.textContent = 'Merci d\'ajouter un commentaire.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (!authorName) {
+                errorDiv.textContent = 'Merci d\'ajouter ton nom et prenom.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/staff-reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        staffId: currentReviewTarget.id,
+                        staffName: currentReviewTarget.name,
+                        rating: currentStars,
+                        comment: comment,
+                        reviewer: authorName
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to submit review');
+                
+                successDiv.textContent = 'Avis envoye avec succes.';
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                
+                setTimeout(() => {
+                    document.getElementById('review-modal').style.display = 'none';
+                    loadStaffProfiles();
+                }, 1500);
+            } catch (error) {
+                errorDiv.textContent = 'Erreur lors de l\'envoi de l\'avis.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function initReviewModal() {
+            const modal = document.getElementById('review-modal');
+            if (!modal) return;
+            
+            document.getElementById('close-review-modal')?.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            document.getElementById('submit-review')?.addEventListener('click', submitReview);
+            
+            document.querySelectorAll('#review-stars .review-star').forEach(star => {
+                star.addEventListener('click', () => {
+                    currentStars = parseInt(star.dataset.star);
+                    updateStarsDisplay();
+                });
+            });
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            initReviewModal();
+            loadStaffProfiles();
+        });
+    </script>
+</body>
+</html>

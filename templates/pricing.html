@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarification - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .pricing-hero {
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .pricing-highlight {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .pricing-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #ffd700;
+            text-transform: uppercase;
+        }
+
+        .pricing-category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .category-tab {
+            padding: 0.5rem 1.25rem;
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 40px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-tab.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .price-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .price-card .badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffd700;
+            color: #1a1a2e;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .price-card h3 {
+            margin: 1rem 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        .price-amount {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .note {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #888;
+            text-align: center;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="index.html">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link" href="index.html" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link" href="staff.html" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="recruitment.html" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="clickcollect.html">Click & Collect</a>
+                    <a class="nav-link active" href="pricing.html" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link" href="direction.html" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="page-header animate-in">
+                        <div>
+                            <h1 data-key="pricing.title">Tarification</h1>
+                            <p data-key="pricing.intro">Chaque vehicule est different : nos tarifs sont adaptés et au niveau de customisation performances pour chaque voiture.</p>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in">
+                        <div class="pricing-hero">
+                            <div>
+                                <h3>Temps de travail de nos mecaniciens.</h3>
+                                <p>Le temps peut varier selon la surcharge de travail, la complexite de l intervention.</p>
+                            </div>
+                            <div class="pricing-highlight">
+                                <div>
+                                    <span class="pricing-label">Duree</span>
+                                    <strong>5 Minutes</strong>
+                                </div>
+                                <div>
+                                    <span class="pricing-label">Reclamation si probleme</span>
+                                    <strong>Direction - Secretaire Carla</strong>
+                                </div>
+                                <div>
+                                    <span class="pricing-label">Demande</span>
+                                    <strong>Sur mesure, selon vos choix !</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pricing-category-tabs">
+                            <button type="button" data-category="global" class="category-tab active" data-key="pricing.categories.global">Prestation globale</button>
+                            <button type="button" data-category="custom" class="category-tab" data-key="pricing.categories.custom">Customisation</button>
+                            <button type="button" data-category="paint" class="category-tab" data-key="pricing.categories.paint">Peinture</button>
+                            <button type="button" data-category="sales" class="category-tab" data-key="pricing.categories.sales">Vente</button>
+                        </div>
+
+                        <div id="pricing-global" class="pricing-grid stagger"></div>
+                        <div id="pricing-custom" class="pricing-grid stagger" style="display: none;"></div>
+                        <div id="pricing-paint" class="pricing-grid stagger" style="display: none;"></div>
+                        <div id="pricing-sales" class="pricing-grid stagger" style="display: none;"></div>
+                        <p class="note" id="pricing-note" style="display: none;" data-key="pricing.note">Les full performance sont sans suspension.</p>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser </span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                pricing: { title: "Tarification", intro: "Chaque vehicule est different : nos tarifs sont adaptés et au niveau de customisation performances pour chaque voiture.", note: "Les full performance sont sans suspension.", categories: { global: "Prestation globale", custom: "Customisation", paint: "Peinture", sales: "Vente" } }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                pricing: { title: "Pricing", intro: "Each vehicle is different. Pricing is tailored to the scope and level of customization.", note: "The full performance versions are without suspension.", categories: { global: "Global service", custom: "Customization", paint: "Paint", sales: "Sales" } }
+            }
+        };
+
+        let currentLang = 'fr';
+
+        const pricingData = {
+            global: [
+                { title: "Carrosserie", price: "$50" },
+                { title: "Depannage (/km)", price: "$100" },
+                { title: "Fourriere", price: "$150" },
+                { title: "Fourriere Avion", price: "$300" },
+                { title: "Fourriere Bateaux", price: "$300" },
+                { title: "Fourriere Gouv", price: "$200" },
+                { title: "Fourriere Helicoptere", price: "$300" },
+                { title: "Nettoyage", price: "$50" },
+                { title: "Pneu", price: "$100" },
+                { title: "Repa complete", price: "$250" },
+                { title: "Reparation Moteur", price: "$200" }
+            ],
+            custom: [
+                { title: "Full Perf - Catégorie 1", price: "$20'000" },
+                { title: "Full Perf - Catégorie 2", price: "$38'000" },
+                { title: "Full Perf - Catégorie 3", price: "$67'000" },
+                { title: "Full Perf - Catégorie 4", price: "$90'000" },
+                { title: "Full Perf - Catégorie 5", price: "$190'000" }
+            ],
+            paint: [
+                { title: "Nacrage (Effet de couleur)", price: "$450" },
+                { title: "Peinture Perso", price: "$500" },
+                { title: "Peinture primaire", price: "$200" },
+                { title: "Peinture secondaire", price: "$200" }
+            ],
+            sales: [
+                { title: "Karcher", price: "$200" },
+                { title: "Kit de reparation", price: "$200" },
+                { title: "Moteur", price: "$700" }
+            ]
+        };
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') {
+                    if (el.tagName === 'BUTTON' && el.dataset.category) {
+                        el.textContent = value;
+                    } else {
+                        el.textContent = value;
+                    }
+                }
+            });
+            
+            // Update pricing badges
+            document.querySelectorAll('.price-card .badge').forEach((badge, idx) => {
+                const container = badge.closest('[id^="pricing-"]');
+                if (container) {
+                    const category = container.id.replace('pricing-', '');
+                    badge.textContent = t.pricing.categories[category] || category;
+                }
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                        populatePricingSections();
+                    }
+                });
+            });
+        }
+
+        function populatePricingSections() {
+            const t = translations[currentLang];
+            
+            for (const [category, items] of Object.entries(pricingData)) {
+                const container = document.getElementById(`pricing-${category}`);
+                if (container) {
+                    container.innerHTML = items.map(item => `
+                        <div class="price-card">
+                            <span class="badge">${t.pricing.categories[category] || category}</span>
+                            <h3>${item.title}</h3>
+                            <p class="price-amount">${item.price}</p>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function initCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const category = tab.dataset.category;
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    document.querySelectorAll('[id^="pricing-"]').forEach(container => {
+                        container.style.display = 'none';
+                    });
+                    
+                    const activeContainer = document.getElementById(`pricing-${category}`);
+                    if (activeContainer) activeContainer.style.display = 'grid';
+                    
+                    const note = document.getElementById('pricing-note');
+                    if (note) note.style.display = category === 'custom' ? 'block' : 'none';
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            populatePricingSections();
+            initCategoryTabs();
+        });
+    </script>
+</body>
+</html>

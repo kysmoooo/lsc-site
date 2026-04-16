@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LS Customs - Glife RP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hero {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(0, 0, 0, 0.5));
+            border-radius: 2rem;
+            padding: 3rem;
+        }
+
+        .hero-inner {
+            flex: 1;
+        }
+
+        .hero-eyebrow {
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: #aaa;
+            margin-bottom: 2rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            gap: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section.alt {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 2rem;
+            padding: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .service-card h3 {
+            color: #ffd700;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .stagger > *:nth-child(1) { animation-delay: 0s; }
+        .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+        .stagger > *:nth-child(3) { animation-delay: 0.2s; }
+        .stagger > *:nth-child(4) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="index.html">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link active" href="index.html" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link" href="staff.html" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link" href="recruitment.html" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link" href="clickcollect.html">Click & Collect</a>
+                    <a class="nav-link" href="pricing.html" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link" href="direction.html" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="hero animate-in">
+                        <div class="hero-inner">
+                            <p class="hero-eyebrow" data-key="hero.highlight">Garage performance</p>
+                            <h1 data-key="hero.title">LS Customs - Glife RP</h1>
+                            <p class="hero-subtitle" data-key="hero.subtitle">Reparation, customisation, depannage et vente de moteur/kit de reparation/Karcher.</p>
+                            <div class="hero-actions">
+                                <a class="primary" href="recruitment.html" data-key="hero.cta">Voir nos services</a>
+                                <a class="ghost" href="pricing.html" data-key="nav.pricing">Tarification</a>
+                            </div>
+                        </div>
+                        <div class="hero-card">
+                            <div>
+                                <p class="card-label">Horaire</p>
+                                <p class="card-value">7j/7 24h/24</p>
+                            </div>
+                            <div>
+                                <p class="card-label">Localisation</p>
+                                <p class="card-value">Burton Carcer Way</p>
+                            </div>
+                            <div>
+                                <p class="card-label">Types de Services</p>
+                                <p class="card-value">Reparation, Customs, Vente</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in">
+                        <div class="section-title">
+                            <h2 data-key="about.title">Le LS CUSTOMS</h2>
+                            <p data-key="about.body">Le LS CUSTOMS vous accueille 7j/7 pour la reparation, la customisation et la vente de moteur/kit de reparation/Karcher. Nous assurons un suivi rigoureux et une equipe dediee pour chaque client.</p>
+                        </div>
+                    </section>
+
+                    <section class="section alt animate-in">
+                        <div class="section-title">
+                            <h2 data-key="services.title">Prestations que nous effectuons</h2>
+                        </div>
+                        <div class="grid stagger">
+                            <div class="service-card">
+                                <h3>Prestation Classique</h3>
+                                <p>"Prestation Classique" avec suivi, devis clair, et equipement pro pour chaque intervention.</p>
+                            </div>
+                            <div class="service-card">
+                                <h3>Customisation Performance et esthetique</h3>
+                                <p>"Customisation Performance et esthetique" avec suivi, devis clair, et equipement pro pour chaque intervention.</p>
+                            </div>
+                            <div class="service-card">
+                                <h3>Depannage et remorquage</h3>
+                                <p>"Depannage et remorquage" avec suivi, devis clair, et equipement pro pour chaque intervention.</p>
+                            </div>
+                            <div class="service-card">
+                                <h3>Vente de Moteur, kit de reparation et Karcher</h3>
+                                <p>"Vente de Moteur, kit de reparation et Karcher" avec suivi, devis clair, et equipement pro pour chaque intervention.</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser </span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Traductions
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                hero: { highlight: "Garage performance", title: "LS Customs - Glife RP", subtitle: "Reparation, customisation, depannage et vente de moteur/kit de reparation/Karcher.", cta: "Voir nos services" },
+                about: { title: "Le LS CUSTOMS", body: "Le LS CUSTOMS vous accueille 7j/7 pour la reparation, la customisation et la vente de moteur/kit de reparation/Karcher. Nous assurons un suivi rigoureux et une equipe dediee pour chaque client." },
+                services: { title: "Prestations que nous effectuons" }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                hero: { highlight: "Garage performance", title: "LS Customs", subtitle: "Auto repair, tuning and restoration in Los Santos", cta: "View services" },
+                about: { title: "The LS CUSTOMS", body: "LS Customs handles repair, customization and engine builds. We run a clean process and a dedicated team for every client." },
+                services: { title: "Services We Offer" }
+            }
+        };
+
+        let currentLang = 'fr';
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) {
+                        value = value[k];
+                    } else {
+                        value = null;
+                        break;
+                    }
+                }
+                if (value && typeof value === 'string') {
+                    el.textContent = value;
+                }
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+        });
+    </script>
+</body>
+</html>
