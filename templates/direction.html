@@ -1006,21 +1006,23 @@
             }
         }
 
-        // ========== GESTION DES ABSENCES ==========
+        // ========== GESTION DES ABSENCES AVEC API ==========
         function loadAbsences() {
             const container = document.getElementById('direction-content');
             if (!container) return;
             
-            // Charger les absences depuis localStorage ou utiliser les données de démo
-            const savedAbsences = localStorage.getItem('absences');
-            if (savedAbsences) {
-                absences = JSON.parse(savedAbsences);
-            } else {
-                absences = demoAbsences;
-                localStorage.setItem('absences', JSON.stringify(absences));
-            }
+            container.innerHTML = '<div class="loader">⏳ Chargement des absences...</div>';
             
-            displayAbsences();
+            fetch(`${API_BASE}/api/absences`, { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    absences = data;
+                    displayAbsences();
+                })
+                .catch(error => {
+                    console.error('Erreur chargement absences:', error);
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des absences</p>';
+                });
         }
 
         function displayAbsences() {
@@ -1038,7 +1040,7 @@
                                 <div class="absence-item">
                                     <div class="absence-info">
                                         <span class="absence-name">${escapeHtml(absence.name)}</span>
-                                        <span class="absence-dates">📅 Du ${formatDate(absence.startDate)} au ${formatDate(absence.endDate)}</span>
+                                        <span class="absence-dates">📅 Du ${formatDate(absence.start_date)} au ${formatDate(absence.end_date)}</span>
                                     </div>
                                     <div class="absence-actions">
                                         <button class="delete-absence" data-id="${absence.id}">🗑 Supprimer</button>
@@ -1047,10 +1049,29 @@
                             `).join('')}
                         </div>
                     </div>
+                    <div class="add-absence-form">
+                        <h3 style="color: #ffd700; margin-bottom: 1rem;">➕ Déclarer une absence</h3>
+                        <form id="new-absence-form">
+                            <div class="form-group">
+                                <label>👤 Nom du personnel</label>
+                                <input type="text" id="absence-name" required placeholder="Nom complet">
+                            </div>
+                            <div class="form-group">
+                                <label>📅 Date de début</label>
+                                <input type="date" id="absence-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label>📅 Date de fin</label>
+                                <input type="date" id="absence-end" required>
+                            </div>
+                            <button type="submit" class="primary" style="width: 100%;">✅ Enregistrer l'absence</button>
+                        </form>
+                        <div id="absence-form-message" class="form-message" style="display: none;"></div>
+                    </div>
                 </div>
             `;
             
-            // Attacher les événements
+            // Attacher les événements de suppression
             document.querySelectorAll('.delete-absence').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const id = parseInt(btn.dataset.id);
@@ -1084,33 +1105,54 @@
                 return;
             }
             
-            const newAbsence = {
-                id: Date.now(),
-                name: name,
-                startDate: startDate,
-                endDate: endDate
-            };
-            
-            absences.push(newAbsence);
-            localStorage.setItem('absences', JSON.stringify(absences));
-            
-            messageDiv.textContent = 'Absence enregistrée avec succès !';
-            messageDiv.className = 'form-message success';
-            messageDiv.style.display = 'block';
-            
-            document.getElementById('new-absence-form').reset();
-            
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
-            
-            displayAbsences();
+            fetch(`${API_BASE}/api/absences`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name, startDate, endDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageDiv.textContent = 'Absence enregistrée avec succès !';
+                    messageDiv.className = 'form-message success';
+                    messageDiv.style.display = 'block';
+                    
+                    document.getElementById('new-absence-form').reset();
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                    
+                    loadAbsences(); // Recharger la liste
+                } else {
+                    messageDiv.textContent = data.error || 'Erreur lors de l\'enregistrement';
+                    messageDiv.className = 'form-message error';
+                    messageDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                messageDiv.textContent = 'Erreur lors de l\'enregistrement';
+                messageDiv.className = 'form-message error';
+                messageDiv.style.display = 'block';
+            });
         }
 
         function deleteAbsence(id) {
-            absences = absences.filter(a => a.id !== id);
-            localStorage.setItem('absences', JSON.stringify(absences));
-            displayAbsences();
+            fetch(`${API_BASE}/api/absences/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadAbsences(); // Recharger la liste
+                }
+            })
+            .catch(error => {
+                console.error('Erreur suppression:', error);
+            });
         }
 
         function formatDate(dateString) {
