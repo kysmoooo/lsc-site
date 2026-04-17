@@ -128,6 +128,7 @@ def pricing_page():
 
 @app.route("/direction.html")
 def direction_page():
+    session.pop('direction_id', None)
     return render_template('direction.html')
 
 @app.route("/commande.html")
