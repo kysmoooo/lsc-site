@@ -861,7 +861,26 @@
             fr: {
                 nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
                 direction: {
-                    title: "Espace direction", select: "Connexion panel Direction", username: "Identifiant", password: "Mot de passe", loginButton: "Se connecter", loginError: "Identifiants invalides.", logout: "Se déconnecter", empty: "Aucune candidature pour le moment.", emptyCategory: "Aucune candidature dans cette catégorie.", accept: "✅ Accepter", reject: "❌ Refuser", close: "🔒 Clôturer", pending: "En attente", accepted: "Acceptée", rejected: "Refusée", closed: "Clôturée", category: "Filtrer par statut :", candidature: "📋 Candidatures", absences: "📅 Absences", annonces: "📢 Annonces",
+                    title: "Espace direction", 
+                    select: "Connexion panel Direction", 
+                    username: "Identifiant", 
+                    password: "Mot de passe", 
+                    loginButton: "Se connecter", 
+                    loginError: "Identifiants invalides.", 
+                    logout: "Se déconnecter", 
+                    empty: "Aucune candidature pour le moment.", 
+                    emptyCategory: "Aucune candidature dans cette catégorie.", 
+                    accept: "Accepter", 
+                    reject: "Refuser", 
+                    close: "Clôturer", 
+                    pending: "En attente", 
+                    accepted: "Acceptée", 
+                    rejected: "Refusée", 
+                    closed: "Clôturée", 
+                    category: "Filtrer par statut :", 
+                    candidature: "📋 Candidatures", 
+                    absences: "📅 Absences", 
+                    annonces: "📢 Annonces",
                     nouvelleAnnonce: "➕ Nouvelle annonce",
                     titre: "Titre",
                     imageUrl: "Image URL",
@@ -1319,7 +1338,7 @@
                 <div>
                     <div class="annonces-header">
                         <h3 style="color: #ffd700;">📢 Gérer les annonces</h3>
-                        <button class="btn-create" id="btn-create-annonce">➕ ${t.nouvelleAnnonce}</button>
+                        <button class="btn-create" id="btn-create-annonce">${t.nouvelleAnnonce}</button>
                     </div>
                     <div class="applications-scroll">
                         ${annonces.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 ${t.aucuneAnnonce}</p>` : annonces.map(annonce => `
