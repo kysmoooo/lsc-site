@@ -1020,12 +1020,15 @@
                     body: JSON.stringify({ username, password })
                 });
                 
+                const data = await response.json();
+
                 if (!response.ok) {
                     errorDiv.style.display = 'block';
                     return;
                 }
-                
-                window.location.reload();
+
+                currentDirectionUser = data.user;
+                showDirectionPanel();
             } catch (error) {
                 errorDiv.style.display = 'block';
             }
