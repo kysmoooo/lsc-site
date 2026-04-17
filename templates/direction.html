@@ -889,7 +889,8 @@
                     annuler: "Annuler",
                     modifier: "Modifier",
                     supprimer: "Supprimer",
-                    aucuneAnnonce: "Aucune annonce pour le moment"
+                    aucuneAnnonce: "Aucune annonce pour le moment",
+                    employes: "👥 Employés",
                 }
             },
             en: {
@@ -904,7 +905,8 @@
                     annuler: "Cancel",
                     modifier: "Edit",
                     supprimer: "Delete",
-                    aucuneAnnonce: "No announcements at the moment" 
+                    aucuneAnnonce: "No announcements at the moment",
+                    employes: "👥 Employees",
                 }
             }
         };
@@ -954,6 +956,7 @@
                             if (currentTab === 'candidature') loadApplications();
                             else if (currentTab === 'absences') loadAbsences();
                             else if (currentTab === 'annonces') loadAnnonces();
+                            else if (currentTab === 'employes') loadEmployesSection();
                         }
                     }
                 });
@@ -1051,6 +1054,7 @@
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
                         <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
                         <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
+                        <button type="button" class="tab" data-tab="employes" data-key="direction.employes">👥 Employés</button>
                     </div>
                     <div id="direction-content">
                         <div class="loader">⏳ Chargement...</div>
@@ -1074,6 +1078,10 @@
                         loadAbsences();
                     } else if (currentTab === 'annonces') {
                         loadAnnonces();
+                    } else if (currentTab === 'employes') { 
+                        loadEmployesSection(); 
+                    } else if (currentTab !== 'employes') { 
+                        clearInterval(employesRefreshInterval); 
                     }
                 });
             });
@@ -1084,7 +1092,10 @@
                 loadAbsences();
             } else if (currentTab === 'annonces') {
                 loadAnnonces();
+            } else if (currentTab === 'employes') {
+                loadEmployesSection(); 
             }
+            
         }
 
         async function handleDirectionLogout() {
@@ -1461,6 +1472,217 @@
                 })
                 .catch(error => console.error('Erreur:', error));
             }
+        }
+
+        // ========== SECTION EMPLOYÉS ==========
+
+        let employesRefreshInterval = null;
+
+        function loadEmployesSection() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 style="color:#ffd700;">👥 Suivi des services</h3>
+                        <span style="font-size:0.75rem; color:#666;">🔄 Actualisation auto toutes les 10s</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 2fr; gap:1.5rem;">
+                        <div id="employes-suivi-list" style="background:rgba(0,0,0,0.35); border-radius:1rem; padding:1rem; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="color:#ffd700; font-size:0.85rem; font-weight:600; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,215,0,0.1);">
+                                📋 Tous les employés
+                            </div>
+                            <div id="suivi-list-inner" class="applications-scroll">
+                                <div class="loader">⏳ Chargement...</div>
+                            </div>
+                        </div>
+                        <div id="employe-detail-panel" style="background:rgba(0,0,0,0.35); border-radius:1rem; padding:1.25rem; border:1px solid rgba(255,255,255,0.05);">
+                            <p style="text-align:center; opacity:0.5; padding:2rem 0;">✨ Sélectionnez un employé pour voir ses services</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            refreshEmployesSuivi();
+            clearInterval(employesRefreshInterval);
+            employesRefreshInterval = setInterval(refreshEmployesSuivi, 10000);
+        }
+
+        async function refreshEmployesSuivi() {
+            try {
+                const res = await fetch(`${API_BASE}/api/direction/employes/suivi`, { credentials: 'include' });
+                if (!res.ok) return;
+                const employes = await res.json();
+                renderSuiviList(employes);
+            } catch (e) {
+                console.error('Erreur suivi employés:', e);
+            }
+        }
+
+        function renderSuiviList(employes) {
+            const inner = document.getElementById('suivi-list-inner');
+            if (!inner) return;
+
+            if (!employes || employes.length === 0) {
+                inner.innerHTML = '<p style="text-align:center; padding:2rem; color:#666;">Aucun employé.</p>';
+                return;
+            }
+
+            inner.innerHTML = employes.map(emp => {
+                const isOnline = emp.en_service > 0;
+                const dotColor = isOnline ? '#2ecc71' : '#e74c3c';
+                const dotGlow = isOnline ? 'box-shadow:0 0 6px #2ecc71;' : '';
+                return `
+                    <button class="application-item" data-emp-id="${emp.id}" onclick="loadEmployeDetail(${emp.id}, '${escapeHtml(emp.display_name)}')">
+                        <div class="application-info">
+                            <span class="application-name" style="display:flex; align-items:center; gap:0.5rem;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:${dotColor}; ${dotGlow} flex-shrink:0; display:inline-block;"></span>
+                                ${escapeHtml(emp.display_name)}
+                            </span>
+                            <span class="application-discord">${isOnline ? '✅ En service' : '❌ Hors service'} · ${emp.services_semaine} cette semaine</span>
+                        </div>
+                        <span style="font-size:1.1rem; font-weight:700; color:${isOnline ? '#2ecc71' : '#666'};">${emp.services_semaine}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        async function loadEmployeDetail(empId, empName) {
+            // Highlight actif
+            document.querySelectorAll('.application-item[data-emp-id]').forEach(el => {
+                el.classList.toggle('active', parseInt(el.dataset.empId) === empId);
+            });
+
+            const panel = document.getElementById('employe-detail-panel');
+            if (!panel) return;
+
+            panel.innerHTML = `<div class="loader">⏳ Chargement...</div>`;
+
+            try {
+                // Charger l'historique des services de cet employé + les actifs
+                const [allRes, actifsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/direction/employes/${empId}/services`, { credentials: 'include' }),
+                    fetch(`${API_BASE}/api/direction/services/actifs`, { credentials: 'include' })
+                ]);
+
+                const allData = await allRes.json();
+                const actifsData = await actifsRes.json();
+
+                const activeService = actifsData.find(s => s.employe_id === empId);
+                const services = allData.services || [];
+
+                // Calcul total semaine
+                const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                const weekServices = services.filter(s => new Date(s.start_time).getTime() > weekAgo);
+                const totalWeekMins = weekServices.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+                const wh = Math.floor(totalWeekMins / 60);
+                const wm = totalWeekMins % 60;
+
+                panel.innerHTML = `
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 style="color:#ffd700; font-size:1.2rem;">👤 ${escapeHtml(empName)}</h3>
+                                <span style="font-size:0.75rem; color:#888;">${weekServices.length} service(s) cette semaine · ${wh}h ${wm}min</span>
+                            </div>
+                            ${activeService ? `
+                                <button onclick="forceEndService(${activeService.id}, '${escapeHtml(empName)}')"
+                                    style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; padding:0.4rem 0.9rem; border-radius:20px; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(231,76,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(231,76,60,0.2)'">
+                                    🔴 Forcer fin de service
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        ${activeService ? `
+                            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:12px; padding:0.85rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#2ecc71; font-weight:600; font-size:0.875rem;">🟢 Actuellement en service</span>
+                                <span style="font-size:0.8rem; color:#aaa;">Depuis ${formatDuration(activeService.duration_minutes)}</span>
+                            </div>
+                        ` : ''}
+
+                        <div style="max-height:380px; overflow-y:auto; padding-right:0.25rem;" class="applications-scroll">
+                            ${services.length === 0 ? '<p style="text-align:center; padding:2rem; color:#666;">Aucun service enregistré.</p>' :
+                                services.map(s => {
+                                    const dur = s.duration_minutes || 0;
+                                    const isShort = dur < 60;
+                                    const isActive = !s.end_time;
+                                    const durLabel = isActive ? '<span style="color:#f39c12; font-size:0.75rem;">En cours...</span>' : formatDuration(dur);
+                                    const borderColor = isActive ? '#f39c12' : (isShort ? '#e74c3c' : '#2ecc71');
+                                    return `
+                                        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-left:3px solid ${borderColor}; border-radius:12px; padding:0.85rem 1rem; margin-bottom:0.5rem; display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; align-items:center; font-size:0.75rem;">
+                                            <div>
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem; display:flex; gap:0.3rem; align-items:center;">
+                                                    <span style="width:6px; height:6px; border-radius:50%; background:#2ecc71; display:inline-block;"></span> DÉBUT
+                                                </div>
+                                                <div style="font-weight:600; color:#e0e0e0;">${formatDateTime(s.start_time)}</div>
+                                            </div>
+                                            <div>
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem; display:flex; gap:0.3rem; align-items:center;">
+                                                    <span style="width:6px; height:6px; border-radius:50%; background:#e74c3c; display:inline-block;"></span> FIN
+                                                </div>
+                                                <div style="font-weight:600; color:#e0e0e0;">${s.end_time ? formatDateTime(s.end_time) : '<span style="color:#f39c12">—</span>'}</div>
+                                            </div>
+                                            <div style="text-align:right;">
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem;">DURÉE</div>
+                                                <div style="font-weight:700; color:${isActive ? '#f39c12' : (isShort ? '#e74c3c' : '#2ecc71')};">${durLabel}</div>
+                                                ${isShort && !isActive ? '<div style="font-size:0.65rem; color:#e74c3c; margin-top:0.15rem;">⚠️ Service court</div>' : ''}
+                                                ${isActive ? `<button onclick="forceEndService(${s.id}, '${escapeHtml(empName)}')" style="margin-top:0.3rem; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; padding:0.2rem 0.5rem; border-radius:10px; cursor:pointer; font-size:0.65rem;">✕ Forcer fin</button>` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                console.error('Erreur détail employé:', e);
+                panel.innerHTML = '<p style="color:#e74c3c; text-align:center;">❌ Erreur de chargement</p>';
+            }
+        }
+
+        async function forceEndService(serviceId, empName) {
+            if (!confirm(`Forcer la fin de service de ${empName} ?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/direction/services/${serviceId}/force-end`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Rafraîchir
+                    refreshEmployesSuivi();
+                    const activeEmpBtn = document.querySelector(`.application-item.active[data-emp-id]`);
+                    if (activeEmpBtn) {
+                        const empId = parseInt(activeEmpBtn.dataset.empId);
+                        loadEmployeDetail(empId, empName);
+                    }
+                } else {
+                    alert('Erreur: ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la fin de service forcée');
+            }
+        }
+
+        function formatDuration(mins) {
+            if (!mins && mins !== 0) return '—';
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return h > 0 ? `${h}h ${m}min` : `${m}min`;
+        }
+
+        function formatDateTime(str) {
+            if (!str) return '—';
+            const d = new Date(str);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         }
 
         document.addEventListener('DOMContentLoaded', () => {

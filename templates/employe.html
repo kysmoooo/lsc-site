@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Employé - LS Customs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .page { min-height: 100vh; display: flex; flex-direction: column; }
+        .layout { display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ===== TOPBAR ===== */
+        .topbar {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo { height: 40px; width: auto; }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .nav-link:hover, .nav-link.active { color: #ffd700; }
+
+        .nav-actions { display: flex; gap: 1rem; align-items: center; }
+
+        .btn-primary, .btn-ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,215,0,0.3);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(255,215,0,0.5);
+            color: #ffd700;
+        }
+
+        .btn-ghost:hover { background: rgba(255,215,0,0.1); }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child { border-radius: 20px 0 0 20px; }
+        .lang-toggle button:last-child { border-radius: 0 20px 20px 0; }
+        .lang-toggle button.active { background: #ffd700; border-color: #ffd700; color: #1a1a2e; }
+
+        /* ===== CONTENT ===== */
+        .content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in { animation: fadeIn 0.5s ease-out; }
+
+        /* ===== LOGIN PANEL ===== */
+        .login-container {
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .login-icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card p {
+            text-align: center;
+            color: #888;
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-field {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-field label {
+            display: block;
+            color: #ffd700;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .form-field input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+        }
+
+        .form-error {
+            background: rgba(231,76,60,0.15);
+            border: 1px solid rgba(231,76,60,0.4);
+            color: #e74c3c;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        /* ===== EMPLOYEE PANEL ===== */
+        #employe-panel { display: none; }
+
+        .employe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 1.25rem;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .employe-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .employe-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .employe-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .employe-role {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 0.15rem;
+        }
+
+        .header-actions { display: flex; gap: 0.75rem; }
+
+        /* ===== MAIN GRID ===== */
+        .employe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .employe-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .panel-card h3 {
+            color: #ffd700;
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== SERVICE PANEL ===== */
+        .status-display {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 0.75rem 1.1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot-live {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-dot-live.on {
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot-live.off { background: #e74c3c; }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 8px #2ecc71; }
+            50% { box-shadow: 0 0 14px #2ecc71, 0 0 20px rgba(46,204,113,0.4); }
+        }
+
+        .status-label { font-weight: 600; }
+        .status-label.on { color: #2ecc71; }
+        .status-label.off { color: #e74c3c; }
+
+        .service-timer {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffd700;
+            font-variant-numeric: tabular-nums;
+            margin: 0.75rem 0;
+            letter-spacing: 2px;
+            display: none;
+        }
+
+        .btn-service {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-service.start {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(46,204,113,0.3);
+        }
+
+        .btn-service.start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46,204,113,0.45);
+        }
+
+        .btn-service.end {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(231,76,60,0.3);
+        }
+
+        .btn-service.end:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231,76,60,0.45);
+        }
+
+        .people-count {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .people-count span:last-child {
+            font-weight: 700;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .btn-voir-heures {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.65rem;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 10px;
+            color: #ffd700;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-voir-heures:hover { background: rgba(255,215,0,0.18); }
+
+        /* ===== ADVERTS PANEL ===== */
+        .advert-timer-bar {
+            background: rgba(0,0,0,0.35);
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .advert-timer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+
+        .advert-timer-val {
+            font-weight: 700;
+            color: #ffd700;
+            font-size: 0.9rem;
+        }
+
+        .advert-progress-bg {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .advert-progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 1s linear;
+        }
+
+        .advert-alert {
+            text-align: center;
+            font-size: 0.8rem;
+            padding: 0.4rem;
+        }
+
+        .advert-alert.due { color: #f39c12; }
+        .advert-alert.ok { color: #2ecc71; }
+
+        .advert-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-advert {
+            padding: 0.65rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-advert.view {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #ccc;
+        }
+
+        .btn-advert.view:hover { background: rgba(255,255,255,0.12); }
+
+        .btn-advert.confirm {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(231,76,60,0.3);
+        }
+
+        .btn-advert.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+        }
+
+        .btn-advert.confirm:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: rgba(12,12,24,0.97);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 560px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-box::-webkit-scrollbar { width: 4px; }
+        .modal-box::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.3); border-radius: 10px; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: #ffd700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: #ccc;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+        /* Heures de service */
+        .heures-total {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .heures-total-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 0.5rem; }
+        .heures-total-val { font-size: 1.3rem; font-weight: 700; color: #fff; }
+
+        .service-entry {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.65rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .service-entry-field { font-size: 0.75rem; }
+        .service-entry-field .lbl { color: #666; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+        .service-entry-field .lbl .dot { width: 7px; height: 7px; border-radius: 50%; }
+        .service-entry-field .lbl .dot.green { background: #2ecc71; }
+        .service-entry-field .lbl .dot.red { background: #e74c3c; }
+        .service-entry-field .val { font-weight: 600; color: #e0e0e0; font-size: 0.875rem; }
+
+        .duration-badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .duration-badge.short { background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+        .duration-badge.normal { background: rgba(46,204,113,0.2); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+
+        .short-label { font-size: 0.65rem; color: #e74c3c; display: flex; align-items: center; gap: 0.25rem; margin-top: 0.25rem; }
+
+        /* Liste adverts */
+        .advert-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            margin-bottom: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .advert-item:hover { border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.05); }
+        .advert-item.selected { border-color: #ffd700; background: rgba(255,215,0,0.08); }
+
+        .advert-item-titre {
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .advert-item-texte {
+            font-size: 0.78rem;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: rgba(0,0,0,0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255,215,0,0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy { display: flex; align-items: center; gap: 0.5rem; }
+        .footer-logo { height: 24px; width: auto; }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="layout">
+        <header class="topbar">
+            <a class="brand" href="{{ url_for('index') }}">
+                <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                <span class="brand-text">LS Customs</span>
+            </a>
+            <nav class="nav-links">
+                <a class="nav-link" href="{{ url_for('index') }}">LS Customs</a>
+                <a class="nav-link" href="{{ url_for('staff_page') }}">Personnel</a>
+                <a class="nav-link" href="{{ url_for('recruitment_page') }}">Recrutement</a>
+                <a class="nav-link" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
+                <a class="nav-link" href="{{ url_for('pricing_page') }}">Tarification</a>
+                <a class="nav-link active" href="{{ url_for('employe_page') }}">Espace Employé</a>
+                <a class="nav-link" href="{{ url_for('direction_page') }}">Direction</a>
+            </nav>
+            <div class="nav-actions">
+                <div class="lang-toggle">
+                    <button class="active" data-lang="fr">FR</button>
+                    <button data-lang="en">EN</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="page-header animate-in">
+                <h1>👤 Espace Employé</h1>
+            </div>
+
+            <!-- LOGIN -->
+            <div id="employe-login" class="login-container animate-in">
+                <div class="login-card">
+                    <div class="login-icon">🔐</div>
+                    <h2>Espace Employé</h2>
+                    <p>Connectez-vous avec vos identifiants</p>
+                    <form id="login-form">
+                        <div class="form-field">
+                            <label>Identifiant</label>
+                            <input type="text" id="emp-username" placeholder="Votre identifiant" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Mot de passe</label>
+                            <input type="password" id="emp-password" placeholder="••••••" required>
+                        </div>
+                        <button class="btn-primary" type="submit" style="width:100%; padding:0.85rem; font-size:1rem; margin-top:0.5rem;">
+                            Se connecter
+                        </button>
+                        <div id="login-error" class="form-error" style="display:none;">❌ Identifiants invalides.</div>
+                    </form>
+                    <div style="margin-top:1.5rem; text-align:center;">
+                        <a href="{{ url_for('index') }}" class="btn-ghost" style="font-size:0.85rem;">← Retour à l'accueil</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL EMPLOYÉ -->
+            <div id="employe-panel">
+                <div class="employe-header animate-in">
+                    <div class="employe-info">
+                        <div class="employe-avatar" id="emp-avatar-initials">?</div>
+                        <div>
+                            <div class="employe-name" id="emp-display-name">Employé</div>
+                            <div class="employe-role" id="emp-display-role">Personnel</div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-ghost" id="btn-logout" style="font-size:0.8rem;">🚪 Déconnexion</button>
+                    </div>
+                </div>
+
+                <div class="employe-grid animate-in">
+                    <!-- PRISE DE SERVICE -->
+                    <div class="panel-card">
+                        <h3>🕐 Prise de service</h3>
+                        <div class="status-display">
+                            <div class="status-dot-live off" id="status-dot"></div>
+                            <span>Statut :</span>
+                            <span class="status-label off" id="status-label">❌ Hors service</span>
+                        </div>
+                        <div class="service-timer" id="service-timer">00:00:00</div>
+                        <button class="btn-service start" id="btn-toggle-service">
+                            🟢 DÉBUTER LE SERVICE
+                        </button>
+                        <div class="people-count">
+                            <span>👥 Personnes en service :</span>
+                            <span id="people-count">0</span>
+                        </div>
+                        <button class="btn-voir-heures" id="btn-voir-heures">📋 Voir mes heures</button>
+                    </div>
+
+                    <!-- ADVERTS -->
+                    <div class="panel-card">
+                        <h3>📢 Adverts</h3>
+                        <p style="font-size:0.8rem; color:#777; margin-bottom:1rem;">Appuyez sur le bouton pour voir les différents adverts</p>
+
+                        <div class="advert-timer-bar">
+                            <div class="advert-timer-row">
+                                <span>📣 Dernier advert :</span>
+                                <span class="advert-timer-val" id="advert-last-time">—</span>
+                            </div>
+                            <div class="advert-progress-bg">
+                                <div class="advert-progress-fill" id="advert-progress" style="width:0%"></div>
+                            </div>
+                            <div class="advert-alert" id="advert-alert">
+                                — En attente d'un service actif
+                            </div>
+                        </div>
+
+                        <div class="advert-buttons">
+                            <button class="btn-advert view" id="btn-voir-adverts">📋 Voir les adverts</button>
+                            <button class="btn-advert confirm" id="btn-confirm-advert" disabled>✅ Confirmer l'advert</button>
+                        </div>
+                        <div id="selected-advert-preview" style="display:none; background:rgba(0,0,0,0.3); border-radius:10px; padding:0.75rem; font-size:0.8rem; color:#ccc; border:1px solid rgba(255,215,0,0.15);">
+                            <div style="color:#ffd700; font-size:0.75rem; margin-bottom:0.35rem; font-weight:600;">Advert sélectionné :</div>
+                            <div id="selected-advert-text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <span>LS Customs - Glife RP</span>
+            <span class="footer-copy">
+                <span>©️2026 - Dev par .x9ser</span>
+                <a href="https://discord.gg/gtaliferp" target="_blank">
+                    <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                </a>
+            </span>
+            <span>7j/7 24h/24</span>
+        </footer>
+    </div>
+</div>
+
+<!-- MODAL : Mes heures -->
+<div class="modal-overlay" id="modal-heures">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>📋 Mes heures de service</h2>
+            <button class="modal-close" onclick="closeModal('modal-heures')">✕</button>
+        </div>
+        <div class="heures-total">
+            <span class="heures-total-label">⏱ Total de service</span>
+            <span class="heures-total-val" id="heures-total-val">0h 0min</span>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div> Service court (&lt; 1h)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2ecc71"></div> Service normal</div>
+        </div>
+        <div id="heures-list">
+            <p style="text-align:center; padding:2rem; color:#666;">Aucun service enregistré.</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL : Adverts -->
+<div class="modal-overlay" id="modal-adverts">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>📣 Annonces disponibles</h2>
+            <button class="modal-close" onclick="closeModal('modal-adverts')">✕</button>
+        </div>
+        <div id="adverts-list">
+            <p style="text-align:center; padding:2rem; color:#666;">Aucune annonce disponible.</p>
+        </div>
+        <div style="text-align:right; margin-top:1rem;">
+            <button class="btn-ghost" onclick="closeModal('modal-adverts')" style="font-size:0.85rem;">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = '';
+    let currentEmploye = null;
+    let serviceActive = false;
+    let serviceStartTime = null;
+    let serviceTimerInterval = null;
+    let advertTimerInterval = null;
+    let lastAdvertTime = null;
+    let advertInterval = 20 * 60; // 20 minutes en secondes
+    let selectedAdvert = null;
+    let peopleRefreshInterval = null;
+
+    // ===== AUTH =====
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('emp-username').value;
+        const password = document.getElementById('emp-password').value;
+        const errorDiv = document.getElementById('login-error');
+
+        try {
+            const res = await fetch(`${API}/employe/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                currentEmploye = data.user;
+                showPanel();
+            } else {
+                errorDiv.style.display = 'block';
+            }
+        } catch {
+            errorDiv.style.display = 'block';
+        }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        // Si en service, fin de service automatique
+        if (serviceActive) await endService();
+        await fetch(`${API}/employe/logout`, { method: 'POST', credentials: 'include' });
+        clearIntervals();
+        currentEmploye = null;
+        document.getElementById('employe-panel').style.display = 'none';
+        document.getElementById('employe-login').style.display = 'block';
+    });
+
+    async function checkAuth() {
+        try {
+            const res = await fetch(`${API}/employe/me`, { credentials: 'include' });
+            const data = await res.json();
+            if (data.user) {
+                currentEmploye = data.user;
+                showPanel();
+            }
+        } catch {}
+    }
+
+    function showPanel() {
+        document.getElementById('employe-login').style.display = 'none';
+        document.getElementById('employe-panel').style.display = 'block';
+
+        const name = currentEmploye.displayName || currentEmploye.username;
+        document.getElementById('emp-display-name').textContent = '👑 ' + name;
+        document.getElementById('emp-display-role').textContent = currentEmploye.role || 'Employé';
+        document.getElementById('emp-avatar-initials').textContent = name.charAt(0).toUpperCase();
+
+        checkCurrentService();
+        loadPeopleCount();
+        loadAdverts();
+
+        peopleRefreshInterval = setInterval(loadPeopleCount, 10000);
+    }
+
+    // ===== SERVICE =====
+    async function checkCurrentService() {
+        try {
+            const res = await fetch(`${API}/employe/service/current`, { credentials: 'include' });
+            const data = await res.json();
+            if (data.active && data.service) {
+                serviceActive = true;
+                serviceStartTime = new Date(data.service.start_time);
+                setServiceUI(true);
+                startTimerDisplay();
+                startAdvertTimer(data.service.last_advert_time);
+            }
+        } catch {}
+    }
+
+    document.getElementById('btn-toggle-service').addEventListener('click', async () => {
+        if (!serviceActive) {
+            await startService();
+        } else {
+            await endService();
+        }
+    });
+
+    async function startService() {
+        try {
+            const res = await fetch(`${API}/employe/service/start`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+                serviceActive = true;
+                serviceStartTime = new Date();
+                setServiceUI(true);
+                startTimerDisplay();
+                startAdvertTimer(null);
+                document.getElementById('btn-confirm-advert').disabled = false;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function endService() {
+        try {
+            const res = await fetch(`${API}/employe/service/end`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+                serviceActive = false;
+                clearInterval(serviceTimerInterval);
+                clearInterval(advertTimerInterval);
+                setServiceUI(false);
+                document.getElementById('service-timer').style.display = 'none';
+                document.getElementById('btn-confirm-advert').disabled = true;
+                document.getElementById('advert-last-time').textContent = '—';
+                document.getElementById('advert-progress').style.width = '0%';
+                document.getElementById('advert-alert').textContent = '— En attente d\'un service actif';
+                document.getElementById('advert-alert').className = 'advert-alert';
+                loadPeopleCount();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function setServiceUI(active) {
+        const dot = document.getElementById('status-dot');
+        const label = document.getElementById('status-label');
+        const btn = document.getElementById('btn-toggle-service');
+
+        if (active) {
+            dot.className = 'status-dot-live on';
+            label.className = 'status-label on';
+            label.textContent = '✅ En service';
+            btn.className = 'btn-service end';
+            btn.textContent = '🔴 TERMINER LE SERVICE';
+            document.getElementById('service-timer').style.display = 'block';
+        } else {
+            dot.className = 'status-dot-live off';
+            label.className = 'status-label off';
+            label.textContent = '❌ Hors service';
+            btn.className = 'btn-service start';
+            btn.textContent = '🟢 DÉBUTER LE SERVICE';
+        }
+    }
+
+    function startTimerDisplay() {
+        clearInterval(serviceTimerInterval);
+        serviceTimerInterval = setInterval(() => {
+            if (!serviceStartTime) return;
+            const elapsed = Math.floor((Date.now() - serviceStartTime.getTime()) / 1000);
+            const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+            const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const s = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('service-timer').textContent = `${h}:${m}:${s}`;
+        }, 1000);
+    }
+
+    // ===== ADVERT TIMER =====
+    function startAdvertTimer(lastAdvert) {
+        lastAdvertTime = lastAdvert ? new Date(lastAdvert) : new Date();
+        clearInterval(advertTimerInterval);
+
+        advertTimerInterval = setInterval(() => {
+            if (!lastAdvertTime) return;
+            const elapsed = Math.floor((Date.now() - lastAdvertTime.getTime()) / 1000);
+            const remaining = advertInterval - elapsed;
+            const pct = Math.min((elapsed / advertInterval) * 100, 100);
+
+            document.getElementById('advert-progress').style.width = pct + '%';
+
+            if (elapsed < 60) {
+                document.getElementById('advert-last-time').textContent = elapsed + 's';
+            } else {
+                const m = Math.floor(elapsed / 60);
+                const s = elapsed % 60;
+                document.getElementById('advert-last-time').textContent = `${m}min ${s}s`;
+            }
+
+            const alertEl = document.getElementById('advert-alert');
+            if (remaining <= 0) {
+                alertEl.textContent = '⚠️ Advert à faire !';
+                alertEl.className = 'advert-alert due';
+                document.getElementById('advert-progress').style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+            } else {
+                const rm = Math.floor(remaining / 60);
+                const rs = remaining % 60;
+                alertEl.textContent = `✅ Prochain dans ${rm}min ${rs}s`;
+                alertEl.className = 'advert-alert ok';
+                document.getElementById('advert-progress').style.background = 'linear-gradient(90deg, #ffd700, #ff8c00)';
+            }
+        }, 1000);
+    }
+
+    // ===== PEOPLE COUNT =====
+    async function loadPeopleCount() {
+        try {
+            const res = await fetch(`${API}/employe/service/count`, { credentials: 'include' });
+            const data = await res.json();
+            document.getElementById('people-count').textContent = data.count || 0;
+        } catch {}
+    }
+
+    // ===== MES HEURES =====
+    document.getElementById('btn-voir-heures').addEventListener('click', async () => {
+        await loadMesHeures();
+        openModal('modal-heures');
+    });
+
+    async function loadMesHeures() {
+        try {
+            const res = await fetch(`${API}/employe/service/history`, { credentials: 'include' });
+            const data = await res.json();
+
+            const listEl = document.getElementById('heures-list');
+            const totalEl = document.getElementById('heures-total-val');
+
+            if (!data.services || data.services.length === 0) {
+                listEl.innerHTML = '<p style="text-align:center; padding:2rem; color:#666;">Aucun service enregistré.</p>';
+                totalEl.textContent = '0h 0min';
+                return;
+            }
+
+            // Calculer total
+            let totalMins = 0;
+            data.services.forEach(s => {
+                if (s.duration_minutes) totalMins += s.duration_minutes;
+            });
+            const th = Math.floor(totalMins / 60);
+            const tm = totalMins % 60;
+            totalEl.textContent = `${th}h ${tm}min`;
+
+            listEl.innerHTML = data.services.map(s => {
+                const dur = s.duration_minutes || 0;
+                const isShort = dur < 60;
+                const h = Math.floor(dur / 60);
+                const m = dur % 60;
+                const durLabel = h > 0 ? `${h}h ${m}min` : `${m}min`;
+                const startFmt = formatDateTime(s.start_time);
+                const endFmt = s.end_time ? formatDateTime(s.end_time) : '<span style="color:#f39c12">En cours</span>';
+
+                return `
+                    <div class="service-entry" style="border-left: 3px solid ${isShort ? '#e74c3c' : '#2ecc71'}">
+                        <div class="service-entry-field">
+                            <div class="lbl"><div class="dot green"></div> DÉBUT</div>
+                            <div class="val">${startFmt}</div>
+                        </div>
+                        <div class="service-entry-field">
+                            <div class="lbl"><div class="dot red"></div> FIN</div>
+                            <div class="val">${endFmt}</div>
+                        </div>
+                        <div class="service-entry-field" style="text-align:right">
+                            <div class="lbl" style="justify-content:flex-end">DURÉE</div>
+                            <div>
+                                <span class="duration-badge ${isShort ? 'short' : 'normal'}">${durLabel}</span>
+                                ${isShort ? '<div class="short-label">⚠️ Service court</div>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // ===== ADVERTS =====
+    async function loadAdverts() {
+        try {
+            const res = await fetch(`${API}/api/annonces/public`, { credentials: 'include' });
+            const data = await res.json();
+            window._adverts = data;
+        } catch {}
+    }
+
+    document.getElementById('btn-voir-adverts').addEventListener('click', () => {
+        const adverts = window._adverts || [];
+        const listEl = document.getElementById('adverts-list');
+
+        if (!adverts || adverts.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; padding:2rem; color:#666;">Aucune annonce disponible.</p>';
+        } else {
+            listEl.innerHTML = adverts.map(a => `
+                <div class="advert-item ${selectedAdvert?.id === a.id ? 'selected' : ''}" data-id="${a.id}" onclick="selectAdvert(${a.id})">
+                    <div class="advert-item-titre">📌 ${escHtml(a.titre)}</div>
+                    <div class="advert-item-texte">${escHtml(a.texte)}</div>
+                </div>
+            `).join('');
+        }
+        openModal('modal-adverts');
+    });
+
+    function selectAdvert(id) {
+        const adverts = window._adverts || [];
+        selectedAdvert = adverts.find(a => a.id === id);
+        document.querySelectorAll('.advert-item').forEach(el => {
+            el.classList.toggle('selected', parseInt(el.dataset.id) === id);
+        });
+        if (selectedAdvert) {
+            document.getElementById('selected-advert-preview').style.display = 'block';
+            document.getElementById('selected-advert-text').textContent = selectedAdvert.texte;
+        }
+    }
+
+    document.getElementById('btn-confirm-advert').addEventListener('click', async () => {
+        if (!serviceActive) return;
+        try {
+            const res = await fetch(`${API}/employe/advert/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ advert_id: selectedAdvert?.id, advert_titre: selectedAdvert?.titre })
+            });
+            const data = await res.json();
+            if (data.success) {
+                lastAdvertTime = new Date();
+                startAdvertTimer(null);
+                closeModal('modal-adverts');
+                selectedAdvert = null;
+                document.getElementById('selected-advert-preview').style.display = 'none';
+            }
+        } catch (e) { console.error(e); }
+    });
+
+    // ===== UTILS =====
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function clearIntervals() {
+        clearInterval(serviceTimerInterval);
+        clearInterval(advertTimerInterval);
+        clearInterval(peopleRefreshInterval);
+    }
+
+    function formatDateTime(str) {
+        if (!str) return '—';
+        const d = new Date(str);
+        return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    // ===== LANG TOGGLE =====
+    document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.lang-toggle button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Click outside modals
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+</body>
+</html>

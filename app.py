@@ -34,6 +34,9 @@ DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIf
 DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app/callback")
 DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
+WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
+WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "")
+
 
 # Login manager
 login_manager = LoginManager()
@@ -125,6 +128,11 @@ def recruitment_page():
 @app.route("/pricing.html")
 def pricing_page():
     return render_template('pricing.html')
+
+@app.route("/employe.html")
+def employe_page():
+    session.pop('employe_id', None)
+    return render_template('employe.html')
 
 @app.route("/direction.html")
 def direction_page():
@@ -457,6 +465,676 @@ def delete_absence(absence_id):
     
     except Exception as e:
         print(f"❌ Erreur DELETE absence: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ─────────────────────────────────────────────────
+# AUTH EMPLOYÉ
+# ─────────────────────────────────────────────────
+ 
+def require_employe(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'employe_id' not in session:
+            return jsonify({"success": False, "error": "Non autorisé"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+ 
+ 
+@app.route("/employe/me")
+def employe_me():
+    if 'employe_id' in session:
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor(dictionary=True)
+            cur.execute("SELECT id, username, display_name, role FROM employes WHERE id=%s AND active=1", (session['employe_id'],))
+            user = cur.fetchone()
+            cur.close()
+            conn.close()
+            if user:
+                return jsonify({"user": {
+                    "id": user['id'],
+                    "username": user['username'],
+                    "displayName": user['display_name'],
+                    "role": user['role']
+                }})
+    return jsonify({"user": None})
+ 
+ 
+@app.route("/employe/login", methods=["POST"])
+def employe_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+ 
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Erreur DB"}), 500
+ 
+    cur = conn.cursor(dictionary=True)
+    cur.execute(
+        "SELECT id, username, display_name, role FROM employes WHERE username=%s AND password_hash=%s AND active=1",
+        (username, password)
+    )
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+ 
+    if user:
+        session['employe_id'] = user['id']
+        return jsonify({
+            "success": True,
+            "user": {"id": user['id'], "username": user['username'],
+                     "displayName": user['display_name'], "role": user['role']}
+        })
+    return jsonify({"success": False}), 401
+ 
+ 
+@app.route("/employe/logout", methods=["POST"])
+def employe_logout():
+    session.pop('employe_id', None)
+    return jsonify({"success": True})
+ 
+ 
+# ─────────────────────────────────────────────────
+# HELPERS — Logique basée sur paires debut/fin
+#
+# Un service actif = dernière ligne de l'employé a action='debut'
+# Un service terminé = paire debut+fin (même employe_id, fin.heure > debut.heure)
+# ─────────────────────────────────────────────────
+ 
+def get_active_debut(conn, employe_id):
+    """
+    Retourne la ligne 'debut' active (sans 'fin' correspondante après).
+    Logique : la dernière ligne de l'employé est un 'debut'.
+    """
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT id, heure FROM services
+        WHERE employe_id = %s
+        ORDER BY heure DESC, id DESC
+        LIMIT 1
+    """, (employe_id,))
+    last = cur.fetchone()
+    cur.close()
+    if last and last['action'] == 'debut' if 'action' in (last or {}) else False:
+        return last
+    # Refaire avec action explicite
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT id, heure, action FROM services
+        WHERE employe_id = %s
+        ORDER BY heure DESC, id DESC
+        LIMIT 1
+    """, (employe_id,))
+    last = cur.fetchone()
+    cur.close()
+    if last and last['action'] == 'debut':
+        return last
+    return None
+ 
+ 
+def get_last_advert_time(employe_id):
+    """Récupère le timestamp du dernier advert confirmé depuis advert_logs"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return None
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT done_at FROM advert_logs WHERE employe_id=%s ORDER BY done_at DESC LIMIT 1",
+            (employe_id,)
+        )
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return row['done_at'] if row else None
+    except:
+        return None
+ 
+ 
+# ─────────────────────────────────────────────────
+# SERVICE
+# ─────────────────────────────────────────────────
+ 
+@app.route("/employe/service/start", methods=["POST"])
+@require_employe
+def employe_service_start():
+    employe_id = session['employe_id']
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+ 
+        # Vérifier si déjà en service
+        debut = get_active_debut(conn, employe_id)
+        if debut:
+            conn.close()
+            return jsonify({"success": False, "error": "Déjà en service"}), 400
+ 
+        # Récupérer nom employé
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        emp = cur.fetchone()
+        name = emp['display_name'] if emp else 'Employé'
+        cur.close()
+ 
+        now = now_paris()
+        cur2 = conn.cursor()
+        cur2.execute(
+            "INSERT INTO services (employe_id, action, heure) VALUES (%s, 'debut', %s)",
+            (employe_id, now)
+        )
+        conn.commit()
+        debut_id = cur2.lastrowid
+        cur2.close()
+        conn.close()
+ 
+        # Stocker heure de début en session pour le timer côté serveur
+        session[f'service_start_{employe_id}'] = now.isoformat()
+ 
+        if WEBHOOK_SERVICE:
+            embed = {
+                "title": "🟢 Prise de service",
+                "color": 3066993,
+                "description": f"**{name}** a pris son service.",
+                "timestamp": now.isoformat()
+            }
+            try:
+                requests.post(WEBHOOK_SERVICE, json={"embeds": [embed]}, timeout=2)
+            except:
+                pass
+ 
+        return jsonify({"success": True, "debut_id": debut_id, "start_time": now.isoformat()})
+ 
+    except Exception as e:
+        print(f"❌ Erreur service start: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+ 
+ 
+@app.route("/employe/service/end", methods=["POST"])
+@require_employe
+def employe_service_end():
+    employe_id = session['employe_id']
+    return _end_service(employe_id)
+ 
+ 
+def _end_service(employe_id, forced_by=None):
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+ 
+        debut = get_active_debut(conn, employe_id)
+        if not debut:
+            conn.close()
+            return jsonify({"success": False, "error": "Aucun service actif"}), 404
+ 
+        # Récupérer nom employé
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        emp = cur.fetchone()
+        name = emp['display_name'] if emp else 'Employé'
+        cur.close()
+ 
+        now = now_paris()
+        start_time = debut['heure']
+        if hasattr(start_time, 'tzinfo') and start_time.tzinfo is None:
+            start_time = PARIS_TZ.localize(start_time)
+ 
+        duration = int((now - start_time).total_seconds() / 60)
+ 
+        # Insérer la ligne 'fin'
+        cur2 = conn.cursor()
+        cur2.execute(
+            "INSERT INTO services (employe_id, action, heure) VALUES (%s, 'fin', %s)",
+            (employe_id, now)
+        )
+        conn.commit()
+        cur2.close()
+        conn.close()
+ 
+        # Nettoyer la session
+        session.pop(f'service_start_{employe_id}', None)
+ 
+        h = duration // 60
+        m = duration % 60
+        dur_str = f"{h}h {m}min" if h > 0 else f"{m}min"
+ 
+        if WEBHOOK_SERVICE:
+            forced_txt = f"\n⚠️ Fin forcée par **{forced_by}**" if forced_by else ""
+            embed = {
+                "title": "🔴 Fin de service",
+                "color": 15158332,
+                "description": f"**{name}** a terminé son service.\n⏱ Durée : **{dur_str}**{forced_txt}",
+                "timestamp": now.isoformat()
+            }
+            try:
+                requests.post(WEBHOOK_SERVICE, json={"embeds": [embed]}, timeout=2)
+            except:
+                pass
+ 
+        return jsonify({"success": True, "duration_minutes": duration})
+ 
+    except Exception as e:
+        print(f"❌ Erreur service end: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+ 
+ 
+@app.route("/employe/service/current")
+@require_employe
+def employe_service_current():
+    employe_id = session['employe_id']
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"active": False})
+ 
+        debut = get_active_debut(conn, employe_id)
+        conn.close()
+ 
+        if debut:
+            last_advert = get_last_advert_time(employe_id)
+            return jsonify({
+                "active": True,
+                "service": {
+                    "id": debut['id'],
+                    "start_time": debut['heure'].isoformat() if debut['heure'] else None,
+                    "last_advert_time": last_advert.isoformat() if last_advert else debut['heure'].isoformat()
+                }
+            })
+        return jsonify({"active": False})
+    except Exception as e:
+        print(f"❌ service current: {e}")
+        return jsonify({"active": False})
+ 
+ 
+@app.route("/employe/service/count")
+def employe_service_count():
+    """Compte les employés dont la dernière ligne est un 'debut'"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"count": 0})
+ 
+        cur = conn.cursor(dictionary=True)
+        # Pour chaque employé, regarder si sa dernière action est 'debut'
+        cur.execute("""
+            SELECT COUNT(*) as cnt FROM (
+                SELECT employe_id
+                FROM services s1
+                WHERE s1.id = (
+                    SELECT id FROM services s2
+                    WHERE s2.employe_id = s1.employe_id
+                    ORDER BY heure DESC, id DESC
+                    LIMIT 1
+                )
+                AND s1.action = 'debut'
+            ) as actifs
+        """)
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return jsonify({"count": row['cnt'] if row else 0})
+    except Exception as e:
+        print(f"❌ service count: {e}")
+        return jsonify({"count": 0})
+ 
+ 
+@app.route("/employe/service/history")
+@require_employe
+def employe_service_history():
+    """
+    Reconstruit les paires debut/fin pour afficher l'historique.
+    Chaque service = 1 ligne debut + 1 ligne fin (ou en cours si pas de fin).
+    """
+    employe_id = session['employe_id']
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"services": []})
+ 
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT id, action, heure
+            FROM services
+            WHERE employe_id = %s
+            ORDER BY heure ASC, id ASC
+        """, (employe_id,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+ 
+        # Reconstruire les paires debut/fin
+        services = []
+        pending_debut = None
+ 
+        for row in rows:
+            if row['action'] == 'debut':
+                pending_debut = row
+            elif row['action'] == 'fin' and pending_debut:
+                start = pending_debut['heure']
+                end = row['heure']
+                if hasattr(start, 'tzinfo') and start.tzinfo is None:
+                    start = PARIS_TZ.localize(start)
+                if hasattr(end, 'tzinfo') and end.tzinfo is None:
+                    end = PARIS_TZ.localize(end)
+                duration = int((end - start).total_seconds() / 60)
+                services.append({
+                    "id": pending_debut['id'],
+                    "start_time": pending_debut['heure'].isoformat(),
+                    "end_time": row['heure'].isoformat(),
+                    "duration_minutes": duration
+                })
+                pending_debut = None
+ 
+        # Service en cours (debut sans fin)
+        if pending_debut:
+            services.append({
+                "id": pending_debut['id'],
+                "start_time": pending_debut['heure'].isoformat(),
+                "end_time": None,
+                "duration_minutes": None
+            })
+ 
+        # Trier du plus récent au plus ancien
+        services.reverse()
+        return jsonify({"services": services[:50]})
+ 
+    except Exception as e:
+        print(f"❌ Erreur history: {e}")
+        return jsonify({"services": []})
+ 
+ 
+# ─────────────────────────────────────────────────
+# ADVERT
+# ─────────────────────────────────────────────────
+ 
+@app.route("/employe/advert/confirm", methods=["POST"])
+@require_employe
+def employe_advert_confirm():
+    employe_id = session['employe_id']
+    data = request.get_json()
+    advert_id = data.get('advert_id')
+    advert_titre = data.get('advert_titre', 'Sans titre')
+ 
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+ 
+        debut = get_active_debut(conn, employe_id)
+        conn.close()
+ 
+        if not debut:
+            return jsonify({"success": False, "error": "Pas de service actif"}), 400
+ 
+        # Récupérer nom employé
+        conn2 = get_db_connection()
+        cur = conn2.cursor(dictionary=True)
+        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        emp = cur.fetchone()
+        name = emp['display_name'] if emp else 'Employé'
+ 
+        now = now_paris()
+        cur.execute(
+            "INSERT INTO advert_logs (employe_id, employe_name, advert_id, advert_titre, done_at) VALUES (%s, %s, %s, %s, %s)",
+            (employe_id, name, advert_id, advert_titre, now)
+        )
+        conn2.commit()
+        cur.close()
+        conn2.close()
+ 
+        if WEBHOOK_ADVERT:
+            embed = {
+                "title": "📢 Advert confirmé",
+                "color": 15844367,
+                "description": f"**{name}** a fait l'advert **{advert_titre}**.",
+                "timestamp": now.isoformat()
+            }
+            try:
+                requests.post(WEBHOOK_ADVERT, json={"embeds": [embed]}, timeout=2)
+            except:
+                pass
+ 
+        return jsonify({"success": True})
+ 
+    except Exception as e:
+        print(f"❌ Erreur advert confirm: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+ 
+ 
+# ─────────────────────────────────────────────────
+# ANNONCES PUBLIQUES
+# ─────────────────────────────────────────────────
+ 
+@app.route("/api/annonces/public")
+def get_annonces_public():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, titre, texte FROM annonces ORDER BY updated_at DESC")
+        annonces = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(annonces)
+    except:
+        return jsonify([])
+ 
+ 
+# ─────────────────────────────────────────────────
+# DIRECTION — SUIVI EMPLOYÉS
+# ─────────────────────────────────────────────────
+ 
+def get_all_active_services(conn):
+    """Retourne la liste des employe_id dont la dernière ligne est 'debut', avec l'heure"""
+    cur = conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT s1.id, s1.employe_id, s1.heure
+        FROM services s1
+        WHERE s1.id = (
+            SELECT id FROM services s2
+            WHERE s2.employe_id = s1.employe_id
+            ORDER BY heure DESC, id DESC
+            LIMIT 1
+        )
+        AND s1.action = 'debut'
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+ 
+ 
+@app.route("/api/direction/services/actifs")
+@require_direction
+def direction_services_actifs():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+ 
+        actifs = get_all_active_services(conn)
+ 
+        # Enrichir avec le nom de l'employé
+        result = []
+        for s in actifs:
+            cur = conn.cursor(dictionary=True)
+            cur.execute("SELECT display_name FROM employes WHERE id=%s", (s['employe_id'],))
+            emp = cur.fetchone()
+            cur.close()
+            name = emp['display_name'] if emp else f"Employé #{s['employe_id']}"
+ 
+            start = s['heure']
+            if hasattr(start, 'tzinfo') and start.tzinfo is None:
+                start = PARIS_TZ.localize(start)
+            duration = int((now_paris() - start).total_seconds() / 60)
+ 
+            result.append({
+                "id": s['id'],
+                "employe_id": s['employe_id'],
+                "employe_name": name,
+                "start_time": s['heure'].isoformat(),
+                "duration_minutes": duration
+            })
+ 
+        conn.close()
+        return jsonify(result)
+ 
+    except Exception as e:
+        print(f"❌ Erreur services actifs: {e}")
+        return jsonify([])
+ 
+ 
+@app.route("/api/direction/employes/suivi")
+@require_direction
+def direction_employes_suivi():
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+ 
+        actifs = get_all_active_services(conn)
+        actifs_ids = {s['employe_id'] for s in actifs}
+ 
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, display_name, role FROM employes WHERE active=1 ORDER BY display_name ASC")
+        employes = cur.fetchall()
+        cur.close()
+ 
+        result = []
+        for emp in employes:
+            # Compter les services cette semaine (lignes 'debut' des 7 derniers jours)
+            cur2 = conn.cursor(dictionary=True)
+            cur2.execute("""
+                SELECT COUNT(*) as cnt FROM services
+                WHERE employe_id=%s AND action='debut'
+                AND heure >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            """, (emp['id'],))
+            row = cur2.fetchone()
+            cur2.close()
+ 
+            result.append({
+                "id": emp['id'],
+                "display_name": emp['display_name'],
+                "role": emp['role'],
+                "services_semaine": row['cnt'] if row else 0,
+                "en_service": 1 if emp['id'] in actifs_ids else 0
+            })
+ 
+        conn.close()
+        return jsonify(result)
+ 
+    except Exception as e:
+        print(f"❌ Erreur suivi employés: {e}")
+        return jsonify([])
+ 
+ 
+@app.route("/api/direction/employes/<int:emp_id>/services")
+@require_direction
+def direction_employe_services(emp_id):
+    """Reconstruit les paires debut/fin pour un employé donné"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"services": []})
+ 
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT id, action, heure FROM services
+            WHERE employe_id=%s
+            ORDER BY heure ASC, id ASC
+        """, (emp_id,))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+ 
+        services = []
+        pending_debut = None
+ 
+        for row in rows:
+            if row['action'] == 'debut':
+                pending_debut = row
+            elif row['action'] == 'fin' and pending_debut:
+                start = pending_debut['heure']
+                end = row['heure']
+                if hasattr(start, 'tzinfo') and start.tzinfo is None:
+                    start = PARIS_TZ.localize(start)
+                if hasattr(end, 'tzinfo') and end.tzinfo is None:
+                    end = PARIS_TZ.localize(end)
+                duration = int((end - start).total_seconds() / 60)
+                services.append({
+                    "id": pending_debut['id'],
+                    "start_time": pending_debut['heure'].isoformat(),
+                    "end_time": row['heure'].isoformat(),
+                    "duration_minutes": duration
+                })
+                pending_debut = None
+ 
+        if pending_debut:
+            services.append({
+                "id": pending_debut['id'],
+                "start_time": pending_debut['heure'].isoformat(),
+                "end_time": None,
+                "duration_minutes": None
+            })
+ 
+        services.reverse()
+        return jsonify({"services": services[:100]})
+ 
+    except Exception as e:
+        print(f"❌ Erreur employe services: {e}")
+        return jsonify({"services": []})
+ 
+ 
+@app.route("/api/direction/services/<int:debut_id>/force-end", methods=["POST"])
+@require_direction
+def direction_force_end_service(debut_id):
+    """
+    Force la fin de service en insérant une ligne 'fin'.
+    debut_id = l'id de la ligne 'debut' active.
+    """
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+ 
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT employe_id, heure, action FROM services WHERE id=%s",
+            (debut_id,)
+        )
+        service = cur.fetchone()
+        cur.close()
+ 
+        if not service or service['action'] != 'debut':
+            conn.close()
+            return jsonify({"success": False, "error": "Service introuvable ou déjà terminé"}), 404
+ 
+        # Vérifier que c'est bien le dernier debut (actif)
+        debut = get_active_debut(conn, service['employe_id'])
+        if not debut or debut['id'] != debut_id:
+            conn.close()
+            return jsonify({"success": False, "error": "Ce service n'est plus actif"}), 400
+ 
+        conn.close()
+ 
+        # Récupérer nom direction
+        dir_name = "Direction"
+        conn2 = get_db_connection()
+        if conn2:
+            cur2 = conn2.cursor(dictionary=True)
+            cur2.execute("SELECT display_name FROM direction_users WHERE id=%s", (session['direction_id'],))
+            d = cur2.fetchone()
+            if d:
+                dir_name = d['display_name']
+            cur2.close()
+            conn2.close()
+ 
+        return _end_service(service['employe_id'], forced_by=dir_name)
+ 
+    except Exception as e:
+        print(f"❌ Erreur force end: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ========== API AUTH ==========
