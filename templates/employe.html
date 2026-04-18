@@ -1355,6 +1355,7 @@
             textarea.value = textToCopy;
             textarea.style.position = 'fixed';
             textarea.style.opacity = '0';
+            textarea.style.resize = 'vertical'
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand('copy');
