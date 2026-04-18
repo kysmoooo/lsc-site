@@ -610,7 +610,7 @@ def employe_service_start():
  
         # Récupérer nom employé
         cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        cur.execute("SELECT name as display_name FROM staff_profiles WHERE id=%s", (employe_id,))
         emp = cur.fetchone()
         name = emp['display_name'] if emp else 'Employé'
         cur.close()
@@ -668,7 +668,7 @@ def _end_service(employe_id, forced_by=None):
  
         # Récupérer nom employé
         cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        cur.execute("SELECT name as display_name FROM staff_profiles WHERE id=%s", (employe_id,))
         emp = cur.fetchone()
         name = emp['display_name'] if emp else 'Employé'
         cur.close()
@@ -868,7 +868,7 @@ def employe_advert_confirm():
         # Récupérer nom employé
         conn2 = get_db_connection()
         cur = conn2.cursor(dictionary=True)
-        cur.execute("SELECT display_name FROM employes WHERE id=%s", (employe_id,))
+        cur.execute("SELECT name as display_name FROM staff_profiles WHERE id=%s", (employe_id,))
         emp = cur.fetchone()
         name = emp['display_name'] if emp else 'Employé'
  
@@ -957,7 +957,7 @@ def direction_services_actifs():
         result = []
         for s in actifs:
             cur = conn.cursor(dictionary=True)
-            cur.execute("SELECT display_name FROM employes WHERE id=%s", (s['employe_id'],))
+            cur.execute("SELECT name as display_name FROM staff_profiles WHERE id=%s", (s['employe_id'],))
             emp = cur.fetchone()
             cur.close()
             name = emp['display_name'] if emp else f"Employé #{s['employe_id']}"
@@ -995,7 +995,7 @@ def direction_employes_suivi():
         actifs_ids = {s['employe_id'] for s in actifs}
  
         cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT id, display_name, role FROM employes WHERE active=1 ORDER BY display_name ASC")
+        cur.execute("SELECT id, name as display_name, role FROM staff_profiles WHERE active=1 ORDER BY display_name ASC")
         employes = cur.fetchall()
         cur.close()
  
