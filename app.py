@@ -470,7 +470,7 @@ def delete_absence(absence_id):
 # ─────────────────────────────────────────────────
 # AUTH EMPLOYÉ
 # ─────────────────────────────────────────────────
- 
+
 def require_employe(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -478,15 +478,47 @@ def require_employe(f):
             return jsonify({"success": False, "error": "Non autorisé"}), 401
         return f(*args, **kwargs)
     return decorated_function
- 
- 
+
+@app.route("/employe/login", methods=["POST"])
+def employe_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Erreur DB"}), 500
+    
+    cur = conn.cursor(dictionary=True)
+    cur.execute(
+        "SELECT id, username, name as display_name, role FROM staff_profiles WHERE username=%s AND password_hash=%s AND active=1",
+        (username, password)
+    )
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if user:
+        session['employe_id'] = user['id']  # Maintenant c'est l'ID de staff_profiles
+        return jsonify({
+            "success": True,
+            "user": {"id": user['id'], "username": user['username'],
+                    "displayName": user['display_name'], "role": user['role']}
+        })
+    return jsonify({"success": False}), 401
+
+# Mettre à jour get_active_debut (pas de changement, déjà utilise services.employe_id)
+# Mettre à jour _end_service (pas de changement)
+
+# Modifier employe_me pour utiliser staff_profiles
 @app.route("/employe/me")
 def employe_me():
     if 'employe_id' in session:
         conn = get_db_connection()
         if conn:
             cur = conn.cursor(dictionary=True)
-            cur.execute("SELECT id, username, display_name, role FROM employes WHERE id=%s AND active=1", (session['employe_id'],))
+            # CHANGEMENT ICI
+            cur.execute("SELECT id, username, name as display_name, role FROM staff_profiles WHERE id=%s AND active=1", (session['employe_id'],))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -498,41 +530,6 @@ def employe_me():
                     "role": user['role']
                 }})
     return jsonify({"user": None})
- 
- 
-@app.route("/employe/login", methods=["POST"])
-def employe_login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
- 
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Erreur DB"}), 500
- 
-    cur = conn.cursor(dictionary=True)
-    cur.execute(
-        "SELECT id, username, display_name, role FROM employes WHERE username=%s AND password_hash=%s AND active=1",
-        (username, password)
-    )
-    user = cur.fetchone()
-    cur.close()
-    conn.close()
- 
-    if user:
-        session['employe_id'] = user['id']
-        return jsonify({
-            "success": True,
-            "user": {"id": user['id'], "username": user['username'],
-                     "displayName": user['display_name'], "role": user['role']}
-        })
-    return jsonify({"success": False}), 401
- 
- 
-@app.route("/employe/logout", methods=["POST"])
-def employe_logout():
-    session.pop('employe_id', None)
-    return jsonify({"success": True})
  
  
 # ─────────────────────────────────────────────────
