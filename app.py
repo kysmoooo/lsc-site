@@ -878,7 +878,7 @@ def employe_advert_confirm():
         now = now_paris()
         cur.execute(
             "INSERT INTO advert_logs (employe_id, employe_name, advert_id, advert_titre, done_at) VALUES (%s, %s, %s, %s, %s)",
-            (employe_id, name, "Advert 1", "Advert", now)
+            (employe_id, name, "1", "Advert", now)
         )
         conn2.commit()
         cur.close()
