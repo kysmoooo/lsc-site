@@ -34,7 +34,7 @@ DB_CONFIG = {
 # Configuration Discord
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "814277691981168680")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIfPcdAT0Cacn2nSL4rF")
-DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app/callback")
+DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://www.lscustoms-gliferp.fr/callback")
 DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
