@@ -208,9 +208,9 @@ def submit_staff_review():
         
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO staff_reviews (staff_id, staff_name, rating, comment, reviewer, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (staff_id, staff_name, rating, comment, reviewer, now_paris()))
+            INSERT INTO staff_reviews (staff_profile_id, staff_name_snapshot, reviewer_name, rating, comment, discord_sent, discord_sent_at, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (staff_id, staff_name, reviewer, rating, comment, 1, now_paris(), now_paris()))
         conn.commit()
         cur.close()
         conn.close()
