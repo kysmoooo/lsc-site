@@ -879,6 +879,7 @@
                         <button class="btn-service start" id="btn-toggle-service">
                             🟢 DÉBUTER LE SERVICE
                         </button>
+                        <div id="service-msg"></div>
                         <div class="people-count">
                             <span>👥 Personnes en service :</span>
                             <span id="people-count">0</span>
@@ -1140,6 +1141,29 @@
             }
         } catch {}
     }
+
+    // Ajouter cette fonction
+    function startAutoRefresh() {
+        setInterval(async () => {
+            if (!serviceActive) return;
+            
+            const res = await fetch(`${API}/employe/service/current`, { credentials: 'include' });
+            const data = await res.json();
+            
+            if (!data.active && serviceActive) {
+                // Service terminé par la direction
+                serviceActive = false;
+                clearInterval(serviceTimerInterval);
+                setServiceUI(false);
+                document.getElementById('service-timer').style.display = 'none';
+                showMessage('service-msg', "⚠️ Votre service a été terminé par la direction !", 'error');
+                loadPeopleCount();
+            }
+        }, 3000); // Vérification toutes les 3 secondes
+    }
+
+    // Appeler cette fonction après le login réussi, dans showPanel()
+    startAutoRefresh();
 
     document.getElementById('btn-toggle-service').addEventListener('click', async () => {
         if (!serviceActive) {
