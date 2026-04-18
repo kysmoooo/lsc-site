@@ -889,10 +889,9 @@
                             📋 Voir les adverts
                         </button>
                         <div class="advert-confirm-btn-wrap">
-                            <button class="btn-advert-confirm-inline" onclick="confirmAdvertInline()">
+                            <button class="btn-advert-confirm-inline" id="btn-confirm-advert">
                                 ✅ Confirmer l'advert
                             </button>
-                            ${!serviceActive ? '<p style="font-size:0.72rem; color:#e74c3c; text-align:center; margin-top:0.35rem;">⚠️ Vous devez être en service pour confirmer</p>' : ''}
                         </div>
                     </div>
                 </div>
@@ -1354,22 +1353,34 @@
     }
 
     async function confirmAdvertInline() {
-        if (!serviceActive) return;
+        if (!serviceActive) {
+            alert("Vous devez être en service pour confirmer un advert");
+            return;
+        }
+        
         try {
             const res = await fetch(`${API}/employe/advert/confirm`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                body: JSON.stringify({})  // Corps vide
             });
+            
             const data = await res.json();
+            
             if (data.success) {
                 lastAdvertTime = new Date();
                 startAdvertTimer();
                 closeModal('modal-adverts');
+            } else {
+                alert("Erreur: " + (data.error || "Impossible de confirmer"));
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e);
+            alert("Erreur lors de la confirmation");
+        }
     }
-
+    document.getElementById('btn-confirm-advert').addEventListener('click', confirmAdvertInline);
     // ===== UTILS =====
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
