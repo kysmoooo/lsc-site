@@ -14,6 +14,9 @@ PARIS_TZ = pytz.timezone("Europe/Paris")
 def now_paris():
     return datetime.now(PARIS_TZ)
 
+def format_date():
+    return now_paris().strftime("%d/%m à %H:%M:%S")
+
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
 
@@ -628,12 +631,12 @@ def employe_service_start():
  
         # Stocker heure de début en session pour le timer côté serveur
         session[f'service_start_{employe_id}'] = now.isoformat()
- 
+        maintenant = format_date()
         if WEBHOOK_SERVICE:
             embed = {
                 "title": "🟢 Prise de service",
                 "color": 3066993,
-                "description": f"**{name}** a pris son service à **{now.isoformat()}**",
+                "description": f"**{name}** a pris son service le **{maintenant}**",
                 "timestamp": now.isoformat()
             }
             try:
@@ -875,17 +878,17 @@ def employe_advert_confirm():
         now = now_paris()
         cur.execute(
             "INSERT INTO advert_logs (employe_id, employe_name, advert_id, advert_titre, done_at) VALUES (%s, %s, %s, %s, %s)",
-            (employe_id, name, advert_id, advert_titre, now)
+            (employe_id, name, "Advert 1", "Advert", now)
         )
         conn2.commit()
         cur.close()
         conn2.close()
- 
+        maintenant = format_date()
         if WEBHOOK_ADVERT:
             embed = {
                 "title": "📢 Advert confirmé",
                 "color": 3066993,
-                "description": f"**{name}** a fait l'advert à **{now.isoformat()}**.",
+                "description": f"**{name}** a fait l'advert le **{maintenant}**.",
                 "timestamp": now.isoformat()
             }
             try:
@@ -919,7 +922,7 @@ def get_annonces_public():
         if not conn:
             return jsonify([])
         cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT id, titre, texte FROM annonces ORDER BY updated_at DESC")
+        cur.execute("SELECT id, titre, image_url, texte FROM annonces ORDER BY updated_at DESC")
         annonces = cur.fetchall()
         cur.close()
         conn.close()

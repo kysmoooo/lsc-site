@@ -888,6 +888,14 @@
                         <button class="btn-advert view" id="btn-voir-adverts" style="width:100%; margin-bottom:0.75rem; padding:0.75rem;">
                             📋 Voir les adverts
                         </button>
+                        <div class="advert-confirm-btn-wrap">
+                            <button class="btn-advert-confirm-inline ${!serviceActive ? 'disabled' : ''}"
+                                ${!serviceActive ? 'disabled' : ''}
+                                onclick="confirmAdvertInline(event)">
+                                ✅ Confirmer cet advert
+                            </button>
+                            ${!serviceActive ? '<p style="font-size:0.72rem; color:#e74c3c; text-align:center; margin-top:0.35rem;">⚠️ Vous devez être en service pour confirmer</p>' : ''}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1306,14 +1314,6 @@
                             <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.texte)}, this)">📋 Copier</button>
                         </div>
                     </div>
-                    <div class="advert-confirm-btn-wrap">
-                        <button class="btn-advert-confirm-inline ${!serviceActive ? 'disabled' : ''}"
-                            ${!serviceActive ? 'disabled' : ''}
-                            onclick="confirmAdvertInline(event, ${a.id}, ${JSON.stringify(a.titre)})">
-                            ✅ Confirmer cet advert
-                        </button>
-                        ${!serviceActive ? '<p style="font-size:0.72rem; color:#e74c3c; text-align:center; margin-top:0.35rem;">⚠️ Vous devez être en service pour confirmer</p>' : ''}
-                    </div>
                 </div>
             </div>
         `).join('');
@@ -1356,7 +1356,7 @@
         }
     }
 
-    async function confirmAdvertInline(event, advertId, advertTitre) {
+    async function confirmAdvertInline(event) {
         event.stopPropagation();
         if (!serviceActive) return;
         try {
@@ -1364,7 +1364,6 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ advert_id: advertId, advert_titre: advertTitre })
             });
             const data = await res.json();
             if (data.success) {
