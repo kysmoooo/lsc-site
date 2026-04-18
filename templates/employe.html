@@ -889,10 +889,8 @@
                             📋 Voir les adverts
                         </button>
                         <div class="advert-confirm-btn-wrap">
-                            <button class="btn-advert-confirm-inline ${!serviceActive ? 'disabled' : ''}"
-                                ${!serviceActive ? 'disabled' : ''}
-                                onclick="confirmAdvertInline(event)">
-                                ✅ Confirmer cet advert
+                            <button class="btn-advert-confirm-inline" onclick="confirmAdvertInline()">
+                                ✅ Confirmer l'advert
                             </button>
                             ${!serviceActive ? '<p style="font-size:0.72rem; color:#e74c3c; text-align:center; margin-top:0.35rem;">⚠️ Vous devez être en service pour confirmer</p>' : ''}
                         </div>
@@ -1295,7 +1293,7 @@
                         <div class="copy-field-label">Titre</div>
                         <div class="copy-field-row">
                             <div class="copy-field-value">${escHtml(a.titre)}</div>
-                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.titre)}, this)">📋 Copier</button>
+                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.titre)}, this)">📋 Copier</button>
                         </div>
                     </div>
                     ${a.image_url ? `
@@ -1303,7 +1301,7 @@
                         <div class="copy-field-label">Image URL</div>
                         <div class="copy-field-row">
                             <div class="copy-field-value">${escHtml(a.image_url)}</div>
-                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.image_url)}, this)">📋 Copier</button>
+                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.image_url)}, this)">📋 Copier</button>
                         </div>
                     </div>
                     ` : ''}
@@ -1311,7 +1309,7 @@
                         <div class="copy-field-label">Texte</div>
                         <div class="copy-field-row">
                             <div class="copy-field-value">${escHtml(a.texte)}</div>
-                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.texte)}, this)">📋 Copier</button>
+                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.texte)}, this)">📋 Copier</button>
                         </div>
                     </div>
                 </div>
@@ -1327,8 +1325,7 @@
         if (!isOpen) el.classList.add('open');
     }
 
-    async function copyField(event, text, btn) {
-        event.stopPropagation();
+    async function copyField(text, btn) {
         try {
             await navigator.clipboard.writeText(text);
             btn.textContent = '✅ Copié !';
@@ -1356,8 +1353,7 @@
         }
     }
 
-    async function confirmAdvertInline(event) {
-        event.stopPropagation();
+    async function confirmAdvertInline() {
         if (!serviceActive) return;
         try {
             const res = await fetch(`${API}/employe/advert/confirm`, {
