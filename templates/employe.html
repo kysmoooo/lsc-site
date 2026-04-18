@@ -622,33 +622,128 @@
 
         .short-label { font-size: 0.65rem; color: #e74c3c; display: flex; align-items: center; gap: 0.25rem; margin-top: 0.25rem; }
 
-        /* Liste adverts */
-        .advert-item {
+        /* ===== ADVERT DETAIL VIEW (dans la liste) ===== */
+        .advert-list-item {
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
-            padding: 1rem 1.1rem;
-            margin-bottom: 0.65rem;
+            border-radius: 14px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
             cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .advert-list-item:hover { border-color: rgba(255,215,0,0.3); }
+        .advert-list-item.open { border-color: rgba(255,215,0,0.5); }
+
+        .advert-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1rem;
+        }
+
+        .advert-list-titre {
+            font-weight: 600;
+            color: #ffd700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .advert-list-chevron {
+            color: #666;
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        .advert-list-item.open .advert-list-chevron { transform: rotate(180deg); }
+
+        .advert-detail-panel {
+            display: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 1rem;
+        }
+
+        .advert-list-item.open .advert-detail-panel { display: block; }
+
+        /* Chaque champ copie : titre, image url, texte */
+        .copy-field {
+            margin-bottom: 0.75rem;
+        }
+
+        .copy-field-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.35rem;
+        }
+
+        .copy-field-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .copy-field-value {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.8rem;
+            color: #ccc;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .btn-copy {
+            flex-shrink: 0;
+            background: rgba(255,215,0,0.12);
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 8px;
+            color: #ffd700;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-copy:hover { background: rgba(255,215,0,0.2); }
+        .btn-copy.copied { background: rgba(46,204,113,0.2); border-color: rgba(46,204,113,0.4); color: #2ecc71; }
+
+        .advert-confirm-btn-wrap {
+            margin-top: 0.75rem;
+        }
+
+        .btn-advert-confirm-inline {
+            width: 100%;
+            padding: 0.65rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
             transition: all 0.2s;
         }
 
-        .advert-item:hover { border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.05); }
-        .advert-item.selected { border-color: #ffd700; background: rgba(255,215,0,0.08); }
-
-        .advert-item-titre {
-            font-weight: 600;
-            color: #ffd700;
-            margin-bottom: 0.3rem;
-            font-size: 0.9rem;
+        .btn-advert-confirm-inline:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(231,76,60,0.4);
         }
 
-        .advert-item-texte {
-            font-size: 0.78rem;
-            color: #999;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .btn-advert-confirm-inline:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         /* ===== FOOTER ===== */
@@ -775,8 +870,9 @@
                     <!-- ADVERTS -->
                     <div class="panel-card">
                         <h3>📢 Adverts</h3>
-                        <p style="font-size:0.8rem; color:#777; margin-bottom:1rem;">Appuyez sur le bouton pour voir les différents adverts</p>
+                        <p style="font-size:0.8rem; color:#777; margin-bottom:1rem;">Cliquez sur un advert pour voir le détail et copier les éléments.</p>
 
+                        <!-- Timer advert — toujours visible -->
                         <div class="advert-timer-bar">
                             <div class="advert-timer-row">
                                 <span>📣 Dernier advert :</span>
@@ -785,19 +881,13 @@
                             <div class="advert-progress-bg">
                                 <div class="advert-progress-fill" id="advert-progress" style="width:0%"></div>
                             </div>
-                            <div class="advert-alert" id="advert-alert">
-                                — En attente d'un service actif
-                            </div>
+                            <div class="advert-alert" id="advert-alert"></div>
                         </div>
 
-                        <div class="advert-buttons">
-                            <button class="btn-advert view" id="btn-voir-adverts">📋 Voir les adverts</button>
-                            <button class="btn-advert confirm" id="btn-confirm-advert" disabled>✅ Confirmer l'advert</button>
-                        </div>
-                        <div id="selected-advert-preview" style="display:none; background:rgba(0,0,0,0.3); border-radius:10px; padding:0.75rem; font-size:0.8rem; color:#ccc; border:1px solid rgba(255,215,0,0.15);">
-                            <div style="color:#ffd700; font-size:0.75rem; margin-bottom:0.35rem; font-weight:600;">Advert sélectionné :</div>
-                            <div id="selected-advert-text"></div>
-                        </div>
+                        <!-- Bouton voir les adverts (ouvre la modale liste) -->
+                        <button class="btn-advert view" id="btn-voir-adverts" style="width:100%; margin-bottom:0.75rem; padding:0.75rem;">
+                            📋 Voir les adverts
+                        </button>
                     </div>
                 </div>
             </div>
@@ -837,7 +927,7 @@
     </div>
 </div>
 
-<!-- MODAL : Adverts -->
+<!-- MODAL : Adverts (liste + détail) -->
 <div class="modal-overlay" id="modal-adverts">
     <div class="modal-box">
         <div class="modal-header">
@@ -861,8 +951,7 @@
     let serviceTimerInterval = null;
     let advertTimerInterval = null;
     let lastAdvertTime = null;
-    let advertInterval = 30 * 60; // 20 minutes en secondes
-    let selectedAdvert = null;
+    let advertInterval = 30 * 60; // 30 minutes en secondes
     let peopleRefreshInterval = null;
 
     // ===== AUTH =====
@@ -892,7 +981,6 @@
     });
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
-        // Si en service, fin de service automatique
         if (serviceActive) await endService();
         await fetch(`${API}/employe/logout`, { method: 'POST', credentials: 'include' });
         clearIntervals();
@@ -924,8 +1012,31 @@
         checkCurrentService();
         loadPeopleCount();
         loadAdverts();
+        loadLastAdvertFromDB(); // Charger le dernier advert depuis la BDD
 
         peopleRefreshInterval = setInterval(loadPeopleCount, 10000);
+    }
+
+    // ===== CHARGER DERNIER ADVERT DEPUIS LA BDD =====
+    async function loadLastAdvertFromDB() {
+        // On interroge le service/current qui renvoie last_advert_time
+        // même si pas en service on peut faire un appel dédié
+        try {
+            const res = await fetch(`${API}/employe/advert/last`, { credentials: 'include' });
+            const data = await res.json();
+            if (data.last_advert_time) {
+                lastAdvertTime = new Date(data.last_advert_time);
+                startAdvertTimer();
+            } else {
+                // Aucun advert en BDD : afficher "Jamais" et barre à 0
+                document.getElementById('advert-last-time').textContent = 'Jamais';
+                document.getElementById('advert-progress').style.width = '0%';
+                document.getElementById('advert-alert').textContent = '⚠️ Aucun advert effectué';
+                document.getElementById('advert-alert').className = 'advert-alert due';
+            }
+        } catch {
+            document.getElementById('advert-last-time').textContent = '—';
+        }
     }
 
     // ===== SERVICE =====
@@ -938,7 +1049,15 @@
                 serviceStartTime = new Date(data.service.start_time);
                 setServiceUI(true);
                 startTimerDisplay();
-                startAdvertTimer(data.service.last_advert_time);
+                // Le last_advert_time vient déjà de loadLastAdvertFromDB
+                // On l'utilise si plus récent
+                if (data.service.last_advert_time) {
+                    const t = new Date(data.service.last_advert_time);
+                    if (!lastAdvertTime || t > lastAdvertTime) {
+                        lastAdvertTime = t;
+                        startAdvertTimer();
+                    }
+                }
             }
         } catch {}
     }
@@ -963,8 +1082,6 @@
                 serviceStartTime = new Date();
                 setServiceUI(true);
                 startTimerDisplay();
-                startAdvertTimer(null);
-                document.getElementById('btn-confirm-advert').disabled = false;
             }
         } catch (e) {
             console.error(e);
@@ -981,15 +1098,10 @@
             if (data.success) {
                 serviceActive = false;
                 clearInterval(serviceTimerInterval);
-                clearInterval(advertTimerInterval);
                 setServiceUI(false);
                 document.getElementById('service-timer').style.display = 'none';
-                document.getElementById('btn-confirm-advert').disabled = true;
-                document.getElementById('advert-last-time').textContent = '—';
-                document.getElementById('advert-progress').style.width = '0%';
-                document.getElementById('advert-alert').textContent = '— En attente d\'un service actif';
-                document.getElementById('advert-alert').className = 'advert-alert';
                 loadPeopleCount();
+                // Le timer advert continue même hors service
             }
         } catch (e) {
             console.error(e);
@@ -1029,10 +1141,10 @@
         }, 1000);
     }
 
-    // ===== ADVERT TIMER =====
-    function startAdvertTimer(lastAdvert) {
-        lastAdvertTime = lastAdvert ? new Date(lastAdvert) : new Date();
+    // ===== ADVERT TIMER — Toujours actif =====
+    function startAdvertTimer() {
         clearInterval(advertTimerInterval);
+        if (!lastAdvertTime) return;
 
         advertTimerInterval = setInterval(() => {
             if (!lastAdvertTime) return;
@@ -1042,13 +1154,10 @@
 
             document.getElementById('advert-progress').style.width = pct + '%';
 
-            if (elapsed < 60) {
-                document.getElementById('advert-last-time').textContent = elapsed + 's';
-            } else {
-                const m = Math.floor(elapsed / 60);
-                const s = elapsed % 60;
-                document.getElementById('advert-last-time').textContent = `${m}min ${s}s`;
-            }
+            // Afficher l'heure du dernier advert (hh:mm)
+            const h = lastAdvertTime.getHours().toString().padStart(2, '0');
+            const m = lastAdvertTime.getMinutes().toString().padStart(2, '0');
+            document.getElementById('advert-last-time').textContent = `${h}:${m}`;
 
             const alertEl = document.getElementById('advert-alert');
             if (remaining <= 0) {
@@ -1063,6 +1172,13 @@
                 document.getElementById('advert-progress').style.background = 'linear-gradient(90deg, #ffd700, #ff8c00)';
             }
         }, 1000);
+
+        // Déclencher immédiatement
+        const elapsed = Math.floor((Date.now() - lastAdvertTime.getTime()) / 1000);
+        const h = lastAdvertTime.getHours().toString().padStart(2, '0');
+        const m = lastAdvertTime.getMinutes().toString().padStart(2, '0');
+        document.getElementById('advert-last-time').textContent = `${h}:${m}`;
+        document.getElementById('advert-progress').style.width = Math.min((elapsed / advertInterval) * 100, 100) + '%';
     }
 
     // ===== PEOPLE COUNT =====
@@ -1094,7 +1210,6 @@
                 return;
             }
 
-            // Calculer total
             let totalMins = 0;
             data.services.forEach(s => {
                 if (s.duration_minutes) totalMins += s.duration_minutes;
@@ -1137,7 +1252,7 @@
         }
     }
 
-    // ===== ADVERTS =====
+    // ===== ADVERTS — CHARGEMENT =====
     async function loadAdverts() {
         try {
             const res = await fetch(`${API}/api/annonces/public`, { credentials: 'include' });
@@ -1146,54 +1261,119 @@
         } catch {}
     }
 
+    // ===== ADVERTS — OUVRIR MODALE LISTE =====
     document.getElementById('btn-voir-adverts').addEventListener('click', () => {
+        renderAdvertsList();
+        openModal('modal-adverts');
+    });
+
+    function renderAdvertsList() {
         const adverts = window._adverts || [];
         const listEl = document.getElementById('adverts-list');
 
         if (!adverts || adverts.length === 0) {
             listEl.innerHTML = '<p style="text-align:center; padding:2rem; color:#666;">Aucune annonce disponible.</p>';
-        } else {
-            listEl.innerHTML = adverts.map(a => `
-                <div class="advert-item ${selectedAdvert?.id === a.id ? 'selected' : ''}" data-id="${a.id}" onclick="selectAdvert(${a.id})">
-                    <div class="advert-item-titre">📌 ${escHtml(a.titre)}</div>
-                    <div class="advert-item-texte">${escHtml(a.texte)}</div>
-                </div>
-            `).join('');
+            return;
         }
-        openModal('modal-adverts');
-    });
 
-    function selectAdvert(id) {
-        const adverts = window._adverts || [];
-        selectedAdvert = adverts.find(a => a.id === id);
-        document.querySelectorAll('.advert-item').forEach(el => {
-            el.classList.toggle('selected', parseInt(el.dataset.id) === id);
-        });
-        if (selectedAdvert) {
-            document.getElementById('selected-advert-preview').style.display = 'block';
-            document.getElementById('selected-advert-text').textContent = selectedAdvert.texte;
+        listEl.innerHTML = adverts.map(a => `
+            <div class="advert-list-item" id="advert-item-${a.id}" onclick="toggleAdvertDetail(${a.id})">
+                <div class="advert-list-header">
+                    <div class="advert-list-titre">📌 ${escHtml(a.titre)}</div>
+                    <span class="advert-list-chevron">▼</span>
+                </div>
+                <div class="advert-detail-panel">
+                    <div class="copy-field">
+                        <div class="copy-field-label">Titre</div>
+                        <div class="copy-field-row">
+                            <div class="copy-field-value">${escHtml(a.titre)}</div>
+                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.titre)}, this)">📋 Copier</button>
+                        </div>
+                    </div>
+                    ${a.image_url ? `
+                    <div class="copy-field">
+                        <div class="copy-field-label">Image URL</div>
+                        <div class="copy-field-row">
+                            <div class="copy-field-value">${escHtml(a.image_url)}</div>
+                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.image_url)}, this)">📋 Copier</button>
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="copy-field">
+                        <div class="copy-field-label">Texte</div>
+                        <div class="copy-field-row">
+                            <div class="copy-field-value">${escHtml(a.texte)}</div>
+                            <button class="btn-copy" onclick="copyField(event, ${JSON.stringify(a.texte)}, this)">📋 Copier</button>
+                        </div>
+                    </div>
+                    <div class="advert-confirm-btn-wrap">
+                        <button class="btn-advert-confirm-inline ${!serviceActive ? 'disabled' : ''}"
+                            ${!serviceActive ? 'disabled' : ''}
+                            onclick="confirmAdvertInline(event, ${a.id}, ${JSON.stringify(a.titre)})">
+                            ✅ Confirmer cet advert
+                        </button>
+                        ${!serviceActive ? '<p style="font-size:0.72rem; color:#e74c3c; text-align:center; margin-top:0.35rem;">⚠️ Vous devez être en service pour confirmer</p>' : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleAdvertDetail(id) {
+        const el = document.getElementById(`advert-item-${id}`);
+        const isOpen = el.classList.contains('open');
+        // Fermer tous
+        document.querySelectorAll('.advert-list-item').forEach(i => i.classList.remove('open'));
+        if (!isOpen) el.classList.add('open');
+    }
+
+    async function copyField(event, text, btn) {
+        event.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(text);
+            btn.textContent = '✅ Copié !';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '📋 Copier';
+                btn.classList.remove('copied');
+            }, 2000);
+        } catch {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.textContent = '✅ Copié !';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = '📋 Copier';
+                btn.classList.remove('copied');
+            }, 2000);
         }
     }
 
-    document.getElementById('btn-confirm-advert').addEventListener('click', async () => {
+    async function confirmAdvertInline(event, advertId, advertTitre) {
+        event.stopPropagation();
         if (!serviceActive) return;
         try {
             const res = await fetch(`${API}/employe/advert/confirm`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ advert_id: selectedAdvert?.id, advert_titre: selectedAdvert?.titre })
+                body: JSON.stringify({ advert_id: advertId, advert_titre: advertTitre })
             });
             const data = await res.json();
             if (data.success) {
                 lastAdvertTime = new Date();
-                startAdvertTimer(null);
+                startAdvertTimer();
                 closeModal('modal-adverts');
-                selectedAdvert = null;
-                document.getElementById('selected-advert-preview').style.display = 'none';
             }
         } catch (e) { console.error(e); }
-    });
+    }
 
     // ===== UTILS =====
     function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -1214,7 +1394,7 @@
 
     function escHtml(str) {
         if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+        return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
     // ===== LANG TOGGLE =====
