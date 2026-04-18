@@ -636,7 +636,7 @@ def employe_service_start():
             embed = {
                 "title": "🟢 Prise de service",
                 "color": 3066993,
-                "description": f"**{name}** a pris son service.",
+                "description": f"**{name}** a pris son service à **{now.isoformat()}**",
                 "timestamp": now.isoformat()
             }
             try:
@@ -887,8 +887,8 @@ def employe_advert_confirm():
         if WEBHOOK_ADVERT:
             embed = {
                 "title": "📢 Advert confirmé",
-                "color": 15844367,
-                "description": f"**{name}** a fait l'advert **{advert_titre}**.",
+                "color": 3066993,
+                "description": f"**{name}** a fait l'advert à **{now.isoformat()}**.",
                 "timestamp": now.isoformat()
             }
             try:
