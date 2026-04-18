@@ -34,8 +34,8 @@ DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "nfnAJBlnt1TvBIf
 DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://lsc-site-production-e2c1.up.railway.app/callback")
 DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
-WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "https://discord.com/api/webhooks/1299414850732032000/cMX_cy9ljmm1LPGslhsjrQbGL-QAXoH7QReUrjK4Ari5rSIINJUxlJkUlSUhkSB1kK_M")
-WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "https://discord.com/api/webhooks/1494849287371096164/eY03hcs8D9o2GYGJFjGCS2OddHv-SVL5QI33LJIVq3sjCJUt3LEMarsb6nojGjA5ASa5")
+WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
+WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "")
 
 
 # Login manager
