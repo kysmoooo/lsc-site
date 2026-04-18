@@ -22,11 +22,11 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df997587235
 
 # Configuration MySQL
 DB_CONFIG = {
-    'host': os.environ.get("DB_HOST", "hopper.proxy.rlwy.net"),
-    'port': int(os.environ.get("DB_PORT", 32384)),
+    'host': os.environ.get("DB_HOST", "nozomi.proxy.rlwy.net"),
+    'port': int(os.environ.get("DB_PORT", 46434)),
     'database': os.environ.get("DB_NAME", "railway"),
     'user': os.environ.get("DB_USER", "root"),
-    'password': os.environ.get("DB_PASSWORD", "kBBVhpqLHHmSBAlgXtGiFcxWwndvBpOD"),
+    'password': os.environ.get("DB_PASSWORD", "puPqRYWigeOxenQOZRNhGmsfxKRdbYbP"),
     'connection_timeout': 5,
     'autocommit': True
 }
