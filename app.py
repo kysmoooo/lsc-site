@@ -572,7 +572,6 @@ def get_active_debut(conn, employe_id):
         return last
     return None
  
- 
 def get_last_advert_time(employe_id):
     """Récupère le timestamp du dernier advert confirmé depuis advert_logs"""
     try:
@@ -590,7 +589,31 @@ def get_last_advert_time(employe_id):
         return row['done_at'] if row else None
     except:
         return None
- 
+
+def get_last_advert_time_global():
+    """Récupère le timestamp du dernier advert confirmé (tous employés confondus)"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return None
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT done_at FROM advert_logs ORDER BY done_at DESC LIMIT 1"
+        )
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return row['done_at'] if row else None
+    except:
+        return None
+
+@app.route("/employe/advert/last-global")
+@require_employe
+def employe_advert_last_global():
+    last = get_last_advert_time_global()
+    return jsonify({
+        "last_advert_time": last.isoformat() if last else None
+    })
  
 # ─────────────────────────────────────────────────
 # SERVICE

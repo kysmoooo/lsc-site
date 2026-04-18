@@ -1099,16 +1099,14 @@
 
     // ===== CHARGER DERNIER ADVERT DEPUIS LA BDD =====
     async function loadLastAdvertFromDB() {
-        // On interroge le service/current qui renvoie last_advert_time
-        // même si pas en service on peut faire un appel dédié
         try {
-            const res = await fetch(`${API}/employe/advert/last`, { credentials: 'include' });
+            // Utiliser la nouvelle route globale
+            const res = await fetch(`${API}/employe/advert/last-global`, { credentials: 'include' });
             const data = await res.json();
             if (data.last_advert_time) {
                 lastAdvertTime = new Date(data.last_advert_time);
                 startAdvertTimer();
             } else {
-                // Aucun advert en BDD : afficher "Jamais" et barre à 0
                 document.getElementById('advert-last-time').textContent = 'Jamais';
                 document.getElementById('advert-progress').style.width = '0%';
                 document.getElementById('advert-alert').textContent = '⚠️ Aucun advert effectué';
@@ -1480,15 +1478,21 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({})  // Corps vide
+                body: JSON.stringify({})
             });
             
             const data = await res.json();
             
             if (data.success) {
-                lastAdvertTime = new Date();
-                startAdvertTimer();
+                // Recharger le dernier advert GLOBAL
+                const lastRes = await fetch(`${API}/employe/advert/last-global`, { credentials: 'include' });
+                const lastData = await lastRes.json();
+                if (lastData.last_advert_time) {
+                    lastAdvertTime = new Date(lastData.last_advert_time);
+                    startAdvertTimer();
+                }
                 closeModal('modal-adverts');
+                showMessage('advert-msg', "✅ Advert confirmé !", "success");
             } else {
                 showMessage('advert-msg', "❌ " + (data.error || "Impossible de confirmer"), "error");
             }
@@ -1497,6 +1501,7 @@
             showMessage('advert-msg', "❌ Erreur lors de la confirmation", "error");
         }
     }
+    
     document.getElementById('btn-confirm-advert').addEventListener('click', confirmAdvertInline);
     // ===== UTILS =====
     function openModal(id) { document.getElementById(id).classList.add('active'); }
