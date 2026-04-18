@@ -216,7 +216,7 @@ def submit_staff_review():
         conn.close()
         
         # Webhook Discord pour les avis
-        webhook = os.environ.get("REVIEW_WEBHOOK", "https://discord.com/api/webhooks/1482122375767265390/FH6mWGeh1XODdmTUA_EJHEDSAD-r8XXjEMCSENF7xamXkMrPIhxlOyLlxC5qrSzwK7bm")
+        webhook = os.environ.get("REVIEW_WEBHOOK", "https://discord.com/api/webhooks/1495174985256272014/b04LBEKNMHVG6XXUFeN_e7Dh6sQv3TuTDJY1J9Mb-chVv1xFDunzUQnHmr2eZ_Srxc5o")
         
         stars_text = "⭐" * int(rating)
         embed = {
