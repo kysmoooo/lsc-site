@@ -1282,8 +1282,8 @@
         }
 
         listEl.innerHTML = adverts.map(a => `
-            <div class="advert-list-item" id="advert-item-${a.id}" onclick="toggleAdvertDetail(${a.id})">
-                <div class="advert-list-header">
+            <div class="advert-list-item" id="advert-item-${a.id}">
+                <div class="advert-list-header" onclick="toggleAdvertDetail(${a.id})">
                     <div class="advert-list-titre">📌 ${escHtml(a.titre)}</div>
                     <span class="advert-list-chevron">▼</span>
                 </div>
@@ -1291,62 +1291,80 @@
                     <div class="copy-field">
                         <div class="copy-field-label">Titre</div>
                         <div class="copy-field-row">
-                            <div class="copy-field-value">${escHtml(a.titre)}</div>
-                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.titre)}, this)">📋 Copier</button>
+                            <div class="copy-field-value" id="titre-value-${a.id}">${escHtml(a.titre)}</div>
+                            <button class="btn-copy" data-copy-id="titre-value-${a.id}">📋 Copier</button>
                         </div>
                     </div>
                     ${a.image_url ? `
                     <div class="copy-field">
                         <div class="copy-field-label">Image URL</div>
                         <div class="copy-field-row">
-                            <div class="copy-field-value">${escHtml(a.image_url)}</div>
-                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.image_url)}, this)">📋 Copier</button>
+                            <div class="copy-field-value" id="image-value-${a.id}">${escHtml(a.image_url)}</div>
+                            <button class="btn-copy" data-copy-id="image-value-${a.id}">📋 Copier</button>
                         </div>
                     </div>
                     ` : ''}
                     <div class="copy-field">
                         <div class="copy-field-label">Texte</div>
                         <div class="copy-field-row">
-                            <div class="copy-field-value">${escHtml(a.texte)}</div>
-                            <button class="btn-copy" onclick="copyField(${JSON.stringify(a.texte)}, this)">📋 Copier</button>
+                            <div class="copy-field-value" id="texte-value-${a.id}">${escHtml(a.texte)}</div>
+                            <button class="btn-copy" data-copy-id="texte-value-${a.id}">📋 Copier</button>
                         </div>
                     </div>
                 </div>
             </div>
         `).join('');
+
+        // Attacher les événements de copie après avoir créé les éléments
+        document.querySelectorAll('.btn-copy').forEach(btn => {
+            btn.removeEventListener('click', handleCopy);
+            btn.addEventListener('click', handleCopy);
+        });
     }
 
     function toggleAdvertDetail(id) {
         const el = document.getElementById(`advert-item-${id}`);
+        if (!el) return;
         const isOpen = el.classList.contains('open');
         // Fermer tous
         document.querySelectorAll('.advert-list-item').forEach(i => i.classList.remove('open'));
         if (!isOpen) el.classList.add('open');
     }
 
-    async function copyField(text, btn) {
+    async function handleCopy(e) {
+        const btn = e.currentTarget;
+        const targetId = btn.getAttribute('data-copy-id');
+        const targetElement = document.getElementById(targetId);
+        
+        if (!targetElement) return;
+        
+        const textToCopy = targetElement.textContent || targetElement.innerText;
+        
         try {
-            await navigator.clipboard.writeText(text);
+            await navigator.clipboard.writeText(textToCopy);
+            const originalText = btn.textContent;
             btn.textContent = '✅ Copié !';
             btn.classList.add('copied');
             setTimeout(() => {
-                btn.textContent = '📋 Copier';
+                btn.textContent = originalText;
                 btn.classList.remove('copied');
             }, 2000);
-        } catch {
-            // Fallback
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
+        } catch (err) {
+            // Fallback pour navigateurs sans clipboard API
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
             document.execCommand('copy');
-            document.body.removeChild(ta);
+            document.body.removeChild(textarea);
+            
+            const originalText = btn.textContent;
             btn.textContent = '✅ Copié !';
             btn.classList.add('copied');
             setTimeout(() => {
-                btn.textContent = '📋 Copier';
+                btn.textContent = originalText;
                 btn.classList.remove('copied');
             }, 2000);
         }
