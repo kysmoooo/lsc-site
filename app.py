@@ -899,6 +899,14 @@ def employe_advert_confirm():
         print(f"❌ Erreur advert confirm: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
  
+@app.route("/employe/advert/last")
+@require_employe
+def employe_advert_last():
+    employe_id = session['employe_id']
+    last = get_last_advert_time(employe_id)
+    return jsonify({
+        "last_advert_time": last.isoformat() if last else None
+    })
  
 # ─────────────────────────────────────────────────
 # ANNONCES PUBLIQUES
