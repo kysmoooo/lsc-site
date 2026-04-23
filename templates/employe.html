@@ -1243,6 +1243,7 @@
         loadLastAdvertFromDB(); // Charger le dernier advert depuis la BDD
 
         peopleRefreshInterval = setInterval(loadPeopleCount, 10000);
+        startAutoRefresh()
     }
 
     // ===== CHARGER DERNIER ADVERT DEPUIS LA BDD =====
@@ -1308,8 +1309,12 @@
         }, 3000); // Vérification toutes les 3 secondes
     }
 
-    // Appeler cette fonction après le login réussi, dans showPanel()
-    startAutoRefresh();
+    setInterval(async () => {
+        if (!currentEmploye) return;
+        try {
+            await fetch(`${API}/employe/me`, { credentials: 'include' });
+        } catch {}
+    }, 4 * 60 * 1000); // ping toutes les 4 minutes
 
     document.getElementById('btn-toggle-service').addEventListener('click', async () => {
         if (!serviceActive) {

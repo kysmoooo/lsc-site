@@ -8,6 +8,7 @@ import traceback
 from datetime import datetime
 import pytz
 from functools import wraps
+from datetime import timedelta
 
 PARIS_TZ = pytz.timezone("Europe/Paris")
 
@@ -19,6 +20,10 @@ def format_date():
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True  # ton site est en HTTPS
 
 # Configuration MySQL
 DB_CONFIG = {
@@ -46,6 +51,10 @@ DEV_MODE = False
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth_discord'
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 # Classe User
 class User(UserMixin):
@@ -600,6 +609,7 @@ def employe_login():
     conn.close()
     
     if user:
+        session.permanent = True
         session['employe_id'] = user['id']  # Maintenant c'est l'ID de staff_profiles
         return jsonify({
             "success": True,
