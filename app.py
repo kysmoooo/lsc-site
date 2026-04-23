@@ -371,9 +371,10 @@ def post_application():
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO applications 
-            (full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
+            (username, full_name, discord_tag, avatar_url, birth_date, phone, rib, experience, availability, motivation, status, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s)
         """, (
+            data.get('discord_name'),
             data.get('fullName'),
             data.get('discordTag'),
             data.get('avatarUrl'),

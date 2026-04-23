@@ -379,6 +379,7 @@
                                 <label>
                                     <span data-key="form.fullName">NOM Prénom (Ex: Nash Dawkins)</span>
                                     <input name="fullName" id="fullName" required>
+                                    <input type="hidden" id="username" name="username">
                                 </label>
                                 <label>
                                     <span data-key="form.discordTag">ID DISCORD (Ex: 123456789012345678)</span>
@@ -518,6 +519,7 @@
                     document.getElementById('application-form').style.display = 'block';
                     document.getElementById('discordTag').value = discordUser.id;
                     document.getElementById('avatarUrl').value = discordUser.avatar;
+                    document.getElementById('username').value = discordUser.username;
                 } else {
                     document.getElementById('recruitment-login').style.display = 'block';
                     document.getElementById('application-form').style.display = 'none';
@@ -537,6 +539,7 @@
                 e.preventDefault();
                 
                 const formData = {
+                    username: document.getElementById('username').value,
                     fullName: document.getElementById('fullName').value,
                     discordTag: document.getElementById('discordTag').value,
                     avatarUrl: document.getElementById('avatarUrl').value,
