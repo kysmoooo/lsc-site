@@ -1155,6 +1155,7 @@
                         <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
                         <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
                         <button type="button" class="tab" data-tab="employes" data-key="direction.employes">👥 Employés</button>
+                        <button type="button" class="tab" data-tab="inscriptions">📬 Inscriptions</button>
                     </div>
                     <div id="direction-content">
                         <div class="loader">⏳ Chargement...</div>
@@ -1171,18 +1172,13 @@
                     currentTab = tab.dataset.tab;
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    
-                    if (currentTab === 'candidature') {
-                        loadApplications();
-                    } else if (currentTab === 'absences') {
-                        loadAbsences();
-                    } else if (currentTab === 'annonces') {
-                        loadAnnonces();
-                    } else if (currentTab === 'employes') { 
-                        loadEmployesSection(); 
-                    } else if (currentTab !== 'employes') { 
-                        clearInterval(employesRefreshInterval); 
-                    }
+                    clearInterval(employesRefreshInterval);
+
+                    if (currentTab === 'candidature') loadApplications();
+                    else if (currentTab === 'absences') loadAbsences();
+                    else if (currentTab === 'annonces') loadAnnonces();
+                    else if (currentTab === 'employes') loadEmployesSection();
+                    else if (currentTab === 'inscriptions') loadInscriptions();
                 });
             });
             
@@ -1194,6 +1190,8 @@
                 loadAnnonces();
             } else if (currentTab === 'employes') {
                 loadEmployesSection(); 
+            } else if (currentTab === 'inscriptions') {
+                loadInscriptions();
             }
             
         }
@@ -1767,6 +1765,76 @@
                     showMessage('employe-detail-msg', '❌ Erreur lors de la fin de service forcée', 'error');
                 }
             });
+        }
+
+        function loadInscriptions() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            container.innerHTML = '<div class="loader">⏳ Chargement...</div>';
+
+            fetch(`${API_BASE}/api/direction/inscriptions`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => renderInscriptions(data))
+                .catch(() => {
+                    container.innerHTML = '<p style="text-align:center;color:#e74c3c;">❌ Erreur de chargement</p>';
+                });
+        }
+
+        function renderInscriptions(list) {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+
+            if (!list.length) {
+                container.innerHTML = '<p style="text-align:center;padding:2rem;color:#666;">📭 Aucune inscription en attente.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div>
+                    <h3 style="color:#ffd700;margin-bottom:1.25rem;">📬 Inscriptions en attente (${list.length})</h3>
+                    <div id="inscriptions-msg"></div>
+                    ${list.map(u => `
+                        <div style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                            <div>
+                                <div style="font-weight:600;color:#fff;font-size:0.95rem;">🎮 ${escapeHtml(u.username)}</div>
+                                <div style="font-size:0.75rem;color:#888;margin-top:0.2rem;">Demande reçue le ${formatDate(u.created_at)}</div>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;">
+                                <button onclick="handleInscription(${u.id},'accept')"
+                                    style="background:rgba(46,204,113,0.2);border:1px solid #2ecc71;color:#2ecc71;padding:0.35rem 0.9rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(46,204,113,0.35)'"
+                                    onmouseout="this.style.background='rgba(46,204,113,0.2)'">
+                                    ✅ Valider
+                                </button>
+                                <button onclick="handleInscription(${u.id},'reject')"
+                                    style="background:rgba(231,76,60,0.2);border:1px solid #e74c3c;color:#e74c3c;padding:0.35rem 0.9rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(231,76,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(231,76,60,0.2)'">
+                                    ❌ Refuser
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function handleInscription(id, action) {
+            try {
+                const res  = await fetch(`${API_BASE}/api/direction/inscriptions/${id}/${action}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showMessage('inscriptions-msg', action === 'accept' ? '✅ Compte activé !' : '🗑 Demande refusée.', action === 'accept' ? 'success' : 'error');
+                    setTimeout(loadInscriptions, 800);
+                } else {
+                    showMessage('inscriptions-msg', '❌ ' + (data.error || 'Erreur'), 'error');
+                }
+            } catch {
+                showMessage('inscriptions-msg', '❌ Erreur réseau', 'error');
+            }
         }
 
         function formatDuration(mins) {

@@ -40,6 +40,7 @@ BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
 WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "")
 
+DEV_MODE = False
 
 # Login manager
 login_manager = LoginManager()
@@ -94,6 +95,8 @@ def require_direction(f):
     return decorated_function
 
 def is_user_in_guild(user_id):
+    if DEV_MODE:
+        return True
     url = f"https://discord.com/api/v10/guilds/{DISCORD_GUILD_ID}/members/{user_id}"
     headers = {"Authorization": f"Bot {BOT_TOKEN}"}
     try:
@@ -158,6 +161,101 @@ def serve_css(filename):
 @app.route("/js/<path:filename>")
 def serve_js(filename):
     return render_template('js', filename)
+
+@app.route("/employe/register", methods=["POST"])
+@login_required  # doit être connecté Discord
+def employe_register():
+    data     = request.get_json()
+    password = (data.get('password') or '').strip()
+
+    if not password:
+        return jsonify({"success": False, "error": "Mot de passe manquant"}), 400
+
+    # Vérifier membre du Discord
+    if not is_user_in_guild(current_user.discord_id):
+        return jsonify({"success": False, "error": "Vous devez être membre du Discord."}), 403
+
+    username = current_user.username  # pseudo Discord automatique
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "error": "Erreur DB"}), 500
+
+    try:
+        cur = conn.cursor(dictionary=True, buffered=True)
+        cur.execute(
+            "SELECT id, active FROM staff_profiles WHERE username = %s",
+            (username,)
+        )
+        employe = cur.fetchone()
+
+        cur.execute(
+            """UPDATE staff_profiles SET password_hash = %s, active = 0 WHERE id = %s""",
+            (password, employe['id'],)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        print(f"❌ Erreur register: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/direction/inscriptions")
+@require_direction
+def direction_get_inscriptions():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify([])
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """SELECT id, username, created_at
+               FROM staff_profiles
+               WHERE active = 0
+               ORDER BY created_at DESC"""
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        print(f"❌ Erreur get inscriptions: {e}")
+        return jsonify([])
+
+
+@app.route("/api/direction/inscriptions/<int:user_id>/<action>", methods=["POST"])
+@require_direction
+def direction_handle_inscription(user_id, action):
+    if action not in ('accept', 'reject'):
+        return jsonify({"success": False, "error": "Action invalide"}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "error": "Erreur DB"}), 500
+    try:
+        cur = conn.cursor()
+        if action == 'accept':
+            cur.execute(
+                "UPDATE staff_profiles SET active = 1 WHERE id = %s AND active = 0",
+                (user_id,)
+            )
+        else:
+            cur.execute(
+                "DELETE FROM staff_profiles WHERE id = %s AND active = 0",
+                (user_id,)
+            )
+        conn.commit()
+        affected = cur.rowcount
+        cur.close()
+        conn.close()
+        if affected == 0:
+            return jsonify({"success": False, "error": "Introuvable ou déjà traité"}), 404
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"❌ Erreur handle inscription: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ========== API STAFF ==========
 @app.route("/api/staff")

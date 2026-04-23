@@ -848,6 +848,60 @@
                     <div style="margin-top:1.5rem; text-align:center;">
                         <a href="{{ url_for('index') }}" class="btn-ghost" style="font-size:0.85rem;">← Retour à l'accueil</a>
                     </div>
+                    <div class="auth-toggle">
+                        Pas encore de compte ? <a onclick="showRegister()">S'inscrire</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSCRIPTION -->
+            <div id="employe-register" class="login-container animate-in" style="display:none;">
+                <div class="login-card">
+                    <div class="login-icon">📝</div>
+                    <h2>Créer un compte</h2>
+                    <p>Votre compte sera activé après validation par la direction</p>
+
+                    <!-- Pas connecté Discord -->
+                    <div id="register-no-discord" style="display:none; text-align:center;">
+                        <p style="color:#888; font-size:0.85rem; margin-bottom:1rem;">
+                            Vous devez être connecté via Discord pour vous inscrire.
+                        </p>
+                        <a href="/auth/discord" class="btn-primary" style="display:inline-block; padding:0.75rem 1.5rem;">
+                            🎮 Se connecter avec Discord
+                        </a>
+                    </div>
+
+                    <!-- Connecté Discord -->
+                    <div id="register-discord-ok" style="display:none;">
+                        <div style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:0.85rem 1rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <img id="reg-avatar" src="" alt="" style="width:36px; height:36px; border-radius:50%; display:none;">
+                            <div>
+                                <div style="font-weight:600; color:#ffd700; font-size:0.9rem;" id="reg-discord-name">—</div>
+                                <div style="font-size:0.7rem; color:#888;">Pseudo Discord détecté automatiquement</div>
+                            </div>
+                        </div>
+                        <form id="register-form">
+                            <div class="form-field">
+                                <label>Mot de passe</label>
+                                <input type="password" id="reg-password" placeholder="••••••" required minlength="4">
+                            </div>
+                            <div class="form-field">
+                                <label>Confirmer le mot de passe</label>
+                                <input type="password" id="reg-password-confirm" placeholder="••••••" required minlength="4">
+                            </div>
+                            <button class="btn-primary" type="submit" style="width:100%; padding:0.85rem; font-size:1rem; margin-top:0.5rem;">
+                                Envoyer la demande
+                            </button>
+                            <div id="register-error" class="form-error" style="display:none;"></div>
+                            <div id="register-success" class="register-status" style="display:none;">
+                                ✅ Demande envoyée ! En attente de validation par la direction.
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="auth-toggle">
+                        Déjà un compte ? <a onclick="showLogin()">Se connecter</a>
+                    </div>
                 </div>
             </div>
 
@@ -1079,6 +1133,76 @@
             }
         } catch {}
     }
+
+    async function showRegister() {
+        document.getElementById('employe-login').style.display = 'none';
+        document.getElementById('employe-register').style.display = 'block';
+
+        // Vérifier si connecté Discord
+        try {
+            const res  = await fetch(`${API}/auth/me`);
+            const data = await res.json();
+
+            if (data.user) {
+                document.getElementById('register-no-discord').style.display = 'none';
+                document.getElementById('register-discord-ok').style.display = 'block';
+                document.getElementById('reg-discord-name').textContent = data.user.username;
+                if (data.user.avatar) {
+                    const av = document.getElementById('reg-avatar');
+                    av.src = data.user.avatar;
+                    av.style.display = 'block';
+                }
+            } else {
+                document.getElementById('register-no-discord').style.display = 'block';
+                document.getElementById('register-discord-ok').style.display = 'none';
+            }
+        } catch {
+            document.getElementById('register-no-discord').style.display = 'block';
+            document.getElementById('register-discord-ok').style.display = 'none';
+        }
+    }
+
+    function showLogin() {
+        document.getElementById('employe-register').style.display = 'none';
+        document.getElementById('employe-login').style.display = 'block';
+    }
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const password = document.getElementById('reg-password').value;
+        const confirm  = document.getElementById('reg-password-confirm').value;
+        const errDiv   = document.getElementById('register-error');
+        const okDiv    = document.getElementById('register-success');
+
+        errDiv.style.display = 'none';
+        okDiv.style.display  = 'none';
+
+        if (password !== confirm) {
+            errDiv.textContent = '❌ Les mots de passe ne correspondent pas.';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res  = await fetch(`${API}/employe/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ password })  // plus besoin d'envoyer username
+            });
+            const data = await res.json();
+            if (data.success) {
+                okDiv.style.display = 'block';
+                document.getElementById('register-form').reset();
+            } else {
+                errDiv.textContent = '❌ ' + (data.error || 'Erreur lors de l\'inscription.');
+                errDiv.style.display = 'block';
+            }
+        } catch {
+            errDiv.textContent = '❌ Erreur réseau.';
+            errDiv.style.display = 'block';
+        }
+    });
 
     function showPanel() {
         document.getElementById('employe-login').style.display = 'none';
