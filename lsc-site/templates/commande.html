@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click & Collect - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost, .primary-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary, .primary-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover, .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .clickcollect-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .clickcollect-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .store-tag {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .clickcollect-header h1 span {
+            color: #ffd700;
+        }
+
+        .user-info {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .order-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .order-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .products-section .category {
+            margin-bottom: 2rem;
+        }
+
+        .category-title {
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .product-price {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .product-weight {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .add-btn {
+            background: #ffd700;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #1a1a2e;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .cart-section {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+        }
+
+        .cart-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .cart-items {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 500;
+        }
+
+        .cart-item-details {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .cart-item-qty {
+            width: 60px;
+            padding: 0.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cart-total {
+            margin: 1rem 0;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .grand-total {
+            font-weight: bold;
+            font-size: 1.125rem;
+            color: #ffd700;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .customer-info {
+            margin: 1rem 0;
+        }
+
+        .customer-info h4 {
+            margin-bottom: 0.75rem;
+            color: #ffd700;
+        }
+
+        .customer-info input, .customer-info select {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+        }
+
+        .validate-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #1a1a2e;
+        }
+
+        .validate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .app-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .app-toast.success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .app-toast.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="{{ url_for('index') }}" data-key="nav.about">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
+                    <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link {% if request.endpoint == 'employe_page' %}active{% endif %}" href="{{ url_for('employe_page') }}" data-key="nav.employe">Employé</a>
+                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="clickcollect-container">
+                    <div class="clickcollect-header">
+                        <span class="store-tag" data-key="clickcollect.storeTag">LS Customs</span>
+                        <h1>Créer votre <span data-key="clickcollect.title">Click & Collect</span></h1>
+                        <p data-key="clickcollect.subtitle">Sélectionnez vos produits et validez votre panier</p>
+                        <div id="user-info" class="user-info" style="display: none;"></div>
+                    </div>
+
+                    <div class="order-layout">
+                        <div class="products-section">
+                            <div class="category">
+                                <h3 class="category-title">🧑‍🔧 Ventes</h3>
+                                <div class="products-grid">
+                                    <div class="product-card" data-id="moteur" data-name="Moteur" data-price="700" data-weight="3">
+                                        <div class="product-name">Moteur</div>
+                                        <div class="product-details">
+                                            <span class="product-price">700.00$</span>
+                                            <span class="product-weight">3000g</span>
+                                            <button class="add-btn">+ Ajouter</button>
+                                        </div>
+                                    </div>
+                                    <div class="product-card" data-id="kit" data-name="Kit de réparation" data-price="200" data-weight="2">
+                                        <div class="product-name">Kit de réparation</div>
+                                        <div class="product-details">
+                                            <span class="product-price">200.00$</span>
+                                            <span class="product-weight">2000g</span>
+                                            <button class="add-btn">+ Ajouter</button>
+                                        </div>
+                                    </div>
+                                    <div class="product-card" data-id="karcher" data-name="Karcher" data-price="200" data-weight="1">
+                                        <div class="product-name">Karcher</div>
+                                        <div class="product-details">
+                                            <span class="product-price">200.00$</span>
+                                            <span class="product-weight">1000g</span>
+                                            <button class="add-btn">+ Ajouter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cart-section">
+                            <div class="cart-title" data-key="clickcollect.cart">🛒 Votre panier</div>
+                            <div id="cart-items" class="cart-items">
+                                <div class="empty-cart" data-key="clickcollect.emptyCart">Votre panier est vide</div>
+                            </div>
+                            <div id="cart-total" class="cart-total" style="display: none;">
+                                <div class="total-row">
+                                    <span data-key="clickcollect.totalProducts">Total produits</span>
+                                    <span id="total-products">0</span>
+                                </div>
+                                <div class="total-row">
+                                    <span data-key="clickcollect.totalWeight">Poids total</span>
+                                    <span id="total-weight">0.00 kg</span>
+                                </div>
+                                <div class="total-row grand-total">
+                                    <span>💰 <span data-key="clickcollect.totalPrice">Total à payer</span></span>
+                                    <span id="total-price">0.00$</span>
+                                </div>
+                            </div>
+
+                            <div class="customer-info">
+                                <h4 data-key="clickcollect.customerInfo">Informations client</h4>
+                                <input type="text" id="customer-name" placeholder="Votre nom" data-key="clickcollect.name">
+                                <input type="text" id="customer-phone" placeholder="Téléphone" data-key="clickcollect.phone">
+                                <select id="delivery-method">
+                                    <option value="chercher" data-key="clickcollect.pickUp">Venir chercher au garage</option>
+                                </select>
+                            </div>
+
+                            <div id="order-actions">
+                                <a class="primary-btn" href="#" id="discord-order-btn" style="display: none;" data-key="clickcollect.loginButton">🔗 Connexion Discord</a>
+                                <button id="validate-order-btn" class="validate-btn" style="display: none;" data-key="clickcollect.validate">✅ Valider votre Click & Collect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="back-link">
+                        <a href="{{ url_for('index') }}" data-key="nav.about" data-key="clickcollect.backToHome">Retour à l'accueil</a>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser & lix_js</span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <div id="notification-toast" class="app-toast" style="display: none;"></div>
+
+    <script>
+        const API_BASE = '';
+        
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                clickcollect: { storeTag: "LS Customs", title: "Click & Collect", subtitle: "Sélectionnez vos produits et validez votre panier", cart: "Votre panier", emptyCart: "Votre panier est vide", customerInfo: "Informations client", name: "Votre nom", phone: "Téléphone", pickUp: "Venir chercher au garage", validate: "Valider votre Click & Collect", totalProducts: "Total produits", totalWeight: "Poids total", totalPrice: "Total à payer", backToHome: "Retour à l'accueil", loginButton: "Connexion Discord" }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                clickcollect: { storeTag: "LS Customs", title: "Click & Collect", subtitle: "Select your products and validate your order", cart: "Your cart", emptyCart: "Your cart is empty", customerInfo: "Customer information", name: "Your name", phone: "Phone", pickUp: "Pick up at the garage", validate: "Validate your Click & Collect", totalProducts: "Total products", totalWeight: "Total weight", totalPrice: "Total to pay", backToHome: "Back to home", loginButton: "Discord login" }
+            }
+        };
+
+        let currentLang = 'fr';
+        let discordUser = null;
+        let cart = {};
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') {
+                    if (el.tagName === 'INPUT') {
+                        el.placeholder = value;
+                    } else if (el.tagName === 'OPTION') {
+                        el.textContent = value;
+                    } else {
+                        el.textContent = value;
+                    }
+                }
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                        updateCartDisplay();
+                    }
+                });
+            });
+        }
+
+        function showNotification(message, isError = false) {
+            const toast = document.getElementById('notification-toast');
+            toast.textContent = message;
+            toast.className = `app-toast ${isError ? 'error' : 'success'}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function loadCart() {
+            const saved = localStorage.getItem('ltd_cart');
+            if (saved) {
+                try {
+                    cart = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Failed to load cart', e);
+                }
+            }
+            updateCartDisplay();
+        }
+
+        function saveCart() {
+            localStorage.setItem('ltd_cart', JSON.stringify(cart));
+        }
+
+        function addToCart(product) {
+            const key = `${product.id}`;
+            if (cart[key]) {
+                cart[key].quantity++;
+            } else {
+                cart[key] = { ...product, quantity: 1 };
+            }
+            saveCart();
+            updateCartDisplay();
+            showNotification(`${product.name} ajouté au panier`);
+        }
+
+        function updateQuantity(key, quantity) {
+            if (quantity <= 0) {
+                delete cart[key];
+            } else {
+                cart[key].quantity = quantity;
+            }
+            saveCart();
+            updateCartDisplay();
+        }
+
+        function removeItem(key) {
+            delete cart[key];
+            saveCart();
+            updateCartDisplay();
+            showNotification('Article supprimé');
+        }
+
+        function updateCartDisplay() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalContainer = document.getElementById('cart-total');
+            const cartItems = Object.values(cart);
+            
+            if (cartItems.length === 0) {
+                cartItemsContainer.innerHTML = `<div class="empty-cart" data-key="clickcollect.emptyCart">Votre panier est vide</div>`;
+                cartTotalContainer.style.display = 'none';
+                updatePageText();
+                return;
+            }
+            
+            cartTotalContainer.style.display = 'block';
+            
+            let totalPrice = 0;
+            let totalWeight = 0;
+            let totalProducts = 0;
+            
+            cartItemsContainer.innerHTML = cartItems.map((item, idx) => {
+                const key = Object.keys(cart)[idx];
+                totalPrice += item.price * item.quantity;
+                totalWeight += item.weight * item.quantity;
+                totalProducts += item.quantity;
+                
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-details">${item.price.toFixed(2)}$ | ${(item.weight * 1000).toFixed(0)}g</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <input type="number" class="cart-item-qty" value="${item.quantity}" min="0" step="1" data-key="${key}">
+                            <button class="remove-btn" data-key="${key}">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('total-products').textContent = totalProducts;
+            document.getElementById('total-weight').textContent = totalWeight.toFixed(2) + ' kg';
+            document.getElementById('total-price').textContent = totalPrice.toFixed(2) + '$';
+            
+            // Attach event handlers
+            document.querySelectorAll('.cart-item-qty').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const key = e.target.dataset.key;
+                    updateQuantity(key, parseInt(e.target.value) || 0);
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const key = btn.dataset.key;
+                    removeItem(key);
+                });
+            });
+        }
+
+        async function checkDiscordAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+                const data = await response.json();
+                
+                discordUser = data.user;
+                const userInfoDiv = document.getElementById('user-info');
+                const discordBtn = document.getElementById('discord-order-btn');
+                const validateBtn = document.getElementById('validate-order-btn');
+                
+                if (discordUser) {
+                    userInfoDiv.style.display = 'flex';
+                    userInfoDiv.innerHTML = `<span>${discordUser.username}</span><span style="color: #57F287;">✓ Discord : Connecté</span>`;
+                    discordBtn.style.display = 'none';
+                    validateBtn.style.display = 'block';
+                } else {
+                    userInfoDiv.style.display = 'none';
+                    discordBtn.style.display = 'block';
+                    discordBtn.href = `${API_BASE}/auth/discord`;
+                    validateBtn.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+            }
+        }
+
+        async function validateOrder() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const deliveryMethod = document.getElementById('delivery-method').value;
+            const cartItems = Object.values(cart);
+            
+            if (!customerName) {
+                showNotification('Veuillez entrer votre nom', true);
+                return;
+            }
+            
+            if (!customerPhone) {
+                showNotification('Veuillez entrer votre numéro de téléphone', true);
+                return;
+            }
+            
+            if (cartItems.length === 0) {
+                showNotification('Votre panier est vide', true);
+                return;
+            }
+            
+            let totalPrice = 0;
+            let totalWeight = 0;
+            const items = cartItems.map(item => {
+                totalPrice += item.price * item.quantity;
+                totalWeight += item.weight * item.quantity;
+                return {
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    weight: item.weight,
+                    totalPrice: item.price * item.quantity,
+                    totalWeight: item.weight * item.quantity
+                };
+            });
+            
+            const orderData = {
+                customer_name: customerName,
+                customer_phone: customerPhone,
+                delivery_method: deliveryMethod,
+                items: items,
+                total_price: totalPrice,
+                total_weight: totalWeight,
+                order_date: new Date().toLocaleString('fr-FR')
+            };
+            
+            const validateBtn = document.getElementById('validate-order-btn');
+            validateBtn.disabled = true;
+            validateBtn.textContent = '...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/submit_order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Click & Collect validé ! Un ticket a été créé sur Discord');
+                    cart = {};
+                    saveCart();
+                    updateCartDisplay();
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-phone').value = '';
+                } else {
+                    showNotification('❌ Erreur: ' + (data.error || 'Problème lors de la validation'), true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('❌ Erreur de connexion au serveur', true);
+            } finally {
+                validateBtn.disabled = false;
+                validateBtn.textContent = translations[currentLang].clickcollect.validate;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            loadCart();
+            checkDiscordAuth();
+            
+            // Add to cart buttons
+            document.querySelectorAll('.add-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const card = btn.closest('.product-card');
+                    const product = {
+                        id: card.dataset.id,
+                        name: card.dataset.name,
+                        price: parseFloat(card.dataset.price),
+                        weight: parseFloat(card.dataset.weight)
+                    };
+                    addToCart(product);
+                });
+            });
+            
+            // Validate order button
+            document.getElementById('validate-order-btn').addEventListener('click', validateOrder);
+        });
+    </script>
+</body>
+</html>

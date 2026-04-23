@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direction - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+            transition: transform 0.2s ease;
+        }
+
+        .brand:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .direction-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .direction-login {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            backdrop-filter: blur(4px);
+        }
+
+        .form label {
+            display: block;
+            margin-bottom: 1.25rem;
+        }
+
+        .form label span {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form input, .form select, .form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form input:focus, .form select:focus, .form textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        .form-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .form-message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .form-message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        .direction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .direction-user {
+            font-weight: bold;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .direction-hint {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+
+        .direction-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .direction-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+
+        .application-list {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-filter-label {
+            font-size: 0.875rem;
+            color: #ffd700;
+            margin-right: 0.5rem;
+        }
+
+        .status-filter {
+            padding: 0.3rem 0.9rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .status-filter:hover {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .status-filter.active {
+            background: #ffd700;
+            color: #1a1a2e;
+            border-color: #ffd700;
+        }
+
+        .applications-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .applications-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .applications-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .applications-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.4);
+            border-radius: 10px;
+        }
+
+        .application-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 0.65rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .application-item:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.2);
+            transform: translateX(4px);
+        }
+
+        .application-item.active {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+        }
+
+        .application-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .application-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .application-discord {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+
+        .status-dot.status-pending { background: #f39c12; box-shadow: 0 0 4px #f39c12; }
+        .status-dot.status-accepted { background: #2ecc71; box-shadow: 0 0 4px #2ecc71; }
+        .status-dot.status-rejected { background: #e74c3c; box-shadow: 0 0 4px #e74c3c; }
+        .status-dot.status-closed { background: #95a5a6; }
+
+        .application-detail {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .applicant-detail h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .detail-grid div {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            border-left: 2px solid #ffd700;
+        }
+
+        .detail-grid strong {
+            color: #ffd700;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Styles pour la section des absences */
+        .absence-list {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .absence-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 0.65rem;
+        }
+
+        .absence-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .absence-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .absence-dates {
+            font-size: 0.75rem;
+            color: #ffd700;
+            margin-top: 0.2rem;
+        }
+
+        .absence-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .delete-absence {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+
+        .delete-absence:hover {
+            background: rgba(231, 76, 60, 0.4);
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+        }
+
+        .form-group:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            color: #ffd700;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem 0.7rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.2s ease;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+            transition: transform 0.2s;
+        }
+
+        .footer-logo:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 2rem;
+            color: #ffd700;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .status-badge.accepted { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.rejected { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .status-badge.closed { background: rgba(149, 165, 166, 0.2); color: #95a5a6; }
+
+        /* Styles pour les annonces */
+        .annonces-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .annonce-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        .annonce-card:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .annonce-titre {
+            color: #ffd700;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .annonce-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .annonce-texte {
+            color: #ccc;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+        }
+
+        .annonce-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-edit {
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(10, 10, 20, 0.95);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: #ffd700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Alertes */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: rgba(12, 12, 24, 0.97);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 560px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="{{ url_for('index') }}" data-key="nav.about">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
+                    <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link {% if request.endpoint == 'employe_page' %}active{% endif %}" href="{{ url_for('employe_page') }}" data-key="nav.employe">Employé</a>
+                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="page-header animate-in">
+                        <div>
+                            <h1 data-key="direction.title">Espace direction</h1>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in">
+                        <div id="direction-panel">
+                            <div class="direction-login">
+                                <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction</p>
+                                <form class="form" id="direction-login-form">
+                                    <label>
+                                        <span data-key="direction.username">Identifiant</span>
+                                        <input name="username" id="direction-username" required placeholder="Identifiant">
+                                    </label>
+                                    <label>
+                                        <span data-key="direction.password">Mot de passe</span>
+                                        <input name="password" type="password" id="direction-password" required placeholder="Mot de passe">
+                                    </label>
+                                    <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
+                                    <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser & lix_js</span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                direction: {
+                    title: "Espace direction", 
+                    select: "Connexion panel Direction", 
+                    username: "Identifiant", 
+                    password: "Mot de passe", 
+                    loginButton: "Se connecter", 
+                    loginError: "Identifiants invalides.", 
+                    logout: "Se déconnecter", 
+                    empty: "Aucune candidature pour le moment.", 
+                    emptyCategory: "Aucune candidature dans cette catégorie.", 
+                    accept: "Accepter", 
+                    reject: "Refuser", 
+                    close: "Clôturer", 
+                    pending: "En attente", 
+                    accepted: "Acceptée", 
+                    rejected: "Refusée", 
+                    closed: "Clôturée", 
+                    category: "Filtrer par statut :", 
+                    candidature: "📋 Candidatures", 
+                    absences: "📅 Absences", 
+                    annonces: "📢 Annonces",
+                    nouvelleAnnonce: "➕ Nouvelle annonce",
+                    titre: "Titre",
+                    imageUrl: "Image URL",
+                    texte: "Texte",
+                    enregistrer: "Enregistrer",
+                    annuler: "Annuler",
+                    modifier: "Modifier",
+                    supprimer: "Supprimer",
+                    aucuneAnnonce: "Aucune annonce pour le moment",
+                    employes: "👥 Employés",
+                }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                direction: { 
+                    title: "Management Area", select: "Connection to the management panel", username: "Username", password: "Password", loginButton: "Log in", loginError: "Invalid credentials.", logout: "Log out", empty: "No applications at the moment.", emptyCategory: "No applications in this category.", accept: "✅ Accept", reject: "❌ Reject", close: "🔒 Close", pending: "Pending", accepted: "Accepted", rejected: "Rejected", closed: "Closed", category: "Filter by status :", candidature: "📋 Applications", absences: "📅 Absences", annonces: "📢 Announcements",
+                    nouvelleAnnonce: "➕ New announcement",
+                    titre: "Title",
+                    imageUrl: "Image URL",
+                    texte: "Text",
+                    enregistrer: "Save",
+                    annuler: "Cancel",
+                    modifier: "Edit",
+                    supprimer: "Delete",
+                    aucuneAnnonce: "No announcements at the moment",
+                    employes: "👥 Employees",
+                }
+            }
+        };
+
+        let currentLang = 'fr';
+        let currentDirectionUser = null;
+        let applications = [];
+        let currentStatusFilter = 'pending';
+        let selectedApplicationId = null;
+        let currentTab = 'candidature';
+        let absences = [];
+        let annonces = [];
+
+        // Afficher un message
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+                setTimeout(() => {
+                    if (el.innerHTML === `<div class="alert alert-${type}">${message}</div>`) {
+                        el.innerHTML = '';
+                    }
+                }, 3000);
+            }
+        }
+
+        function Confirm(elementId, message, type, callback) {
+            const uid = Date.now(); // IDs uniques
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal-overlay';
+            confirmModal.style.cssText = 'display:flex; z-index:9999;';
+            confirmModal.innerHTML = `
+                <div class="modal-box" style="max-width:400px; text-align:center;">
+                    <h3 style="color:#ffd700; margin-bottom:1rem;">⚠️ Confirmation</h3>
+                    <p style="margin-bottom:1.5rem; color:#aaa; font-size:0.9rem;">${message}</p>
+                    <div style="display:flex; gap:1rem; justify-content:center;">
+                        <button id="confirmYes-${uid}"
+                            style="background:linear-gradient(135deg,#ffd700,#ff8c00);
+                                color:#1a1a2e; border:none; padding:0.65rem 1.5rem;
+                                border-radius:40px; font-weight:700; cursor:pointer;">
+                            ✅ Oui
+                        </button>
+                        <button id="confirmNo-${uid}"
+                            style="background:transparent; color:#ccc;
+                                border:1px solid rgba(255,255,255,0.2);
+                                padding:0.65rem 1.5rem; border-radius:40px;
+                                font-weight:600; cursor:pointer;">
+                            ❌ Non
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(confirmModal);
+            setTimeout(() => confirmModal.classList.add('active'), 10);
+
+            document.getElementById(`confirmYes-${uid}`).onclick = () => {
+                confirmModal.remove();
+                if (callback && typeof callback === 'function') callback();
+                if (elementId) showMessage(elementId, message.replace('Supprimer', 'Supprimé').replace('?', ' ✅'), type);
+            };
+
+            document.getElementById(`confirmNo-${uid}`).onclick = () => confirmModal.remove();
+
+            confirmModal.onclick = (e) => { if (e.target === confirmModal) confirmModal.remove(); };
+        }
+
+        // Données de test pour les absences
+        const demoAbsences = [
+            { id: 1, name: "Dialo Fatou", startDate: "2026-04-11", endDate: "2026-04-20" },
+            { id: 2, name: "Jean Dupont", startDate: "2026-04-15", endDate: "2026-04-18" },
+            { id: 3, name: "Marie Lambert", startDate: "2026-04-20", endDate: "2026-04-25" }
+        ];
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') el.textContent = value;
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                        if (currentDirectionUser) {
+                            if (currentTab === 'candidature') loadApplications();
+                            else if (currentTab === 'absences') loadAbsences();
+                            else if (currentTab === 'annonces') loadAnnonces();
+                            else if (currentTab === 'employes') loadEmployesSection();
+                        }
+                    }
+                });
+            });
+        }
+
+        async function checkDirectionAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/direction/me`, { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.user) {
+                    currentDirectionUser = data.user;
+                    showDirectionPanel();
+                } else {
+                    showDirectionLogin();
+                }
+            } catch (error) {
+                console.error('Error checking direction auth:', error);
+                showDirectionLogin();
+            }
+        }
+
+        function showDirectionLogin() {
+            const panel = document.getElementById('direction-panel');
+            if (!panel) return;
+            
+            panel.innerHTML = `
+                <div class="direction-login">
+                    <p data-key="direction.select" style="text-align: center; margin-bottom: 1rem;">🔐 Connexion panel Direction</p>
+                    <form class="form" id="direction-login-form">
+                        <label>
+                            <span data-key="direction.username">Identifiant</span>
+                            <input name="username" id="direction-username" required placeholder="Identifiant">
+                        </label>
+                        <label>
+                            <span data-key="direction.password">Mot de passe</span>
+                            <input name="password" type="password" id="direction-password" required placeholder="Mot de passe">
+                        </label>
+                        <button class="primary" type="submit" style="width: 100%;" data-key="direction.loginButton">Se connecter</button>
+                        <div id="direction-login-error" class="form-message error" style="display: none;" data-key="direction.loginError">Identifiants invalides.</div>
+                    </form>
+                </div>
+            `;
+            
+            updatePageText();
+            
+            const form = document.getElementById('direction-login-form');
+            form.addEventListener('submit', handleDirectionLogin);
+        }
+
+        async function handleDirectionLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('direction-username').value;
+            const password = document.getElementById('direction-password').value;
+            const errorDiv = document.getElementById('direction-login-error');
+            
+            try {
+                const response = await fetch(`${API_BASE}/direction/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                currentDirectionUser = data.user;
+                showDirectionPanel();
+            } catch (error) {
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showDirectionPanel() {
+            const panel = document.getElementById('direction-panel');
+            if (!panel) return;
+            
+            panel.innerHTML = `
+                <div class="direction-panel">
+                    <div class="direction-header">
+                        <div>
+                            <p class="direction-user">👑 ${currentDirectionUser?.displayName || 'Direction'}</p>
+                            <p class="direction-hint">Panel Administratif</p>
+                        </div>
+                        <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
+                    </div>
+                    <div class="direction-tabs">
+                        <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
+                        <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
+                        <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
+                        <button type="button" class="tab" data-tab="employes" data-key="direction.employes">👥 Employés</button>
+                        <button type="button" class="tab" data-tab="inscriptions">📬 Inscriptions</button>
+                    </div>
+                    <div id="direction-content">
+                        <div class="loader">⏳ Chargement...</div>
+                    </div>
+                </div>
+            `;
+            
+            updatePageText();
+            
+            document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    currentTab = tab.dataset.tab;
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    clearInterval(employesRefreshInterval);
+
+                    if (currentTab === 'candidature') loadApplications();
+                    else if (currentTab === 'absences') loadAbsences();
+                    else if (currentTab === 'annonces') loadAnnonces();
+                    else if (currentTab === 'employes') loadEmployesSection();
+                    else if (currentTab === 'inscriptions') loadInscriptions();
+                });
+            });
+            
+            if (currentTab === 'candidature') {
+                loadApplications();
+            } else if (currentTab === 'absences') {
+                loadAbsences();
+            } else if (currentTab === 'annonces') {
+                loadAnnonces();
+            } else if (currentTab === 'employes') {
+                loadEmployesSection(); 
+            } else if (currentTab === 'inscriptions') {
+                loadInscriptions();
+            }
+            
+        }
+
+        async function handleDirectionLogout() {
+            await fetch(`${API_BASE}/direction/logout`, { method: 'POST', credentials: 'include' });
+            window.location.reload();
+        }
+
+        // ========== GESTION DES CANDIDATURES ==========
+        async function loadApplications() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/applications`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load applications');
+                
+                applications = await response.json();
+                displayApplications();
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des candidatures</p>';
+            }
+        }
+
+        function displayApplications() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            const t = translations[currentLang].direction;
+            const filtered = applications.filter(a => a.status === currentStatusFilter);
+            
+            container.innerHTML = `
+                <div class="direction-grid">
+                    <div class="application-list">
+                        <div class="status-filters">
+                            <span class="status-filter-label">📌 ${t.category}</span>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'pending' ? 'active' : ''}" data-status="pending">⏳ ${t.pending}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'accepted' ? 'active' : ''}" data-status="accepted">✅ ${t.accepted}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'rejected' ? 'active' : ''}" data-status="rejected">❌ ${t.rejected}</button>
+                            <button type="button" class="status-filter ${currentStatusFilter === 'closed' ? 'active' : ''}" data-status="closed">🔒 ${t.closed}</button>
+                        </div>
+                        <div class="applications-scroll">
+                            ${filtered.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 ${t.emptyCategory}</p>` : filtered.map(app => `
+                                <button class="application-item ${selectedApplicationId === app.id ? 'active' : ''}" data-id="${app.id}">
+                                    <div class="application-info">
+                                        <span class="application-name">${escapeHtml(app.full_name)}</span>
+                                        <span class="application-discord">${escapeHtml(app.discord_tag)}</span>
+                                    </div>
+                                    <span class="status-dot status-${app.status}"></span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="application-detail" id="application-detail">
+                        <p style="text-align:center; opacity:0.7;">✨ Sélectionnez une candidature pour voir les détails</p>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.status-filter').forEach(filter => {
+                filter.addEventListener('click', () => {
+                    currentStatusFilter = filter.dataset.status;
+                    selectedApplicationId = null;
+                    displayApplications();
+                });
+            });
+            
+            document.querySelectorAll('.application-item').forEach(item => {
+                item.addEventListener('click', async () => {
+                    const id = parseInt(item.dataset.id);
+                    selectedApplicationId = id;
+                    displayApplications();
+                    await loadApplicationDetail(id);
+                });
+            });
+        }
+
+        async function loadApplicationDetail(id) {
+            const detailContainer = document.getElementById('application-detail');
+            if (!detailContainer) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/applications/${id}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to load detail');
+                
+                const detail = await response.json();
+                const t = translations[currentLang].direction;
+                const statusText = { pending: t.pending, accepted: t.accepted, rejected: t.rejected, closed: t.closed }[detail.status];
+                
+                detailContainer.innerHTML = `
+                    <div class="applicant-detail">
+                        <h3>👤 ${escapeHtml(detail.full_name)} <span class="status-badge ${detail.status}">${statusText}</span></h3>
+                        <div class="detail-grid">
+                            <div><strong>🎮 Discord</strong> ${escapeHtml(detail.discord_tag)}</div>
+                            <div><strong>🎂 Date naissance</strong> ${detail.birth_date || 'Non renseignée'}</div>
+                            <div><strong>📱 Téléphone</strong> ${detail.phone || 'Non renseigné'}</div>
+                            <div><strong>🏦 RIB</strong> ${detail.rib || 'Non renseigné'}</div>
+                            <div><strong>💼 Expérience</strong> ${detail.experience || 'Aucune'}</div>
+                            <div><strong>⏰ Disponibilité</strong> ${detail.availability || 'Non spécifiée'}</div>
+                        </div>
+                        <div><strong>💬 Motivation :</strong></div>
+                        <p style="background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 10px; margin-top: 0.5rem;">${escapeHtml(detail.motivation)}</p>
+                        <div class="detail-actions">
+                            ${detail.status === 'pending' ? `
+                                <button class="primary" id="accept-app">✅ ${t.accept}</button>
+                                <button class="ghost" id="reject-app">❌ ${t.reject}</button>
+                            ` : ''}
+                            ${detail.status !== 'closed' ? `
+                                <button class="ghost" id="close-app">🔒 ${t.close}</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('accept-app')?.addEventListener('click', () => updateApplicationStatus(id, 'accepted'));
+                document.getElementById('reject-app')?.addEventListener('click', () => updateApplicationStatus(id, 'rejected'));
+                document.getElementById('close-app')?.addEventListener('click', () => updateApplicationStatus(id, 'closed'));
+                
+            } catch (error) {
+                console.error('Error loading detail:', error);
+                detailContainer.innerHTML = '<p style="color:#e74c3c;">❌ Erreur lors du chargement des détails</p>';
+            }
+        }
+
+        async function updateApplicationStatus(id, status) {
+            try {
+                const response = await fetch(`${API_BASE}/api/applications/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update status');
+                
+                await loadApplications();
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        // ========== GESTION DES ABSENCES AVEC API ==========
+        function loadAbsences() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loader">⏳ Chargement des absences...</div>';
+            
+            fetch(`${API_BASE}/api/absences`, { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    absences = data;
+                    displayAbsences();
+                })
+                .catch(error => {
+                    console.error('Erreur chargement absences:', error);
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des absences</p>';
+                });
+        }
+
+        function displayAbsences() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="direction-grid">
+                    <div class="absence-list">
+                        <div style="margin-bottom: 1rem;">
+                            <h3 style="color: #ffd700;">📅 Absences déclarées</h3>
+                        </div>
+                        <div class="applications-scroll">
+                            ${absences.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 Aucune absence déclarée</p>` : absences.map(absence => `
+                                <div class="absence-item">
+                                    <div class="absence-info">
+                                        <span class="absence-name">${escapeHtml(absence.name)}</span>
+                                        <span class="absence-dates">📅 Du ${formatDate(absence.start_date)} au ${formatDate(absence.end_date)}</span>
+                                    </div>
+                                    <div class="absence-actions">
+                                        <button class="delete-absence" data-id="${absence.id}">🗑 Supprimer</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Attacher les événements de suppression
+            document.querySelectorAll('.delete-absence').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    deleteAbsence(id);
+                });
+            });
+        }
+
+        function deleteAbsence(id) {
+            fetch(`${API_BASE}/api/absences/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadAbsences(); // Recharger la liste
+                }
+            })
+            .catch(error => {
+                console.error('Erreur suppression:', error);
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // ========== GESTION DES ANNONCES ==========
+        function loadAnnonces() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loader">⏳ Chargement des annonces...</div>';
+            
+            fetch(`${API_BASE}/api/annonces`, { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    annonces = data;
+                    displayAnnonces();
+                })
+                .catch(error => {
+                    console.error('Erreur chargement annonces:', error);
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des annonces</p>';
+                });
+        }
+
+        function displayAnnonces() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            const t = translations[currentLang].direction;
+            
+            container.innerHTML = `
+                <div>
+                    <div class="annonces-header">
+                        <h3 style="color: #ffd700;">📢 Gérer les annonces</h3>
+                        <button class="btn-create" id="btn-create-annonce">${t.nouvelleAnnonce}</button>
+                    </div>
+                    <div class="applications-scroll">
+                        ${annonces.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 ${t.aucuneAnnonce}</p>` : annonces.map(annonce => `
+                            <div class="annonce-card" data-id="${annonce.id}">
+                                <div class="annonce-titre">📌 ${escapeHtml(annonce.titre)}</div>
+                                ${annonce.image_url ? `<img class="annonce-image" src="${escapeHtml(annonce.image_url)}" alt="Image" style="max-width: 200px;">` : ''}
+                                <div class="annonce-texte">${escapeHtml(annonce.texte)}</div>
+                                <div class="annonce-actions">
+                                    <button class="btn-edit" data-id="${annonce.id}">✏️ ${t.modifier}</button>
+                                    <button class="btn-delete" data-id="${annonce.id}">🗑 ${t.supprimer}</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('btn-create-annonce')?.addEventListener('click', () => openAnnonceModal());
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    const annonce = annonces.find(a => a.id === id);
+                    if (annonce) openAnnonceModal(annonce);
+                });
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteAnnonce(parseInt(btn.dataset.id)));
+            });
+        }
+
+        // Modal HTML
+        function openAnnonceModal(annonce = null) {
+            const t = translations[currentLang].direction;
+            const modalHtml = `
+                <div id="annonce-modal" class="modal active">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>${annonce ? '✏️ ' + t.modifier : '➕ ' + t.nouvelleAnnonce}</h2>
+                            <button class="modal-close" onclick="closeAnnonceModal()">✕</button>
+                        </div>
+                        <form id="annonce-form">
+                            <div class="form-group">
+                                <label>${t.titre}</label>
+                                <input type="text" id="annonce-titre" value="${annonce ? escapeHtml(annonce.titre) : ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>${t.imageUrl}</label>
+                                <input type="url" id="annonce-image" value="${annonce ? escapeHtml(annonce.image_url || '') : ''}" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>${t.texte}</label>
+                                <textarea id="annonce-texte" rows="4" required>${annonce ? escapeHtml(annonce.texte) : ''}</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="ghost" onclick="closeAnnonceModal()">${t.annuler}</button>
+                                <button type="submit" class="primary">${t.enregistrer}</button>
+                                <div id="annonce-msg"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            const form = document.getElementById('annonce-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveAnnonce(annonce?.id);
+            });
+        }
+
+        function closeAnnonceModal() {
+            const modal = document.getElementById('annonce-modal');
+            if (modal) modal.remove();
+        }
+
+        function saveAnnonce(id = null) {
+            const titre = document.getElementById('annonce-titre').value.trim();
+            const image_url = document.getElementById('annonce-image').value.trim();
+            const texte = document.getElementById('annonce-texte').value.trim();
+            
+            const url = id ? `${API_BASE}/api/annonces/${id}` : `${API_BASE}/api/annonces`;
+            const method = id ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ titre, image_url, texte })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeAnnonceModal();
+                    loadAnnonces();
+                } else {
+                    showMessage('annonce-msg', '❌ ' + (data.error || 'Une erreur est survenue'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showMessage('annonce-msg', "❌ Erreur lors de l'enregistrement", 'error');
+            });
+        }
+
+        function deleteAnnonce(id) {
+            Confirm('annonce-msg', 'Supprimer cette annonce ?', 'success', () => {
+                fetch(`${API_BASE}/api/annonces/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => { if (data.success) loadAnnonces(); })
+                .catch(error => console.error('Erreur:', error));
+            });
+        }
+
+        // ========== SECTION EMPLOYÉS ==========
+
+        let employesRefreshInterval = null;
+
+        function loadEmployesSection() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h3 style="color:#ffd700;">👥 Suivi des services</h3>
+                        <span style="font-size:0.75rem; color:#666;">🔄 Actualisation auto toutes les 10s</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 2fr; gap:1.5rem;">
+                        <div id="employes-suivi-list" style="background:rgba(0,0,0,0.35); border-radius:1rem; padding:1rem; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="color:#ffd700; font-size:0.85rem; font-weight:600; margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,215,0,0.1);">
+                                📋 Tous les employés
+                            </div>
+                            <div id="suivi-list-inner" class="applications-scroll">
+                                <div class="loader">⏳ Chargement...</div>
+                            </div>
+                        </div>
+                        <div id="employe-detail-panel" style="background:rgba(0,0,0,0.35); border-radius:1rem; padding:1.25rem; border:1px solid rgba(255,255,255,0.05);">
+                            <div id="employe-detail-msg"></div>
+                            <p style="text-align:center; opacity:0.5; padding:2rem 0;">✨ Sélectionnez un employé pour voir ses services</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            refreshEmployesSuivi();
+            clearInterval(employesRefreshInterval);
+            employesRefreshInterval = setInterval(refreshEmployesSuivi, 10000);
+        }
+
+        async function refreshEmployesSuivi() {
+            try {
+                const res = await fetch(`${API_BASE}/api/direction/employes/suivi`, { credentials: 'include' });
+                if (!res.ok) return;
+                const employes = await res.json();
+                renderSuiviList(employes);
+            } catch (e) {
+                console.error('Erreur suivi employés:', e);
+            }
+        }
+
+        function renderSuiviList(employes) {
+            const inner = document.getElementById('suivi-list-inner');
+            if (!inner) return;
+
+            if (!employes || employes.length === 0) {
+                inner.innerHTML = '<p style="text-align:center; padding:2rem; color:#666;">Aucun employé.</p>';
+                return;
+            }
+
+            inner.innerHTML = employes.map(emp => {
+                const isOnline = emp.en_service > 0;
+                const dotColor = isOnline ? '#2ecc71' : '#e74c3c';
+                const dotGlow = isOnline ? 'box-shadow:0 0 6px #2ecc71;' : '';
+                return `
+                    <button class="application-item" data-emp-id="${emp.id}" onclick="loadEmployeDetail(${emp.id}, '${escapeHtml(emp.display_name)}')">
+                        <div class="application-info">
+                            <span class="application-name" style="display:flex; align-items:center; gap:0.5rem;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:${dotColor}; ${dotGlow} flex-shrink:0; display:inline-block;"></span>
+                                ${escapeHtml(emp.display_name)}
+                            </span>
+                            <span class="application-discord">${isOnline ? '✅ En service' : '❌ Hors service'} · ${emp.services_semaine} cette semaine</span>
+                        </div>
+                        <span style="font-size:1.1rem; font-weight:700; color:${isOnline ? '#2ecc71' : '#666'};">${emp.services_semaine}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        async function loadEmployeDetail(empId, empName) {
+            // Highlight actif
+            document.querySelectorAll('.application-item[data-emp-id]').forEach(el => {
+                el.classList.toggle('active', parseInt(el.dataset.empId) === empId);
+            });
+
+            const panel = document.getElementById('employe-detail-panel');
+            if (!panel) return;
+
+            panel.innerHTML = `<div class="loader">⏳ Chargement...</div>`;
+
+            try {
+                // Charger l'historique des services de cet employé + les actifs
+                const [allRes, actifsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/direction/employes/${empId}/services`, { credentials: 'include' }),
+                    fetch(`${API_BASE}/api/direction/services/actifs`, { credentials: 'include' })
+                ]);
+
+                const allData = await allRes.json();
+                const actifsData = await actifsRes.json();
+
+                const activeService = actifsData.find(s => s.employe_id === empId);
+                const services = allData.services || [];
+
+                // Calcul total semaine
+                const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                const weekServices = services.filter(s => new Date(s.start_time).getTime() > weekAgo);
+                const totalWeekMins = weekServices.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+                const wh = Math.floor(totalWeekMins / 60);
+                const wm = totalWeekMins % 60;
+
+                panel.innerHTML = `
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 style="color:#ffd700; font-size:1.2rem;">👤 ${escapeHtml(empName)}</h3>
+                                <span style="font-size:0.75rem; color:#888;">${weekServices.length} service(s) cette semaine · ${wh}h ${wm}min</span>
+                            </div>
+                            ${activeService ? `
+                                <button onclick="forceEndService(${activeService.id}, '${escapeHtml(empName)}')"
+                                    style="background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; padding:0.4rem 0.9rem; border-radius:20px; cursor:pointer; font-size:0.8rem; font-weight:600; transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(231,76,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(231,76,60,0.2)'">
+                                    🔴 Forcer fin de service
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        ${activeService ? `
+                            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:12px; padding:0.85rem 1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#2ecc71; font-weight:600; font-size:0.875rem;">🟢 Actuellement en service</span>
+                                <span style="font-size:0.8rem; color:#aaa;">Depuis ${formatDuration(activeService.duration_minutes)}</span>
+                            </div>
+                        ` : ''}
+
+                        <div style="max-height:380px; overflow-y:auto; padding-right:0.25rem;" class="applications-scroll">
+                            ${services.length === 0 ? '<p style="text-align:center; padding:2rem; color:#666;">Aucun service enregistré.</p>' :
+                                services.map(s => {
+                                    const dur = s.duration_minutes || 0;
+                                    const isShort = dur < 60;
+                                    const isActive = !s.end_time;
+                                    const durLabel = isActive ? '<span style="color:#f39c12; font-size:0.75rem;">En cours...</span>' : formatDuration(dur);
+                                    const borderColor = isActive ? '#f39c12' : (isShort ? '#e74c3c' : '#2ecc71');
+                                    return `
+                                        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-left:3px solid ${borderColor}; border-radius:12px; padding:0.85rem 1rem; margin-bottom:0.5rem; display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; align-items:center; font-size:0.75rem;">
+                                            <div>
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem; display:flex; gap:0.3rem; align-items:center;">
+                                                    <span style="width:6px; height:6px; border-radius:50%; background:#2ecc71; display:inline-block;"></span> DÉBUT
+                                                </div>
+                                                <div style="font-weight:600; color:#e0e0e0;">${formatDateTime(s.start_time)}</div>
+                                            </div>
+                                            <div>
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem; display:flex; gap:0.3rem; align-items:center;">
+                                                    <span style="width:6px; height:6px; border-radius:50%; background:#e74c3c; display:inline-block;"></span> FIN
+                                                </div>
+                                                <div style="font-weight:600; color:#e0e0e0;">${s.end_time ? formatDateTime(s.end_time) : '<span style="color:#f39c12">—</span>'}</div>
+                                            </div>
+                                            <div style="text-align:right;">
+                                                <div style="color:#555; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem;">DURÉE</div>
+                                                <div style="font-weight:700; color:${isActive ? '#f39c12' : (isShort ? '#e74c3c' : '#2ecc71')};">${durLabel}</div>
+                                                ${isShort && !isActive ? '<div style="font-size:0.65rem; color:#e74c3c; margin-top:0.15rem;">⚠️ Service court</div>' : ''}
+                                                ${isActive ? `<button onclick="forceEndService(${s.id}, '${escapeHtml(empName)}')" style="margin-top:0.3rem; background:rgba(231,76,60,0.2); border:1px solid #e74c3c; color:#e74c3c; padding:0.2rem 0.5rem; border-radius:10px; cursor:pointer; font-size:0.65rem;">✕ Forcer fin</button>` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                console.error('Erreur détail employé:', e);
+                panel.innerHTML = '<p style="color:#e74c3c; text-align:center;">❌ Erreur de chargement</p>';
+            }
+        }
+
+        async function forceEndService(serviceId, empName) {
+            Confirm('employe-detail-msg', `Forcer la fin de service de ${empName} ?`, 'success', async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/api/direction/services/${serviceId}/force-end`, {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        // Rafraîchir
+                        refreshEmployesSuivi();
+                        const activeEmpBtn = document.querySelector(`.application-item.active[data-emp-id]`);
+                        if (activeEmpBtn) {
+                            const empId = parseInt(activeEmpBtn.dataset.empId);
+                            loadEmployeDetail(empId, empName);
+                        }
+                    } else {
+                        showMessage('employe-detail-msg', '❌ ' + (data.error || 'Une erreur est survenue'), 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showMessage('employe-detail-msg', '❌ Erreur lors de la fin de service forcée', 'error');
+                }
+            });
+        }
+
+        function loadInscriptions() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            container.innerHTML = '<div class="loader">⏳ Chargement...</div>';
+
+            fetch(`${API_BASE}/api/direction/inscriptions`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => renderInscriptions(data))
+                .catch(() => {
+                    container.innerHTML = '<p style="text-align:center;color:#e74c3c;">❌ Erreur de chargement</p>';
+                });
+        }
+
+        function renderInscriptions(list) {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+
+            if (!list.length) {
+                container.innerHTML = '<p style="text-align:center;padding:2rem;color:#666;">📭 Aucune inscription en attente.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div>
+                    <h3 style="color:#ffd700;margin-bottom:1.25rem;">📬 Inscriptions en attente (${list.length})</h3>
+                    <div id="inscriptions-msg"></div>
+                    ${list.map(u => `
+                        <div style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                            <div>
+                                <div style="font-weight:600;color:#fff;font-size:0.95rem;">🎮 ${escapeHtml(u.username)}</div>
+                                <div style="font-size:0.75rem;color:#888;margin-top:0.2rem;">Demande reçue le ${formatDate(u.created_at)}</div>
+                            </div>
+                            <div style="display:flex;gap:0.5rem;">
+                                <button onclick="handleInscription(${u.id},'accept')"
+                                    style="background:rgba(46,204,113,0.2);border:1px solid #2ecc71;color:#2ecc71;padding:0.35rem 0.9rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(46,204,113,0.35)'"
+                                    onmouseout="this.style.background='rgba(46,204,113,0.2)'">
+                                    ✅ Valider
+                                </button>
+                                <button onclick="handleInscription(${u.id},'reject')"
+                                    style="background:rgba(231,76,60,0.2);border:1px solid #e74c3c;color:#e74c3c;padding:0.35rem 0.9rem;border-radius:20px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;"
+                                    onmouseover="this.style.background='rgba(231,76,60,0.35)'"
+                                    onmouseout="this.style.background='rgba(231,76,60,0.2)'">
+                                    ❌ Refuser
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function handleInscription(id, action) {
+            try {
+                const res  = await fetch(`${API_BASE}/api/direction/inscriptions/${id}/${action}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showMessage('inscriptions-msg', action === 'accept' ? '✅ Compte activé !' : '🗑 Demande refusée.', action === 'accept' ? 'success' : 'error');
+                    setTimeout(loadInscriptions, 800);
+                } else {
+                    showMessage('inscriptions-msg', '❌ ' + (data.error || 'Erreur'), 'error');
+                }
+            } catch {
+                showMessage('inscriptions-msg', '❌ Erreur réseau', 'error');
+            }
+        }
+
+        function formatDuration(mins) {
+            if (!mins && mins !== 0) return '—';
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return h > 0 ? `${h}h ${m}min` : `${m}min`;
+        }
+
+        function formatDateTime(str) {
+            if (!str) return '—';
+            const d = new Date(str);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            checkDirectionAuth();
+        });
+    </script>
+</body>
+</html>

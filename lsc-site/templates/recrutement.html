@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recrutement - LS Customs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffd700;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .primary, .ghost {
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .ghost {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .ghost:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-toggle button:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .lang-toggle button:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .lang-toggle button.active {
+            background: #ffd700;
+            border-color: #ffd700;
+            color: #1a1a2e;
+        }
+
+        .content {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .page-shell {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .form {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .form label {
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .form label span {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.875rem;
+        }
+
+        .form input, .form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        .form input:focus, .form textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .form input[readonly] {
+            background: rgba(255, 255, 255, 0.02);
+            color: #888;
+        }
+
+        .form-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .form-message.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        .form-message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .login-required {
+            text-align: center;
+        }
+
+        .login-required p {
+            margin-bottom: 1rem;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a0a);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-eyebrow {
+            color: #ffd700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-card h3 {
+            margin: 0.5rem 0 1rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .footer-copy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            height: 24px;
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <a class="brand brand-link" href="{{ url_for('index') }}" data-key="nav.about">
+                    <img class="brand-logo" src="https://i.goopics.net/n2esuo.png" alt="LS Customs">
+                    <span class="brand-text">LS Customs</span>
+                </a>
+                <nav class="nav-links">
+                    <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}" data-key="nav.about">LS Customs</a>
+                    <a class="nav-link {% if request.endpoint == 'staff_page' %}active{% endif %}" href="{{ url_for('staff_page') }}" data-key="nav.staff">Personnel</a>
+                    <a class="nav-link {% if request.endpoint == 'recruitment_page' %}active{% endif %}" href="{{ url_for('recruitment_page') }}" data-key="nav.recruit">Recrutement</a>
+                    <a class="nav-link {% if request.endpoint == 'clickcollect_page' %}active{% endif %}" href="{{ url_for('clickcollect_page') }}">Click & Collect</a>
+                    <a class="nav-link {% if request.endpoint == 'pricing_page' %}active{% endif %}" href="{{ url_for('pricing_page') }}" data-key="nav.pricing">Tarification</a>
+                    <a class="nav-link {% if request.endpoint == 'employe_page' %}active{% endif %}" href="{{ url_for('employe_page') }}" data-key="nav.employe">Employé</a>
+                    <a class="nav-link {% if request.endpoint == 'direction_page' %}active{% endif %}" href="{{ url_for('direction_page') }}" data-key="nav.direction">Direction</a>
+                </nav>
+                <div class="nav-actions">
+                    <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre discord</a>
+                    <div class="lang-toggle">
+                        <button class="active" data-lang="fr">FR</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="page-shell">
+                    <section class="page-header animate-in">
+                        <div>
+                            <h1 data-key="recruit.title">Recrutement</h1>
+                            <p data-key="recruit.intro">Postule en quelques minutes. Les candidatures sont envoyées aux membres de la direction.</p>
+                        </div>
+                    </section>
+
+                    <section class="section animate-in" id="recruitment-section">
+                        <div id="recruitment-login" class="form login-required">
+                            <p data-key="recruit.loginRequired">Connecte-toi avec Discord pour postuler.</p>
+                            <a class="primary" href="#" id="discord-login-btn" data-key="recruit.loginButton">Connexion Avec Discord</a>
+                        </div>
+                        <form id="application-form" class="form" style="display: none;">
+                            <div class="form-grid">
+                                <label>
+                                    <span data-key="form.fullName">NOM Prénom (Ex: Nash Dawkins)</span>
+                                    <input name="fullName" id="fullName" required>
+                                </label>
+                                <label>
+                                    <span data-key="form.discordTag">ID DISCORD (Ex: 123456789012345678)</span>
+                                    <input name="discordTag" id="discordTag" readonly required>
+                                    <input type="hidden" id="avatarUrl" name="avatarUrl">
+                                </label>
+                                <label>
+                                    <span data-key="form.birthDate">Date de naissance</span>
+                                    <input name="birthDate" type="date" id="birthDate" required>
+                                </label>
+                                <label>
+                                    <span data-key="form.phone">Numéro de Téléphone (Ex: 555-12345)</span>
+                                    <input name="phone" id="phone" required>
+                                </label>
+                                <label>
+                                    <span data-key="form.rib">RIB</span>
+                                    <input name="rib" id="rib" required>
+                                </label>
+                                <label>
+                                    <span data-key="form.experience">Expérience</span>
+                                    <input name="experience" id="experience" required>
+                                </label>
+                            </div>
+                            <label>
+                                <span data-key="form.availability">Disponibilité</span>
+                                <input name="availability" id="availability" required>
+                            </label>
+                            <label>
+                                <span data-key="form.motivation">Motivation</span>
+                                <textarea name="motivation" id="motivation" rows="4" required></textarea>
+                            </label>
+                            <button class="primary" type="submit" id="submit-application">
+                                <span data-key="recruit.submit">Envoyer la candidature</span>
+                            </button>
+                            <div id="submit-success" class="form-message success" style="display: none;" data-key="recruit.success">Merci, ta candidature a bien été envoyée</div>
+                            <div id="submit-error" class="form-message error" style="display: none;" data-key="recruit.error">Une erreur est survenue. Réessaie.</div>
+                        </form>
+                    </section>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <span>LS Customs - Glife RP</span>
+                <span class="footer-copy">
+                    <span> ©️2026 - Dev par .x9ser & lix_js</span>
+                    <a href="https://discord.gg/gtaliferp" target="_blank">
+                        <img class="footer-logo" src="https://i.goopics.net/ao4a9d.png" alt="LS Customs">
+                    </a>
+                </span>
+                <span>7j/7 24h/24</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div id="submit-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <p class="modal-eyebrow">Envoi de la Candidature</p>
+            <h3>Votre candidature a bien été envoyée</h3>
+            <p class="modal-body">
+                Transmettez le numéro <strong id="submit-id">ID indisponible</strong> à la Secrétaire Carla.
+            </p>
+            <div class="modal-actions">
+                <a class="primary" href="https://discord.gg/FFRyy9YXW8" target="_blank">Rejoindre Intranet LS Customs</a>
+                <button class="ghost" id="close-modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Détection automatique de l'URL de base
+        const API_BASE = '';
+        
+        const translations = {
+            fr: {
+                nav: { about: "LS Customs", staff: "Personnel", recruit: "Recrutement", pricing: "Tarification", direction: "Direction" },
+                recruit: { title: "Recrutement", intro: "Postule en quelques minutes. Les candidatures sont envoyées aux membres de la direction.", loginRequired: "Connecte-toi avec Discord pour postuler.", loginButton: "Connexion Avec Discord", submit: "Envoyer la candidature", success: "Merci, ta candidature a bien été envoyée", error: "Une erreur est survenue. Réessaie." },
+                form: { fullName: "NOM Prénom (Ex: Nash Dawkins)", discordTag: "ID DISCORD (Ex: 123456789012345678)", birthDate: "Date de naissance", phone: "Numéro de Téléphone (Ex: 555-12345)", rib: "RIB", experience: "Expérience", availability: "Disponibilité", motivation: "Motivation" }
+            },
+            en: {
+                nav: { about: "Garage", staff: "Staff", recruit: "Recruitment", pricing: "Pricing", direction: "Management" },
+                recruit: { title: "Recruitment", intro: "Apply in a few minutes. Applications are sent to the management team.", loginRequired: "Log in with Discord to apply.", loginButton: "Discord login", submit: "Submit Application", success: "Thank you, your application has been successfully submitted", error: "An error occurred. Please try again." },
+                form: { fullName: "Full Name (Ex: Nash Dawkins)", discordTag: "DISCORD ID (Ex: 123456789012345678)", birthDate: "Date of birth", phone: "Phone Number (Ex: 555-12345)", rib: "RIB", experience: "Experience", availability: "Availability", motivation: "Motivation" }
+            }
+        };
+
+        let currentLang = 'fr';
+        let discordUser = null;
+
+        function updatePageText() {
+            const t = translations[currentLang];
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.dataset.key;
+                const keys = key.split('.');
+                let value = t;
+                for (const k of keys) {
+                    if (value && value[k] !== undefined) value = value[k];
+                    else { value = null; break; }
+                }
+                if (value && typeof value === 'string') {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        if (!el.id || (el.id !== 'discordTag')) {
+                            el.placeholder = value;
+                        }
+                    } else if (el.tagName !== 'A') {
+                        el.textContent = value;
+                    }
+                }
+            });
+        }
+
+        function initLangToggle() {
+            const buttons = document.querySelectorAll('.lang-toggle button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lang = btn.dataset.lang;
+                    if (lang === 'fr' || lang === 'en') {
+                        currentLang = lang;
+                        buttons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        updatePageText();
+                    }
+                });
+            });
+        }
+
+        async function checkDiscordAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
+                const data = await response.json();
+                
+                discordUser = data.user;
+                
+                if (discordUser) {
+                    document.getElementById('recruitment-login').style.display = 'none';
+                    document.getElementById('application-form').style.display = 'block';
+                    document.getElementById('discordTag').value = discordUser.id;
+                    document.getElementById('avatarUrl').value = discordUser.avatar;
+                } else {
+                    document.getElementById('recruitment-login').style.display = 'block';
+                    document.getElementById('application-form').style.display = 'none';
+                    const loginBtn = document.getElementById('discord-login-btn');
+                    if (loginBtn) loginBtn.href = `${API_BASE}/auth/discord`;
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+            }
+        }
+
+        function initRecruitmentForm() {
+            const form = document.getElementById('application-form');
+            if (!form) return;
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    discordTag: document.getElementById('discordTag').value,
+                    avatarUrl: document.getElementById('avatarUrl').value,
+                    birthDate: document.getElementById('birthDate').value,
+                    phone: document.getElementById('phone').value,
+                    rib: document.getElementById('rib').value,
+                    experience: document.getElementById('experience').value,
+                    availability: document.getElementById('availability').value,
+                    motivation: document.getElementById('motivation').value
+                };
+                
+                const submitBtn = document.getElementById('submit-application');
+                const successDiv = document.getElementById('submit-success');
+                const errorDiv = document.getElementById('submit-error');
+                
+                submitBtn.disabled = true;
+                successDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/applications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Submit failed');
+                    }
+                    
+                    const data = await response.json();
+                    const modal = document.getElementById('submit-modal');
+                    const submitIdSpan = document.getElementById('submit-id');
+                    
+                    if (submitIdSpan) submitIdSpan.textContent = data.id || 'ID indisponible';
+                    if (modal) modal.style.display = 'flex';
+                    
+                    form.reset();
+                    if (discordUser) document.getElementById('discordTag').value = discordUser.id;
+                    
+                } catch (error) {
+                    console.error('Submit error:', error);
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = error.message || 'Une erreur est survenue';
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            const closeModalBtn = document.getElementById('close-modal');
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', () => {
+                    document.getElementById('submit-modal').style.display = 'none';
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLangToggle();
+            updatePageText();
+            checkDiscordAuth();
+            initRecruitmentForm();
+        });
+    </script>
+</body>
+</html>
