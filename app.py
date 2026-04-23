@@ -471,9 +471,9 @@ def update_application_status(app_id):
         cur = conn.cursor()
         cur.execute("""
             UPDATE applications
-            SET status = %s, updated_at = %s
+            SET status = %s
             WHERE id = %s
-        """, (new_status, now_paris(), app_id))
+        """, (new_status, app_id))
         conn.commit()
         cur.close()
         conn.close()
