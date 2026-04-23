@@ -1593,6 +1593,7 @@ def delete_annonce(annonce_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ========== API GESTION DES SANCTIONS ==========
+# ========== API GESTION DES SANCTIONS ==========
 @app.route("/api/sanctions", methods=["GET"])
 @require_direction
 def get_sanctions():
@@ -1604,8 +1605,9 @@ def get_sanctions():
         
         cur = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT s.id, s.username, s.reason, s.duration_days, s.created_by, s.created_at,
-                   sp.role as employee_role
+            SELECT s.id, s.username, s.type, s.reason, s.duration_days, s.created_by, s.created_at,
+                   sp.role as employee_role,
+                   sp.name as employee_name
             FROM sanctions s
             LEFT JOIN staff_profiles sp ON s.username = sp.username
             ORDER BY s.created_at DESC
@@ -1613,6 +1615,15 @@ def get_sanctions():
         sanctions = cur.fetchall()
         cur.close()
         conn.close()
+        
+        # Convertir le type en texte lisible
+        type_map = {
+            'warning': 'Avertissement',
+            'blacklist': 'Blacklist',
+            'suspension': 'Mise à pied'
+        }
+        for s in sanctions:
+            s['type_label'] = type_map.get(s['type'], s['type'])
         
         return jsonify(sanctions)
     
@@ -1653,12 +1664,17 @@ def create_sanction():
     try:
         data = request.get_json()
         username = data.get('username')
+        sanction_type = data.get('type', 'warning')  # warning, blacklist, suspension
         reason = data.get('reason')
         duration_days = data.get('duration_days', 0)
         created_by = data.get('created_by')
         
         if not username or not reason:
             return jsonify({"success": False, "error": "Nom d'utilisateur et motif requis"}), 400
+        
+        # Validation du type
+        if sanction_type not in ['warning', 'blacklist', 'suspension']:
+            return jsonify({"success": False, "error": "Type de sanction invalide"}), 400
         
         # Récupérer le nom du direction_user
         conn = get_db_connection()
@@ -1671,9 +1687,9 @@ def create_sanction():
         direction_name = direction_user['display_name'] if direction_user else created_by or "Direction"
         
         cur.execute("""
-            INSERT INTO sanctions (username, reason, duration_days, created_by, created_at)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (username, reason, duration_days, direction_name, now_paris()))
+            INSERT INTO sanctions (username, type, reason, duration_days, created_by, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (username, sanction_type, reason, duration_days, direction_name, now_paris()))
         
         conn.commit()
         sanction_id = cur.lastrowid
@@ -1683,12 +1699,20 @@ def create_sanction():
         # Envoyer un webhook Discord pour la sanction
         webhook_sanction = os.environ.get("SANCTION_WEBHOOK", "")
         if webhook_sanction:
+            type_labels = {
+                'warning': '⚠️ Avertissement',
+                'blacklist': '🚫 Blacklist',
+                'suspension': '⏸️ Mise à pied'
+            }
+            type_label = type_labels.get(sanction_type, sanction_type)
             duration_text = f"{duration_days} jour(s)" if duration_days > 0 else "Permanent"
+            
             embed = {
-                "title": "⚠️ Nouvelle sanction",
-                "color": 15158332,
+                "title": f"{type_label} - Nouvelle sanction",
+                "color": 15158332 if sanction_type != 'warning' else 15844367,
                 "fields": [
                     {"name": "Employé", "value": username, "inline": True},
+                    {"name": "Type", "value": type_label, "inline": True},
                     {"name": "Durée", "value": duration_text, "inline": True},
                     {"name": "Motif", "value": reason, "inline": False},
                     {"name": "Créé par", "value": direction_name, "inline": True}
@@ -1713,11 +1737,15 @@ def update_sanction(sanction_id):
     try:
         data = request.get_json()
         username = data.get('username')
+        sanction_type = data.get('type', 'warning')
         reason = data.get('reason')
         duration_days = data.get('duration_days', 0)
         
         if not username or not reason:
             return jsonify({"success": False, "error": "Nom d'utilisateur et motif requis"}), 400
+        
+        if sanction_type not in ['warning', 'blacklist', 'suspension']:
+            return jsonify({"success": False, "error": "Type de sanction invalide"}), 400
         
         conn = get_db_connection()
         if not conn:
@@ -1726,9 +1754,9 @@ def update_sanction(sanction_id):
         cur = conn.cursor()
         cur.execute("""
             UPDATE sanctions
-            SET username = %s, reason = %s, duration_days = %s
+            SET username = %s, type = %s, reason = %s, duration_days = %s
             WHERE id = %s
-        """, (username, reason, duration_days, sanction_id))
+        """, (username, sanction_type, reason, duration_days, sanction_id))
         
         conn.commit()
         rows_affected = cur.rowcount

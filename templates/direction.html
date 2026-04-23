@@ -830,6 +830,25 @@
             max-width: 560px;
         }
 
+        /* Styles pour les badges de sanction */
+        .sanction-badge-warning {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid #f39c12;
+        }
+
+        .sanction-badge-blacklist {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .sanction-badge-suspension {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
     </style>
 </head>
 <body>
@@ -1882,6 +1901,25 @@
             
             const t = translations[currentLang].direction;
             
+            // Fonction pour obtenir la classe CSS selon le type
+            function getTypeBadgeClass(type) {
+                switch(type) {
+                    case 'warning': return 'status-badge pending';
+                    case 'blacklist': return 'status-badge rejected';
+                    case 'suspension': return 'status-badge closed';
+                    default: return 'status-badge';
+                }
+            }
+            
+            function getTypeIcon(type) {
+                switch(type) {
+                    case 'warning': return '⚠️';
+                    case 'blacklist': return '🚫';
+                    case 'suspension': return '⏸️';
+                    default: return '📌';
+                }
+            }
+            
             container.innerHTML = `
                 <div>
                     <div class="annonces-header">
@@ -1892,7 +1930,10 @@
                     <div class="applications-scroll">
                         ${sanctions.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 Aucune sanction enregistrée</p>` : sanctions.map(sanction => `
                             <div class="annonce-card" data-id="${sanction.id}">
-                                <div class="annonce-titre">⚠️ Sanction - ${escapeHtml(sanction.username)}</div>
+                                <div class="annonce-titre">
+                                    ${getTypeIcon(sanction.type)} ${escapeHtml(sanction.type_label)} - ${escapeHtml(sanction.username)}
+                                    <span class="${getTypeBadgeClass(sanction.type)}" style="float: right;">${escapeHtml(sanction.type_label)}</span>
+                                </div>
                                 <div class="annonce-texte">
                                     <strong>Motif :</strong> ${escapeHtml(sanction.reason)}<br>
                                     <strong>Durée :</strong> ${sanction.duration_days > 0 ? sanction.duration_days + ' jour(s)' : 'Permanent'}<br>
@@ -1946,12 +1987,21 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label>Type de sanction *</label>
+                                <select id="sanction-type" required>
+                                    <option value="warning" ${sanction && sanction.type === 'warning' ? 'selected' : ''}>⚠️ Avertissement</option>
+                                    <option value="blacklist" ${sanction && sanction.type === 'blacklist' ? 'selected' : ''}>🚫 Blacklist</option>
+                                    <option value="suspension" ${sanction && sanction.type === 'suspension' ? 'selected' : ''}>⏸️ Mise à pied</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Motif *</label>
                                 <textarea id="sanction-reason" rows="3" required>${sanction ? escapeHtml(sanction.reason) : ''}</textarea>
                             </div>
                             <div class="form-group">
                                 <label>Durée (en jours, 0 = permanent)</label>
                                 <input type="number" id="sanction-duration" min="0" value="${sanction ? sanction.duration_days : 0}">
+                                <small style="color: #888;">Pour les avertissements et blacklists, la durée est généralement permanente (0).</small>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="ghost" onclick="closeSanctionModal()">${t.annuler}</button>
@@ -1970,6 +2020,25 @@
                 e.preventDefault();
                 saveSanction();
             });
+            
+            // Afficher/masquer le champ durée selon le type
+            const typeSelect = document.getElementById('sanction-type');
+            const durationGroup = document.querySelector('#sanction-form .form-group:last-of-type');
+            
+            function toggleDurationField() {
+                const type = typeSelect.value;
+                if (type === 'warning') {
+                    durationGroup.style.opacity = '0.5';
+                    document.getElementById('sanction-duration').value = 0;
+                    document.getElementById('sanction-duration').disabled = true;
+                } else {
+                    durationGroup.style.opacity = '1';
+                    document.getElementById('sanction-duration').disabled = false;
+                }
+            }
+            
+            typeSelect.addEventListener('change', toggleDurationField);
+            toggleDurationField();
         }
 
         function closeSanctionModal() {
@@ -1980,12 +2049,18 @@
 
         function saveSanction() {
             const username = document.getElementById('sanction-username').value;
+            const type = document.getElementById('sanction-type').value;
             const reason = document.getElementById('sanction-reason').value.trim();
-            const duration_days = parseInt(document.getElementById('sanction-duration').value) || 0;
+            let duration_days = parseInt(document.getElementById('sanction-duration').value) || 0;
             
             if (!username || !reason) {
                 showMessage('sanction-msg', '❌ Veuillez remplir tous les champs obligatoires', 'error');
                 return;
+            }
+            
+            // Pour les avertissements, forcer durée à 0
+            if (type === 'warning') {
+                duration_days = 0;
             }
             
             const url = editSanctionId ? `${API_BASE}/api/sanctions/${editSanctionId}` : `${API_BASE}/api/sanctions`;
@@ -1995,7 +2070,7 @@
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ username, reason, duration_days })
+                body: JSON.stringify({ username, type, reason, duration_days })
             })
             .then(response => response.json())
             .then(data => {
