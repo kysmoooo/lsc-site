@@ -937,6 +937,9 @@
                     supprimer: "Supprimer",
                     aucuneAnnonce: "Aucune annonce pour le moment",
                     employes: "👥 Employés",
+                    sanctions: "⚠️ Sanctions",
+                    nouvelleSanction: "➕ Nouvelle sanction",
+                    modifierSanction: "Modifier la sanction"
                 }
             },
             en: {
@@ -953,6 +956,9 @@
                     supprimer: "Delete",
                     aucuneAnnonce: "No announcements at the moment",
                     employes: "👥 Employees",
+                    sanctions: "⚠️ Sanctions",
+                    nouvelleSanction: "➕ New sanction",
+                    modifierSanction: "Modify sanction"
                 }
             }
         };
@@ -1152,6 +1158,7 @@
                     </div>
                     <div class="direction-tabs">
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
+                        <button type="button" class="tab ${currentTab === 'sanctions' ? 'active' : ''}" data-tab="sanctions" data-key="direction.sanctions">⚠️ Sanctions</button>
                         <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
                         <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
                         <button type="button" class="tab" data-tab="employes" data-key="direction.employes">👥 Employés</button>
@@ -1167,6 +1174,7 @@
             
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
             
+            // Dans les écouteurs d'onglets :
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     currentTab = tab.dataset.tab;
@@ -1175,7 +1183,7 @@
                     clearInterval(employesRefreshInterval);
 
                     if (currentTab === 'candidature') loadApplications();
-                    else if (currentTab === 'absences') loadAbsences();
+                    else if (currentTab === 'sanctions') loadSanctions();
                     else if (currentTab === 'annonces') loadAnnonces();
                     else if (currentTab === 'employes') loadEmployesSection();
                     else if (currentTab === 'inscriptions') loadInscriptions();
@@ -1184,6 +1192,8 @@
             
             if (currentTab === 'candidature') {
                 loadApplications();
+            } else if (currentTab === 'sanctions') {
+                loadSanctions();
             } else if (currentTab === 'absences') {
                 loadAbsences();
             } else if (currentTab === 'annonces') {
@@ -1835,6 +1845,189 @@
             } catch {
                 showMessage('inscriptions-msg', '❌ Erreur réseau', 'error');
             }
+        }
+
+        // ========== GESTION DES SANCTIONS ==========
+        let sanctions = [];
+        let employesList = [];
+        let editSanctionId = null;
+
+        function loadSanctions() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loader">⏳ Chargement des sanctions...</div>';
+            
+            // Charger les employés pour le selecteur
+            fetch(`${API_BASE}/api/sanctions/employes`, { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    employesList = data;
+                    return fetch(`${API_BASE}/api/sanctions`, { credentials: 'include' });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    sanctions = data;
+                    displaySanctions();
+                })
+                .catch(error => {
+                    console.error('Erreur chargement sanctions:', error);
+                    container.innerHTML = '<p style="text-align:center; color:#e74c3c;">❌ Erreur lors du chargement des sanctions</p>';
+                });
+        }
+
+        function displaySanctions() {
+            const container = document.getElementById('direction-content');
+            if (!container) return;
+            
+            const t = translations[currentLang].direction;
+            
+            container.innerHTML = `
+                <div>
+                    <div class="annonces-header">
+                        <h3 style="color: #ffd700;">⚠️ Gestion des sanctions</h3>
+                        <button class="btn-create" id="btn-create-sanction">➕ Nouvelle sanction</button>
+                    </div>
+                    <div id="sanction-form-container" style="display: none;" class="form" style="margin-bottom: 2rem;"></div>
+                    <div class="applications-scroll">
+                        ${sanctions.length === 0 ? `<p style="text-align:center; padding:2rem;">📭 Aucune sanction enregistrée</p>` : sanctions.map(sanction => `
+                            <div class="annonce-card" data-id="${sanction.id}">
+                                <div class="annonce-titre">⚠️ Sanction - ${escapeHtml(sanction.username)}</div>
+                                <div class="annonce-texte">
+                                    <strong>Motif :</strong> ${escapeHtml(sanction.reason)}<br>
+                                    <strong>Durée :</strong> ${sanction.duration_days > 0 ? sanction.duration_days + ' jour(s)' : 'Permanent'}<br>
+                                    <strong>Créé par :</strong> ${escapeHtml(sanction.created_by)}<br>
+                                    <strong>Date :</strong> ${formatDate(sanction.created_at)}
+                                </div>
+                                <div class="annonce-actions">
+                                    <button class="btn-edit" data-id="${sanction.id}">✏️ ${t.modifier}</button>
+                                    <button class="btn-delete" data-id="${sanction.id}">🗑 ${t.supprimer}</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('btn-create-sanction')?.addEventListener('click', () => openSanctionModal());
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id);
+                    const sanction = sanctions.find(s => s.id === id);
+                    if (sanction) openSanctionModal(sanction);
+                });
+            });
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteSanction(parseInt(btn.dataset.id)));
+            });
+        }
+
+        function openSanctionModal(sanction = null) {
+            editSanctionId = sanction?.id || null;
+            const t = translations[currentLang].direction;
+            
+            const modalHtml = `
+                <div id="sanction-modal" class="modal active">
+                    <div class="modal-content" style="max-width: 500px;">
+                        <div class="modal-header">
+                            <h2>${sanction ? '✏️ Modifier la sanction' : '➕ Nouvelle sanction'}</h2>
+                            <button class="modal-close" onclick="closeSanctionModal()">✕</button>
+                        </div>
+                        <form id="sanction-form">
+                            <div class="form-group">
+                                <label>Employé *</label>
+                                <select id="sanction-username" required>
+                                    <option value="">Sélectionner un employé</option>
+                                    ${employesList.map(emp => `
+                                        <option value="${escapeHtml(emp.username)}" ${sanction && sanction.username === emp.username ? 'selected' : ''}>
+                                            ${escapeHtml(emp.display_name || emp.username)} (${escapeHtml(emp.role || 'Employé')})
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Motif *</label>
+                                <textarea id="sanction-reason" rows="3" required>${sanction ? escapeHtml(sanction.reason) : ''}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Durée (en jours, 0 = permanent)</label>
+                                <input type="number" id="sanction-duration" min="0" value="${sanction ? sanction.duration_days : 0}">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="ghost" onclick="closeSanctionModal()">${t.annuler}</button>
+                                <button type="submit" class="primary">${t.enregistrer}</button>
+                                <div id="sanction-msg"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            const form = document.getElementById('sanction-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveSanction();
+            });
+        }
+
+        function closeSanctionModal() {
+            const modal = document.getElementById('sanction-modal');
+            if (modal) modal.remove();
+            editSanctionId = null;
+        }
+
+        function saveSanction() {
+            const username = document.getElementById('sanction-username').value;
+            const reason = document.getElementById('sanction-reason').value.trim();
+            const duration_days = parseInt(document.getElementById('sanction-duration').value) || 0;
+            
+            if (!username || !reason) {
+                showMessage('sanction-msg', '❌ Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+            
+            const url = editSanctionId ? `${API_BASE}/api/sanctions/${editSanctionId}` : `${API_BASE}/api/sanctions`;
+            const method = editSanctionId ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, reason, duration_days })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeSanctionModal();
+                    loadSanctions();
+                    showMessage('direction-content', editSanctionId ? '✅ Sanction modifiée avec succès' : '✅ Sanction ajoutée avec succès', 'success');
+                } else {
+                    showMessage('sanction-msg', '❌ ' + (data.error || 'Une erreur est survenue'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showMessage('sanction-msg', "❌ Erreur lors de l'enregistrement", 'error');
+            });
+        }
+
+        function deleteSanction(id) {
+            Confirm('direction-content', 'Supprimer cette sanction ?', 'success', () => {
+                fetch(`${API_BASE}/api/sanctions/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                .then(response => response.json())
+                .then(data => { 
+                    if (data.success) {
+                        loadSanctions();
+                        showMessage('direction-content', '✅ Sanction supprimée', 'success');
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+            });
         }
 
         function formatDuration(mins) {

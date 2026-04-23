@@ -1592,6 +1592,183 @@ def delete_annonce(annonce_id):
         print(f"❌ Erreur DELETE annonce: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+# ========== API GESTION DES SANCTIONS ==========
+@app.route("/api/sanctions", methods=["GET"])
+@require_direction
+def get_sanctions():
+    """Récupère la liste de toutes les sanctions"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+        
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT s.id, s.username, s.reason, s.duration_days, s.created_by, s.created_at,
+                   sp.role as employee_role
+            FROM sanctions s
+            LEFT JOIN staff_profiles sp ON s.username = sp.username
+            ORDER BY s.created_at DESC
+        """)
+        sanctions = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return jsonify(sanctions)
+    
+    except Exception as e:
+        print(f"❌ Erreur GET sanctions: {e}")
+        return jsonify([])
+
+@app.route("/api/sanctions/employes", methods=["GET"])
+@require_direction
+def get_employes_for_sanctions():
+    """Récupère la liste des employés actifs pour le sélecteur"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify([])
+        
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT id, username, name as display_name, role
+            FROM staff_profiles
+            WHERE active = 1
+            ORDER BY name ASC
+        """)
+        employes = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        return jsonify(employes)
+    
+    except Exception as e:
+        print(f"❌ Erreur GET employes: {e}")
+        return jsonify([])
+
+@app.route("/api/sanctions", methods=["POST"])
+@require_direction
+def create_sanction():
+    """Crée une nouvelle sanction"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        reason = data.get('reason')
+        duration_days = data.get('duration_days', 0)
+        created_by = data.get('created_by')
+        
+        if not username or not reason:
+            return jsonify({"success": False, "error": "Nom d'utilisateur et motif requis"}), 400
+        
+        # Récupérer le nom du direction_user
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT display_name FROM direction_users WHERE id = %s", (session['direction_id'],))
+        direction_user = cur.fetchone()
+        direction_name = direction_user['display_name'] if direction_user else created_by or "Direction"
+        
+        cur.execute("""
+            INSERT INTO sanctions (username, reason, duration_days, created_by, created_at)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (username, reason, duration_days, direction_name, now_paris()))
+        
+        conn.commit()
+        sanction_id = cur.lastrowid
+        cur.close()
+        conn.close()
+        
+        # Envoyer un webhook Discord pour la sanction
+        webhook_sanction = os.environ.get("SANCTION_WEBHOOK", "")
+        if webhook_sanction:
+            duration_text = f"{duration_days} jour(s)" if duration_days > 0 else "Permanent"
+            embed = {
+                "title": "⚠️ Nouvelle sanction",
+                "color": 15158332,
+                "fields": [
+                    {"name": "Employé", "value": username, "inline": True},
+                    {"name": "Durée", "value": duration_text, "inline": True},
+                    {"name": "Motif", "value": reason, "inline": False},
+                    {"name": "Créé par", "value": direction_name, "inline": True}
+                ],
+                "timestamp": now_paris().isoformat()
+            }
+            try:
+                requests.post(webhook_sanction, json={"embeds": [embed]}, timeout=2)
+            except:
+                pass
+        
+        return jsonify({"success": True, "id": sanction_id})
+    
+    except Exception as e:
+        print(f"❌ Erreur POST sanction: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/sanctions/<int:sanction_id>", methods=["PUT"])
+@require_direction
+def update_sanction(sanction_id):
+    """Modifie une sanction existante"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        reason = data.get('reason')
+        duration_days = data.get('duration_days', 0)
+        
+        if not username or not reason:
+            return jsonify({"success": False, "error": "Nom d'utilisateur et motif requis"}), 400
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE sanctions
+            SET username = %s, reason = %s, duration_days = %s
+            WHERE id = %s
+        """, (username, reason, duration_days, sanction_id))
+        
+        conn.commit()
+        rows_affected = cur.rowcount
+        cur.close()
+        conn.close()
+        
+        if rows_affected == 0:
+            return jsonify({"success": False, "error": "Sanction non trouvée"}), 404
+        
+        return jsonify({"success": True})
+    
+    except Exception as e:
+        print(f"❌ Erreur PUT sanction: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/sanctions/<int:sanction_id>", methods=["DELETE"])
+@require_direction
+def delete_sanction(sanction_id):
+    """Supprime une sanction"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+        
+        cur = conn.cursor()
+        cur.execute("DELETE FROM sanctions WHERE id = %s", (sanction_id,))
+        conn.commit()
+        rows_affected = cur.rowcount
+        cur.close()
+        conn.close()
+        
+        if rows_affected == 0:
+            return jsonify({"success": False, "error": "Sanction non trouvée"}), 404
+        
+        return jsonify({"success": True})
+    
+    except Exception as e:
+        print(f"❌ Erreur DELETE sanction: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ========== GESTION DES ERREURS ==========
 @app.errorhandler(404)
 def page_not_found(e):
