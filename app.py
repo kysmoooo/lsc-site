@@ -197,6 +197,12 @@ def employe_register():
             (username,)
         )
         employe = cur.fetchone()
+        
+        # ✅ Check if employee exists
+        if not employe:
+            cur.close()
+            conn.close()
+            return jsonify({"success": False, "error": f"Aucun profil trouvé pour {username}. Contactez la direction."}), 404
 
         cur.execute(
             """UPDATE staff_profiles SET password_hash = %s, active = 0 WHERE id = %s""",
