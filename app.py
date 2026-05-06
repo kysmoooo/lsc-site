@@ -512,7 +512,7 @@ def get_absences():
         
         cur = conn.cursor(dictionary=True)
         cur.execute("""
-            SELECT id, name, start_date, end_date, created_at
+            SELECT id, name, start_date, end_date, motif, created_at
             FROM absences
             ORDER BY start_date DESC
         """)
@@ -729,7 +729,48 @@ def employe_advert_last_global():
     return jsonify({
         "last_advert_time": last.isoformat() if last else None
     })
- 
+
+# ─── ABSENCE (employé) ───────────────────────────────────────
+@app.route("/employe/absence/submit", methods=["POST"])
+@require_employe
+def employe_absence_submit():
+    employe_id = session['employe_id']
+    data = request.get_json()
+    start_date = data.get('start_date')
+    end_date   = data.get('end_date')
+    motif      = data.get('motif', '').strip()
+
+    if not all([start_date, end_date, motif]):
+        return jsonify({"success": False, "error": "Champs manquants"}), 400
+    if end_date < start_date:
+        return jsonify({"success": False, "error": "Date de fin invalide"}), 400
+
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"success": False, "error": "Erreur DB"}), 500
+
+        # Récupérer le nom de l'employé
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT name FROM staff_profiles WHERE id=%s", (employe_id,))
+        emp = cur.fetchone()
+        name = emp['name'] if emp else f"Employé #{employe_id}"
+
+        cur.execute("""
+            INSERT INTO absences (name, start_date, end_date, motif, created_at)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (name, start_date, end_date, motif, now_paris()))
+        conn.commit()
+        absence_id = cur.lastrowid
+        cur.close()
+        conn.close()
+
+        return jsonify({"success": True, "id": absence_id})
+
+    except Exception as e:
+        print(f"❌ Erreur employe_absence_submit: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ─────────────────────────────────────────────────
 # SERVICE
 # ─────────────────────────────────────────────────

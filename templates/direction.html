@@ -1398,7 +1398,10 @@
                                 <div class="absence-item">
                                     <div class="absence-info">
                                         <span class="absence-name">${escapeHtml(absence.name)}</span>
-                                        <span class="absence-dates">📅 Du ${formatDate(absence.start_date)} au ${formatDate(absence.end_date)}</span>
+                                        <span class="absence-dates">
+                                            📅 Du ${formatDate(absence.start_date)} au ${formatDate(absence.end_date)}
+                                            ${absence.motif ? `<br>📝 ${escapeHtml(absence.motif)}` : ''}
+                                        </span>
                                     </div>
                                     <div class="absence-actions">
                                         <button class="delete-absence" data-id="${absence.id}">🗑 Supprimer</button>
