@@ -1558,6 +1558,13 @@
         openModal('modal-absence');
     });
 
+    document.getElementById('absence-motif').addEventListener('input', function() {
+        const count = this.value.length;
+        const counter = document.getElementById('motif-counter');
+        counter.textContent = `${count} / 150`;
+        counter.style.color = count >= 140 ? '#e74c3c' : count >= 100 ? '#f39c12' : '#666';
+    });
+    
     function renderAbsencesList() {
         const listEl = document.getElementById('absences-list');
         listEl.innerHTML = `
@@ -1602,12 +1609,6 @@
         const start = document.getElementById('absence-start').value;
         const end   = document.getElementById('absence-end').value;
         const motif = document.getElementById('absence-motif').value.trim();
-        document.getElementById('absence-motif').addEventListener('input', function() {
-            const count = this.value.length;
-            const counter = document.getElementById('motif-counter');
-            counter.textContent = `${count} / 150`;
-            counter.style.color = count >= 140 ? '#e74c3c' : count >= 100 ? '#f39c12' : '#666';
-        });
         if (!start || !end || !motif) {
             showMessage('absence-msg', '⚠️ Veuillez remplir tous les champs.', 'error');
             return;
