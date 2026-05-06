@@ -1387,7 +1387,6 @@
         function displayAbsences() {
             const container = document.getElementById('direction-content');
             if (!container) return;
-            
             container.innerHTML = `
                 <div class="direction-grid">
                     <div class="absence-list">
@@ -1401,7 +1400,7 @@
                                         <span class="absence-name">${escapeHtml(absence.name)}</span>
                                         <span class="absence-dates">
                                             📅 Du ${formatDate(absence.start_date)} au ${formatDate(absence.end_date)}
-                                            ${absence.motif ? `<br>📝 ${escapeHtml(absence.motif)}` : ''}
+                                            ${absence.motif ? `<br>📝 ${escapeHtml(absence.motif.length > 150 ? absence.motif.slice(0, 150) + '...' : absence.motif)}` : ''}
                                         </span>
                                     </div>
                                     <div class="absence-actions">

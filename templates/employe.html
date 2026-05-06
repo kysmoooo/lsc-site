@@ -1572,13 +1572,16 @@
                 </div>
                 <div class="form-field" style="margin-top:1rem;">
                     <label>📝 Motif</label>
-                    <textarea id="absence-motif" rows="3"
+                    <textarea id="absence-motif" rows="3" maxlength="150"
                         style="width:100%; padding:0.85rem 1rem;
                         background:rgba(255,255,255,0.06);
                         border:1px solid rgba(255,255,255,0.12);
                         border-radius:12px; color:#fff; font-size:0.9rem;
-                        resize:vertical; transition:all 0.2s;"
+                        resize:vertical;"
                         placeholder="Raison de l'absence..." required></textarea>
+                    <div id="motif-counter" style="text-align:right; font-size:0.75rem; color:#666; margin-top:0.25rem;">
+                        0 / 150
+                    </div>
                 </div>
                 <div id="absence-msg" style="margin-top:0.75rem;"></div>
                 <button type="submit"
@@ -1599,7 +1602,12 @@
         const start = document.getElementById('absence-start').value;
         const end   = document.getElementById('absence-end').value;
         const motif = document.getElementById('absence-motif').value.trim();
-
+        document.getElementById('absence-motif').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = document.getElementById('motif-counter');
+            counter.textContent = `${count} / 150`;
+            counter.style.color = count >= 140 ? '#e74c3c' : count >= 100 ? '#f39c12' : '#666';
+        });
         if (!start || !end || !motif) {
             showMessage('absence-msg', '⚠️ Veuillez remplir tous les champs.', 'error');
             return;

@@ -744,7 +744,8 @@ def employe_absence_submit():
         return jsonify({"success": False, "error": "Champs manquants"}), 400
     if end_date < start_date:
         return jsonify({"success": False, "error": "Date de fin invalide"}), 400
-
+    if len(motif) > 150:
+        return jsonify({"success": False, "error": "Le motif ne peut pas dépasser 150 caractères"}), 400
     try:
         conn = get_db_connection()
         if not conn:
