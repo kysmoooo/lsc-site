@@ -746,6 +746,28 @@
             cursor: not-allowed;
         }
 
+        .btn-absence {
+            padding: 0.65rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-absence.view {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #ccc;
+        }
+
+        .btn-absence.view:hover { background: rgba(255,255,255,0.12); }
+        
         /* ===== FOOTER ===== */
         .footer {
             background: rgba(0,0,0,0.5);
