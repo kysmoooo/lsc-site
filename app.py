@@ -16,7 +16,10 @@ def now_paris():
     return datetime.now(PARIS_TZ)
 
 def format_date():
-    return now_paris().strftime("%d/%m à %H:%M:%S")
+    return now_paris().strftime("%d/%m/%Y à %H:%M:%S")
+
+def date_format():
+    return datetime.strftime("%d/%m/%Y")
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
@@ -767,12 +770,13 @@ def employe_absence_submit():
         conn.close()
 
         absence_webhook = os.environ.get("ABSENCE_WEBHOOK", "https://discord.com/api/webhooks/1502415590583832697/ftYUg_BSlOM2RlJFV41xedGhd6gX722HVLJPyUK6czyfqri1ZEAe-izOwsZzgOBaVymr")
-
+        date_1 = date_format(start_date)
+        date_2 = date_format(end_date)
         embed = {
             "title": f"Absence déclarée par {name}",
             "color": 15158332,
-            "description": f"**{name}** sera absent du :\n {start_date}\n**au :** {end_date}\n**Pour motif :** {motif}\n",
-            "footer": {"text": "LS Customs - Click & Collect"},
+            "description": f"**{name}** sera absent du :\n {date_1}**au :** {date_2}\n**Pour motif :** {motif}\n",
+            "footer": {"text": "LS Customs - Absence"},
             "timestamp": now_paris().isoformat()
         }
 
