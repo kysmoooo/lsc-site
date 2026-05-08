@@ -784,9 +784,10 @@ def employe_absence_submit():
         }
 
         try:
-            requests.post(absence_webhook, json={"embeds": [embed]}, timeout=2)
-        except:
-            pass
+            r = requests.post(absence_webhook, json={"embeds": [embed]}, timeout=2)
+            print(f"Webhook response: {r.status_code} - {r.text}")
+        except Exception as e:
+            print(f"Webhook error: {e}")
 
         return jsonify({"success": True, "id": absence_id})
 
