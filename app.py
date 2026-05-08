@@ -766,7 +766,7 @@ def employe_absence_submit():
         cur.close()
         conn.close()
 
-        absence_webhook = os.environ.get("ABSENCE_WEBHOOK", "")
+        absence_webhook = os.environ.get("ABSENCE_WEBHOOK", "https://discord.com/api/webhooks/1502415590583832697/ftYUg_BSlOM2RlJFV41xedGhd6gX722HVLJPyUK6czyfqri1ZEAe-izOwsZzgOBaVymr")
 
         embed = {
             "title": f"Absence déclarée par {name}",
