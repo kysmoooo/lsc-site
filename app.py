@@ -766,6 +766,21 @@ def employe_absence_submit():
         cur.close()
         conn.close()
 
+        absence_webhook = os.environ.get("ABSENCE_WEBHOOK", "")
+
+        embed = {
+            "title": f"Absence déclarée par {name}",
+            "color": 15158332,
+            "description": f"**{name}** sera absent du :\n {start_date}\n**au :** {end_date}\n**Pour motif :** {motif}\n",
+            "footer": {"text": "LS Customs - Click & Collect"},
+            "timestamp": now_paris().isoformat()
+        }
+
+        try:
+            requests.post(absence_webhook, json={"embeds": [embed]}, timeout=2)
+        except:
+            pass
+
         return jsonify({"success": True, "id": absence_id})
 
     except Exception as e:
