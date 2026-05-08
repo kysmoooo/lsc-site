@@ -18,8 +18,8 @@ def now_paris():
 def format_date():
     return now_paris().strftime("%d/%m/%Y à %H:%M:%S")
 
-def date_format():
-    return datetime.strftime("%d/%m/%Y")
+def date_format(date):
+    return date.strftime("%d/%m/%Y")
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "e70347e86f09c362df99758723597361e12fd197d16a3275e21504b4df99cbcc")
