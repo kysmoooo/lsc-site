@@ -778,7 +778,7 @@ def employe_absence_submit():
         embed = {
             "title": f"Absence déclarée par {name}",
             "color": 15158332,
-            "description": f"**{name}** sera absent du :\n {date_1}**au :** {date_2}\n**Pour motif :** {motif}\n",
+            "description": f"**{name}** sera absent du :\n{date_1} **au :** {date_2}\n**Pour motif :** {motif}\n",
             "footer": {"text": "LS Customs - Absence"},
             "timestamp": now_paris().isoformat()
         }
