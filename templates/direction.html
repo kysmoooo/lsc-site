@@ -2033,17 +2033,18 @@
             
             // Afficher/masquer le champ durée selon le type
             const typeSelect = document.getElementById('sanction-type');
-            const durationGroup = document.querySelector('#sanction-form .form-group:last-of-type');
-            
+            const durationInput = document.getElementById('sanction-duration');
+            const durationGroup = durationInput?.closest('.form-group');
+
             function toggleDurationField() {
                 const type = typeSelect.value;
                 if (type === 'warning') {
-                    durationGroup.style.opacity = '0.5';
-                    document.getElementById('sanction-duration').value = 0;
-                    document.getElementById('sanction-duration').disabled = true;
+                    if (durationGroup) durationGroup.style.opacity = '0.5';
+                    durationInput.value = 0;
+                    durationInput.disabled = true;
                 } else {
-                    durationGroup.style.opacity = '1';
-                    document.getElementById('sanction-duration').disabled = false;
+                    if (durationGroup) durationGroup.style.opacity = '1';
+                    durationInput.disabled = false;
                 }
             }
             
@@ -2058,7 +2059,7 @@
         }
 
         function saveSanction() {
-            const username = document.getElementById('sanction-username').value || null;
+            const username = document.getElementById('sanction-username').value.trim() || null;
             const discord_id = document.getElementById('sanction-discord_id').value.trim() || null;
             const type = document.getElementById('sanction-type').value;
             const reason = document.getElementById('sanction-reason').value.trim();
