@@ -1731,19 +1731,21 @@ def get_employes_for_sanctions():
 @app.route("/api/sanctions", methods=["POST"])
 @require_direction
 def create_sanction():
-    """Crée une nouvelle sanction"""
     try:
         data = request.get_json()
-        username = data.get('username')
-        sanction_type = data.get('type', 'warning')  # warning, blacklist, suspension
+        username = data.get('username') or None
+        discord_id = data.get('discord_id') or None
+        sanction_type = data.get('type', 'warning')
         reason = data.get('reason')
         duration_days = data.get('duration_days', 0)
-        created_by = data.get('created_by')
-        
-        if not username or not reason:
-            return jsonify({"success": False, "error": "Nom d'utilisateur et motif requis"}), 400
-        
-        # Validation du type
+
+        # Au moins l'un des deux est requis
+        if not username and not discord_id:
+            return jsonify({"success": False, "error": "Un nom d'utilisateur ou un ID Discord est requis"}), 400
+
+        if not reason:
+            return jsonify({"success": False, "error": "Le motif est requis"}), 400
+
         if sanction_type not in ['warning', 'blacklist', 'suspension']:
             return jsonify({"success": False, "error": "Type de sanction invalide"}), 400
         
@@ -1758,9 +1760,9 @@ def create_sanction():
         direction_name = direction_user['display_name'] if direction_user else created_by or "Direction"
         
         cur.execute("""
-            INSERT INTO sanctions (username, type, reason, duration_days, created_by, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (username, sanction_type, reason, duration_days, direction_name, now_paris()))
+            INSERT INTO sanctions (username, discord_id, type, reason, duration_days, created_by, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (username, discord_id, sanction_type, reason, duration_days, direction_name, now_paris()))
         
         conn.commit()
         sanction_id = cur.lastrowid
@@ -1782,7 +1784,8 @@ def create_sanction():
                 "title": f"{type_label} - Nouvelle sanction",
                 "color": 15158332 if sanction_type != 'warning' else 15844367,
                 "fields": [
-                    {"name": "Employé", "value": username, "inline": True},
+                    {"name": "Personne concernée", "value": username, "inline": True},
+                    {"name": "Id Discord", "value": discord_id, "inline": False},
                     {"name": "Type", "value": type_label, "inline": True},
                     {"name": "Durée", "value": duration_text, "inline": True},
                     {"name": "Motif", "value": reason, "inline": False},

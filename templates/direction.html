@@ -1979,15 +1979,22 @@
                         </div>
                         <form id="sanction-form">
                             <div class="form-group">
-                                <label>Employé *</label>
-                                <select id="sanction-username" required>
-                                    <option value="">Sélectionner un employé</option>
+                                <label>Employé <small style="color:#888;">(ou renseigner l'ID Discord ci-dessous)</small></label>
+                                <select id="sanction-username">
+                                    <option value="">— Sélectionner un employé actif —</option>
                                     ${employesList.map(emp => `
-                                        <option value="${escapeHtml(emp.username)}" ${sanction && sanction.username === emp.username ? 'selected' : ''}>
+                                        <option value="${escapeHtml(emp.username)}"
+                                            ${sanction && sanction.username === emp.username ? 'selected' : ''}>
                                             ${escapeHtml(emp.display_name || emp.username)} (${escapeHtml(emp.role || 'Employé')})
                                         </option>
                                     `).join('')}
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label>ID Discord <small style="color:#888;">(si l'employé a quitté le garage)</small></label>
+                                <input type="text" id="sanction-discord_id"
+                                    placeholder="ex: 123456789012345678"
+                                    value="${sanction ? escapeHtml(sanction.discord_id || '') : ''}">
                             </div>
                             <div class="form-group">
                                 <label>Type de sanction *</label>
@@ -2051,20 +2058,23 @@
         }
 
         function saveSanction() {
-            const username = document.getElementById('sanction-username').value;
+            const username = document.getElementById('sanction-username').value || null;
+            const discord_id = document.getElementById('sanction-discord_id').value.trim() || null;
             const type = document.getElementById('sanction-type').value;
             const reason = document.getElementById('sanction-reason').value.trim();
             let duration_days = parseInt(document.getElementById('sanction-duration').value) || 0;
-            
-            if (!username || !reason) {
-                showMessage('sanction-msg', '❌ Veuillez remplir tous les champs obligatoires', 'error');
+
+            // Validation : au moins l'un des deux
+            if (!username && !discord_id) {
+                showMessage('sanction-msg', '❌ Sélectionnez un employé ou renseignez un ID Discord', 'error');
                 return;
             }
-            
-            // Pour les avertissements, forcer durée à 0
-            if (type === 'warning') {
-                duration_days = 0;
+            if (!reason) {
+                showMessage('sanction-msg', '❌ Le motif est requis', 'error');
+                return;
             }
+
+            if (type === 'warning') duration_days = 0;
             
             const url = editSanctionId ? `${API_BASE}/api/sanctions/${editSanctionId}` : `${API_BASE}/api/sanctions`;
             const method = editSanctionId ? 'PUT' : 'POST';
