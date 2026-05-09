@@ -1740,7 +1740,7 @@ def create_sanction():
         duration_days = data.get('duration_days', 0)
 
         # Au moins l'un des deux est requis
-        if not username and not discord_id:
+        if not username or not discord_id:
             return jsonify({"success": False, "error": "Un nom d'utilisateur ou un ID Discord est requis"}), 400
 
         if not reason:
