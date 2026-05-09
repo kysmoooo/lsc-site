@@ -1741,7 +1741,7 @@ def create_sanction():
         duration_days = data.get('duration_days', 0)
 
         # Au moins l'un des deux est requis
-        if not username or not discord_id:
+        if not username and not discord_id:
             return jsonify({"success": False, "error": "Un nom d'utilisateur ou un ID Discord est requis"}), 400
 
         if not reason:
@@ -1758,7 +1758,7 @@ def create_sanction():
         cur = conn.cursor(dictionary=True)
         cur.execute("SELECT display_name FROM direction_users WHERE id = %s", (session['direction_id'],))
         direction_user = cur.fetchone()
-        direction_name = direction_user['display_name'] if direction_user else created_by or "Direction"
+        direction_name = direction_user['display_name'] if direction_user else "Direction"
         
         cur.execute("""
             INSERT INTO sanctions (username, discord_id, type, reason, duration_days, created_by, created_at)
@@ -1785,8 +1785,8 @@ def create_sanction():
                 "title": f"{type_label} - Nouvelle sanction",
                 "color": 15158332 if sanction_type != 'warning' else 15844367,
                 "fields": [
-                    {"name": "Personne concernée", "value": username, "inline": True},
-                    {"name": "Id Discord", "value": discord_id, "inline": False},
+                    {"name": "Personne concernée", "value": username if username else "-", "inline": True},
+                    {"name": "Id Discord", "value": discord_id or "—", "inline": False},
                     {"name": "Type", "value": type_label, "inline": True},
                     {"name": "Durée", "value": duration_text, "inline": True},
                     {"name": "Motif", "value": reason, "inline": False},
