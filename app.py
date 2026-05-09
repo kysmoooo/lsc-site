@@ -1733,6 +1733,7 @@ def get_employes_for_sanctions():
 def create_sanction():
     try:
         data = request.get_json()
+        print(f"DEBUG sanctions POST: {data}")
         username = data.get('username') or None
         discord_id = data.get('discord_id') or None
         sanction_type = data.get('type', 'warning')

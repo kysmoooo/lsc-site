@@ -2084,7 +2084,7 @@
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ username, type, reason, duration_days })
+                body: JSON.stringify({ username, discord_id, type, reason, duration_days })
             })
             .then(response => response.json())
             .then(data => {
