@@ -1192,12 +1192,12 @@
         
         // Vérifier si le rôle est supérieur à mécanicien
         const roleHierarchy = {
-            'Mecanicien': 1,
-            'Supervision': 2,
-            'Direction': 3
+            'Mecanicien': 0,
+            'Supervision': 1,
+            'Direction': 2,
         };
         
-        const currentRole = (currentEmploye.role || 'Mecanicien').toLowerCase();
+        const currentRole = (currentEmploye.role || 'employe').toLowerCase();
         const currentRoleLevel = roleHierarchy[currentRole] || 0;
         
         if (currentRoleLevel <= roleHierarchy['mecanicien']) {
@@ -1205,47 +1205,14 @@
             return;
         }
         
-        // Créer un overlay de chargement
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.id = 'loading-overlay-switch';
-        loadingOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(8px);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 1rem;
-        `;
-        loadingOverlay.innerHTML = `
-            <div style="font-size: 2rem;">🔄</div>
-            <div style="color: #ffd700; font-size: 1.2rem;">Passage en mode direction...</div>
-            <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid rgba(255,215,0,0.3); border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        `;
-        
-        // Ajouter l'animation CSS si elle n'existe pas
-        if (!document.querySelector('#switch-animation-style')) {
-            const style = document.createElement('style');
-            style.id = 'switch-animation-style';
-            style.textContent = `
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        document.body.appendChild(loadingOverlay);
+        // Désactiver le bouton pendant l'opération
+        const btn = document.getElementById('btn-switch');
+        btn.disabled = true;
+        btn.textContent = '🔄 Chargement...';
         
         try {
             // 1. Vérifier si l'utilisateur a un compte direction existant avec le même username
-            const checkRes = await fetch(`${API}/direction/check-by-username`, {
+            const checkRes = await fetch(`/direction/check-by-username`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -1255,11 +1222,16 @@
                 })
             });
             
+            if (!checkRes.ok) {
+                const errorData = await checkRes.json();
+                throw new Error(errorData.error || `Erreur ${checkRes.status}`);
+            }
+            
             const checkData = await checkRes.json();
             
             if (checkData.exists) {
                 // Connexion automatique à la direction
-                const loginRes = await fetch(`${API}/direction/auto-login`, {
+                const loginRes = await fetch(`/direction/auto-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -1268,6 +1240,11 @@
                         employe_id: currentEmploye.id 
                     })
                 });
+                
+                if (!loginRes.ok) {
+                    const errorData = await loginRes.json();
+                    throw new Error(errorData.error || `Erreur ${loginRes.status}`);
+                }
                 
                 const loginData = await loginRes.json();
                 
@@ -1278,8 +1255,6 @@
                     throw new Error(loginData.error || 'Échec de la connexion direction');
                 }
             } else {
-                // L'utilisateur n'a pas de compte direction, l'informer
-                loadingOverlay.remove();
                 showMessage('service-msg', 
                     "❌ Vous n'avez pas de compte direction associé. Contactez l'administrateur pour créer votre compte direction.", 
                     "error"
@@ -1288,8 +1263,10 @@
             
         } catch (error) {
             console.error('Switch direction error:', error);
-            loadingOverlay.remove();
             showMessage('service-msg', "❌ Erreur lors du changement de mode: " + error.message, "error");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🔄 Switch direction';
         }
     });
 

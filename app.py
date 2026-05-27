@@ -50,6 +50,7 @@ DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
 WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "")
+DIRECTION_PING_ROLE_ID = 1509192397622481077
 DIRECTION_ROLE_ID = 1075809086173618266
 
 DEV_MODE = False
@@ -916,7 +917,7 @@ def _end_service(employe_id, forced_by=None):
                 embed2 = {
                     "title": "Service de **Moins d'une heure**",
                     "color": 15158332,
-                    "description": f"<@&{DIRECTION_ROLE_ID}> Eh oh {name} à fait moins d'une heure ! ({dur_str})",
+                    "description": f"<@&{DIRECTION_PING_ROLE_ID}> Eh oh {name} à fait moins d'une heure ! ({dur_str})",
                     "timestamp": now.isoformat()
                 }
             else:
@@ -933,7 +934,7 @@ def _end_service(employe_id, forced_by=None):
                     requests.post(
                         WEBHOOK_SERVICE,
                         json={
-                            "content": f"<@&{DIRECTION_ROLE_ID}>",
+                            "content": f"<@&{DIRECTION_PING_ROLE_ID}>",
                             "embeds": [embed2]
                         },
                         timeout=2
@@ -1500,6 +1501,8 @@ def direction_logout():
     session.pop('direction_id', None)
     return jsonify({"success": True})
 
+# Supprimez complètement l'ancienne route direction/check-by-username et remplacez par :
+
 @app.route("/direction/check-by-username", methods=["POST"])
 def direction_check_by_username():
     """Vérifie si un employé a un compte direction avec son username"""
@@ -1507,15 +1510,17 @@ def direction_check_by_username():
     username = data.get('username')
     role = data.get('role', '').lower()
     
-    # Vérifier le rôle (sécurité côté serveur aussi)
+    print(f"🔍 Vérification direction pour: {username}, rôle: {role}")
+    
+    # Vérifier le rôle (sécurité côté serveur)
     role_hierarchy = {
-        'Mecanicien': 1,
-        'Supervision': 2,
-        'Direction': 3
+        'Mecanicien': 0,
+        'Supervision': 1,
+        'Direction': 2,
     }
     
     role_level = role_hierarchy.get(role, 0)
-    if role_level <= role_hierarchy.get('Mecanicien', 1):
+    if role_level <= role_hierarchy.get('mecanicien', 1):
         return jsonify({"exists": False, "error": "Droits insuffisants"}), 403
     
     conn = get_db_connection()
@@ -1524,6 +1529,7 @@ def direction_check_by_username():
     
     try:
         cur = conn.cursor(dictionary=True)
+        # Vérifier dans direction_users
         cur.execute(
             "SELECT id, username FROM direction_users WHERE username = %s AND active = 1",
             (username,)
@@ -1533,8 +1539,10 @@ def direction_check_by_username():
         conn.close()
         
         if direction_user:
+            print(f"✅ Compte direction trouvé pour {username}")
             return jsonify({"exists": True, "direction_id": direction_user['id']})
         else:
+            print(f"❌ Aucun compte direction pour {username}")
             return jsonify({"exists": False})
             
     except Exception as e:
@@ -1548,6 +1556,8 @@ def direction_auto_login():
     data = request.get_json()
     username = data.get('username')
     employe_id = data.get('employe_id')
+    
+    print(f"🔐 Auto-login direction pour: {username}, employe_id: {employe_id}")
     
     if not username:
         return jsonify({"success": False, "error": "Username requis"}), 400
@@ -1572,13 +1582,13 @@ def direction_auto_login():
             return jsonify({"success": False, "error": "Employé non trouvé"}), 404
         
         role_hierarchy = {
-            'Mecanicien': 1,
-            'Supervision': 2,
-            'Direction': 3
+            'Mecanicien': 0,
+            'Supervision': 1,
+            'Direction': 2,
         }
         
         role_level = role_hierarchy.get(employe['role'].lower(), 0)
-        if role_level <= role_hierarchy.get('Mecanicien', 1):
+        if role_level <= role_hierarchy.get('mecanicien', 1):
             cur.close()
             conn.close()
             return jsonify({"success": False, "error": "Droits insuffisants pour accéder à la direction"}), 403
@@ -1594,10 +1604,13 @@ def direction_auto_login():
         
         if direction_user:
             # Créer la session direction
+            session.permanent = True
             session['direction_id'] = direction_user['id']
             # Garder aussi une trace de l'employé original pour le switch back
             session['original_employe_id'] = employe_id
             session['direction_from_employe'] = True
+            
+            print(f"✅ Session direction créée pour {username}")
             
             return jsonify({
                 "success": True,
@@ -1613,7 +1626,6 @@ def direction_auto_login():
     except Exception as e:
         print(f"❌ Erreur auto-login direction: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
-
 
 @app.route("/direction/switch-back-to-employe", methods=["POST"])
 @require_direction
