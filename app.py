@@ -1481,13 +1481,13 @@ def direction_me():
                     "user": {
                         "id": user['id'],
                         "displayName": user['display_name'],
-                        "role": user['role']
-                    },
-                    "canSwitchToEmploye": can_switch
+                        "role": user['role'],
+                        "canSwitchToEmploye": can_switch
+                    }
                 })
             cur.close()
             conn.close()
-    return jsonify({"user": None, "canSwitchToEmploye": False})
+    return jsonify({"user": None})
 
 @app.route("/direction/login", methods=["POST"])
 def direction_login():
@@ -1506,8 +1506,24 @@ def direction_login():
     conn.close()
     
     if user:
+        session.permanent = True
         session['direction_id'] = user['id']
-        return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
+
+        # Si un compte employé existe avec le même username, on le conserve
+        staff = None
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor(dictionary=True)
+            cur.execute("SELECT id FROM staff_profiles WHERE username=%s AND active=1 LIMIT 1", (user['username'],))
+            staff = cur.fetchone()
+            if staff:
+                session['original_employe_id'] = staff['id']
+                session['direction_from_employe'] = False
+                session['employe_id'] = staff['id']
+            cur.close()
+            conn.close()
+
+        return jsonify({"success": True, "user": {"id": user['id'], "displayName": user['display_name'], "role": user['role'], "canSwitchToEmploye": bool(staff)}})
     return jsonify({"success": False}), 401
 
 @app.route("/direction/logout", methods=["POST"])
@@ -1645,6 +1661,7 @@ def direction_auto_login():
         session['direction_id'] = direction_user['id']
         session['original_employe_id'] = employe_id
         session['direction_from_employe'] = True
+        session['employe_id'] = employe_id
         
         print(f"✅ Session direction créée pour {username} (ID: {direction_user['id']})")
         
@@ -1653,7 +1670,8 @@ def direction_auto_login():
             "user": {
                 "id": direction_user['id'],
                 "displayName": direction_user['display_name'],
-                "role": direction_user['role']
+                "role": direction_user['role'],
+                "canSwitchToEmploye": True
             }
         })
             
@@ -1694,6 +1712,7 @@ def direction_switch_back_to_employe():
 
             session['employe_id'] = staff['id']
 
+        session.permanent = True
         # Supprimer la session direction
         session.pop('direction_id', None)
         session.pop('original_employe_id', None)
