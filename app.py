@@ -50,6 +50,7 @@ DISCORD_GUILD_ID = "925525617863184445"
 BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
 WEBHOOK_SERVICE = os.environ.get("SERVICE_WEBHOOK", "")
 WEBHOOK_ADVERT  = os.environ.get("ADVERT_WEBHOOK",  "")
+DIRECTION_ROLE_ID = 1075809086173618266
 
 DEV_MODE = False
 
@@ -905,16 +906,41 @@ def _end_service(employe_id, forced_by=None):
  
         if WEBHOOK_SERVICE:
             forced_txt = f"\n⚠️ Fin forcée par **{forced_by}**" if forced_by else ""
-            embed = {
-                "title": "🔴 Fin de service",
-                "color": 15158332,
-                "description": f"**{name}** a terminé son service.\n⏱ Durée : **{dur_str}**{forced_txt}",
-                "timestamp": now.isoformat()
-            }
+            if h < 1:
+                embed = {
+                    "title": "🔴 Fin de service",
+                    "color": 15158332,
+                    "description": f"**{name}** a terminé son service.\n⏱ Durée : **{dur_str}**{forced_txt}",
+                    "timestamp": now.isoformat()
+                }
+                embed2 = {
+                    "title": "Service de **Moins d'une heure**",
+                    "color": 15158332,
+                    "description": f"<@&{DIRECTION_ROLE_ID}> Eh oh {name} à fait moins d'une heure ! ({dur_str})",
+                    "timestamp": now.isoformat()
+                }
+            else:
+                embed = {
+                    "title": "🔴 Fin de service",
+                    "color": 15158332,
+                    "description": f"**{name}** a terminé son service.\n⏱ Durée : **{dur_str}**{forced_txt}",
+                    "timestamp": now.isoformat()
+                }
             try:
                 requests.post(WEBHOOK_SERVICE, json={"embeds": [embed]}, timeout=2)
-            except:
-                pass
+
+                if h < 1:
+                    requests.post(
+                        WEBHOOK_SERVICE,
+                        json={
+                            "content": f"<@&{DIRECTION_ROLE_ID}>",
+                            "embeds": [embed2]
+                        },
+                        timeout=2
+                    )
+
+            except Exception as e:
+                print(e)
  
         return jsonify({"success": True, "duration_minutes": duration})
  
@@ -1473,6 +1499,143 @@ def direction_login():
 def direction_logout():
     session.pop('direction_id', None)
     return jsonify({"success": True})
+
+@app.route("/direction/check-by-username", methods=["POST"])
+def direction_check_by_username():
+    """Vérifie si un employé a un compte direction avec son username"""
+    data = request.get_json()
+    username = data.get('username')
+    role = data.get('role', '').lower()
+    
+    # Vérifier le rôle (sécurité côté serveur aussi)
+    role_hierarchy = {
+        'employe': 0,
+        'mecanicien': 1,
+        'chef atelier': 2,
+        'manager': 3,
+        'direction': 4,
+        'admin': 5
+    }
+    
+    role_level = role_hierarchy.get(role, 0)
+    if role_level <= role_hierarchy.get('mecanicien', 1):
+        return jsonify({"exists": False, "error": "Droits insuffisants"}), 403
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"exists": False, "error": "Erreur DB"}), 500
+    
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT id, username FROM direction_users WHERE username = %s AND active = 1",
+            (username,)
+        )
+        direction_user = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if direction_user:
+            return jsonify({"exists": True, "direction_id": direction_user['id']})
+        else:
+            return jsonify({"exists": False})
+            
+    except Exception as e:
+        print(f"❌ Erreur check direction by username: {e}")
+        return jsonify({"exists": False, "error": str(e)}), 500
+
+
+@app.route("/direction/auto-login", methods=["POST"])
+def direction_auto_login():
+    """Connexion automatique à la direction pour un employé autorisé"""
+    data = request.get_json()
+    username = data.get('username')
+    employe_id = data.get('employe_id')
+    
+    if not username:
+        return jsonify({"success": False, "error": "Username requis"}), 400
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "error": "Erreur DB"}), 500
+    
+    try:
+        cur = conn.cursor(dictionary=True)
+        
+        # Récupérer l'employé pour vérifier son rôle (double sécurité)
+        cur.execute(
+            "SELECT id, username, role FROM staff_profiles WHERE id = %s AND username = %s AND active = 1",
+            (employe_id, username)
+        )
+        employe = cur.fetchone()
+        
+        if not employe:
+            cur.close()
+            conn.close()
+            return jsonify({"success": False, "error": "Employé non trouvé"}), 404
+        
+        role_hierarchy = {
+            'employe': 0,
+            'mecanicien': 1,
+            'chef atelier': 2,
+            'manager': 3,
+            'direction': 4,
+            'admin': 5
+        }
+        
+        role_level = role_hierarchy.get(employe['role'].lower(), 0)
+        if role_level <= role_hierarchy.get('mecanicien', 1):
+            cur.close()
+            conn.close()
+            return jsonify({"success": False, "error": "Droits insuffisants pour accéder à la direction"}), 403
+        
+        # Récupérer le compte direction
+        cur.execute(
+            "SELECT id, username, display_name, role FROM direction_users WHERE username = %s AND active = 1",
+            (username,)
+        )
+        direction_user = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if direction_user:
+            # Créer la session direction
+            session['direction_id'] = direction_user['id']
+            # Garder aussi une trace de l'employé original pour le switch back
+            session['original_employe_id'] = employe_id
+            session['direction_from_employe'] = True
+            
+            return jsonify({
+                "success": True,
+                "user": {
+                    "id": direction_user['id'],
+                    "displayName": direction_user['display_name'],
+                    "role": direction_user['role']
+                }
+            })
+        else:
+            return jsonify({"success": False, "error": "Aucun compte direction associé à cet employé"})
+            
+    except Exception as e:
+        print(f"❌ Erreur auto-login direction: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/direction/switch-back-to-employe", methods=["POST"])
+@require_direction
+def direction_switch_back_to_employe():
+    """Permet de revenir en mode employé depuis la direction"""
+    if session.get('direction_from_employe') and session.get('original_employe_id'):
+        original_employe_id = session.get('original_employe_id')
+        
+        # Restaurer la session employé
+        session['employe_id'] = original_employe_id
+        # Supprimer la session direction
+        session.pop('direction_id', None)
+        
+        return jsonify({"success": True, "redirect": "/employe.html"})
+    
+    return jsonify({"success": False, "error": "Impossible de revenir en mode employé"})
 
 # ========== API CLICK & COLLECT ==========
 @app.route("/api/submit_order", methods=["POST"])

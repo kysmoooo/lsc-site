@@ -1174,6 +1174,7 @@
                             <p class="direction-hint">Panel Administratif</p>
                         </div>
                         <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
+                        <button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour mode employé</button>
                     </div>
                     <div class="direction-tabs">
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
@@ -1230,6 +1231,23 @@
             await fetch(`${API_BASE}/direction/logout`, { method: 'POST', credentials: 'include' });
             window.location.reload();
         }
+
+        document.getElementById('btn-back-to-employe')?.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/direction/switch-back-to-employe', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    console.error('Erreur retour employé:', data.error);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
 
         // ========== GESTION DES CANDIDATURES ==========
         async function loadApplications() {
