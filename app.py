@@ -154,7 +154,6 @@ def pricing_page():
 
 @app.route("/employe.html")
 def employe_page():
-    session.pop('employe_id', None)
     return render_template('employe.html')
 
 @app.route("/direction.html")

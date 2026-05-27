@@ -1229,25 +1229,6 @@
 
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
 
-            if (fromEmploye) {
-                document.getElementById('btn-back-to-employe')?.addEventListener('click', async () => {
-                    try {
-                        const res = await fetch('/direction/switch-back-to-employe', {
-                            method: 'POST',
-                            credentials: 'include'
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            window.location.href = data.redirect;
-                        } else {
-                            console.error('Erreur retour employé:', data.error);
-                        }
-                    } catch (error) {
-                        console.error('Erreur:', error);
-                    }
-                });
-            }
-
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     currentTab = tab.dataset.tab;
