@@ -1363,17 +1363,18 @@
 
         const name = currentEmploye.displayName || currentEmploye.username;
         document.getElementById('emp-display-name').textContent = '👑 ' + name;
-        document.getElementById('emp-display-role').textContent = currentEmploye.role || 'Employé';
+        document.getElementById('emp-display-role').textContent = currentEmploye.category || currentEmploye.role || 'Employé';
         document.getElementById('emp-avatar-initials').textContent = name.charAt(0).toUpperCase();
 
         checkCurrentService();
         loadPeopleCount();
         loadAdverts();
-        loadLastAdvertFromDB(); // Charger le dernier advert depuis la BDD
+        loadLastAdvertFromDB();
 
         peopleRefreshInterval = setInterval(loadPeopleCount, 10000);
+        
     }
-
+    
     // ===== CHARGER DERNIER ADVERT DEPUIS LA BDD =====
     async function loadLastAdvertFromDB() {
         try {
