@@ -1190,47 +1190,53 @@
     document.getElementById('btn-switch').addEventListener('click', async () => {
         if (!currentEmploye) return;
         
-        // Vérifier si le rôle est supérieur à mécanicien
-        const roleHierarchy = {
+        // Hiérarchie des catégories (doit correspondre EXACTEMENT à la base de données)
+        const categoryHierarchy = {
             'Mecanicien': 0,
             'Supervision': 1,
             'Direction': 2,
         };
         
-        const currentRole = (currentEmploye.role || 'employe').toLowerCase();
-        const currentRoleLevel = roleHierarchy[currentRole] || 0;
+        const currentCategory = currentEmploye.category || 'Mecanicien';
+        const currentCategoryLevel = categoryHierarchy[currentCategory] || 0;
         
-        if (currentRoleLevel <= roleHierarchy['mecanicien']) {
-            showMessage('service-msg', "❌ Vous n'avez pas les droits pour accéder à la direction (rôle supérieur à mécanicien requis)", "error");
+        console.log(`📊 Catégorie actuelle: "${currentCategory}" (niveau ${currentCategoryLevel})`);
+        console.log(`👤 Employé:`, currentEmploye);
+        
+        if (currentCategoryLevel <= categoryHierarchy['Mecanicien']) {
+            showMessage('service-msg', 
+                `❌ Vous n'avez pas les droits pour accéder à la direction. Votre catégorie: ${currentCategory}. Catégorie requise: Supervision ou Direction.`, 
+                "error"
+            );
             return;
         }
         
-        // Désactiver le bouton pendant l'opération
+        // Désactiver le bouton
         const btn = document.getElementById('btn-switch');
+        const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = '🔄 Chargement...';
         
         try {
-            // 1. Vérifier si l'utilisateur a un compte direction existant avec le même username
+            // 1. Vérifier si l'utilisateur a un compte direction
             const checkRes = await fetch(`/direction/check-by-username`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ 
                     username: currentEmploye.username,
-                    role: currentEmploye.role 
+                    category: currentCategory  // Envoyer category au lieu de role
                 })
             });
             
-            if (!checkRes.ok) {
-                const errorData = await checkRes.json();
-                throw new Error(errorData.error || `Erreur ${checkRes.status}`);
-            }
-            
             const checkData = await checkRes.json();
             
+            if (!checkRes.ok) {
+                throw new Error(checkData.error || `Erreur ${checkRes.status}`);
+            }
+            
             if (checkData.exists) {
-                // Connexion automatique à la direction
+                // 2. Connexion automatique à la direction
                 const loginRes = await fetch(`/direction/auto-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1241,32 +1247,23 @@
                     })
                 });
                 
-                if (!loginRes.ok) {
-                    const errorData = await loginRes.json();
-                    throw new Error(errorData.error || `Erreur ${loginRes.status}`);
-                }
-                
                 const loginData = await loginRes.json();
                 
-                if (loginData.success) {
-                    // Redirection vers la page direction
+                if (loginRes.ok && loginData.success) {
                     window.location.href = '/direction.html';
                 } else {
                     throw new Error(loginData.error || 'Échec de la connexion direction');
                 }
             } else {
-                showMessage('service-msg', 
-                    "❌ Vous n'avez pas de compte direction associé. Contactez l'administrateur pour créer votre compte direction.", 
-                    "error"
-                );
+                throw new Error(checkData.error || 'Aucun compte direction associé');
             }
             
         } catch (error) {
-            console.error('Switch direction error:', error);
-            showMessage('service-msg', "❌ Erreur lors du changement de mode: " + error.message, "error");
+            console.error('❌ Switch direction error:', error);
+            showMessage('service-msg', "❌ " + error.message, "error");
         } finally {
             btn.disabled = false;
-            btn.textContent = '🔄 Switch direction';
+            btn.textContent = originalText;
         }
     });
 

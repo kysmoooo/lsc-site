@@ -633,18 +633,14 @@ def employe_login():
         })
     return jsonify({"success": False}), 401
 
-# Mettre à jour get_active_debut (pas de changement, déjà utilise services.employe_id)
-# Mettre à jour _end_service (pas de changement)
-
-# Modifier employe_me pour utiliser staff_profiles
 @app.route("/employe/me")
 def employe_me():
     if 'employe_id' in session:
         conn = get_db_connection()
         if conn:
             cur = conn.cursor(dictionary=True)
-            # CHANGEMENT ICI
-            cur.execute("SELECT id, username, name as display_name, role FROM staff_profiles WHERE id=%s AND active=1", (session['employe_id'],))
+            # Récupérer category au lieu de role
+            cur.execute("SELECT id, username, name as display_name, category FROM staff_profiles WHERE id=%s AND active=1", (session['employe_id'],))
             user = cur.fetchone()
             cur.close()
             conn.close()
@@ -653,11 +649,10 @@ def employe_me():
                     "id": user['id'],
                     "username": user['username'],
                     "displayName": user['display_name'],
-                    "role": user['role']
+                    "category": user['category']  # Renvoyer category au lieu de role
                 }})
     return jsonify({"user": None})
- 
- 
+
 # ─────────────────────────────────────────────────
 # HELPERS — Logique basée sur paires debut/fin
 #
@@ -1501,27 +1496,36 @@ def direction_logout():
     session.pop('direction_id', None)
     return jsonify({"success": True})
 
-# Supprimez complètement l'ancienne route direction/check-by-username et remplacez par :
-
 @app.route("/direction/check-by-username", methods=["POST"])
 def direction_check_by_username():
     """Vérifie si un employé a un compte direction avec son username"""
     data = request.get_json()
     username = data.get('username')
-    role = data.get('role', '').lower()
+    category = data.get('category', '')  # Récupérer category au lieu de role
     
-    print(f"🔍 Vérification direction pour: {username}, rôle: {role}")
+    print(f"🔍 Vérification direction pour: {username}, category reçue: '{category}'")
     
-    # Vérifier le rôle (sécurité côté serveur)
-    role_hierarchy = {
+    # Hiérarchie des catégories (basée sur la colonne category)
+    category_hierarchy = {
         'Mecanicien': 0,
         'Supervision': 1,
         'Direction': 2,
     }
     
-    role_level = role_hierarchy.get(role, 0)
-    if role_level <= role_hierarchy.get('mecanicien', 1):
-        return jsonify({"exists": False, "error": "Droits insuffisants"}), 403
+    # Vérifier si la category existe dans la hiérarchie
+    if category not in category_hierarchy:
+        print(f"⚠️ Category inconnue: '{category}'")
+        return jsonify({"exists": False, "error": f"Catégorie '{category}' non reconnue"}), 403
+    
+    category_level = category_hierarchy.get(category, 0)
+    required_level = category_hierarchy.get('Mecanicien', 0)
+    
+    print(f"📊 Niveau de la catégorie: {category_level}, Niveau requis: > {required_level}")
+    
+    # Seuls les catégories supérieures à Mecanicien (Supervision, Direction) peuvent switch
+    if category_level <= required_level:
+        print(f"❌ REFUSÉ: category '{category}' niveau {category_level} insuffisant")
+        return jsonify({"exists": False, "error": f"Droits insuffisants. La catégorie '{category}' ne peut pas accéder à la direction"}), 403
     
     conn = get_db_connection()
     if not conn:
@@ -1529,7 +1533,6 @@ def direction_check_by_username():
     
     try:
         cur = conn.cursor(dictionary=True)
-        # Vérifier dans direction_users
         cur.execute(
             "SELECT id, username FROM direction_users WHERE username = %s AND active = 1",
             (username,)
@@ -1543,10 +1546,10 @@ def direction_check_by_username():
             return jsonify({"exists": True, "direction_id": direction_user['id']})
         else:
             print(f"❌ Aucun compte direction pour {username}")
-            return jsonify({"exists": False})
+            return jsonify({"exists": False, "error": f"Aucun compte direction associé à '{username}'"})
             
     except Exception as e:
-        print(f"❌ Erreur check direction by username: {e}")
+        print(f"❌ Erreur check direction: {e}")
         return jsonify({"exists": False, "error": str(e)}), 500
 
 
@@ -1569,9 +1572,9 @@ def direction_auto_login():
     try:
         cur = conn.cursor(dictionary=True)
         
-        # Récupérer l'employé pour vérifier son rôle (double sécurité)
+        # Récupérer l'employé avec sa category (et non role)
         cur.execute(
-            "SELECT id, username, role FROM staff_profiles WHERE id = %s AND username = %s AND active = 1",
+            "SELECT id, username, category FROM staff_profiles WHERE id = %s AND username = %s AND active = 1",
             (employe_id, username)
         )
         employe = cur.fetchone()
@@ -1581,17 +1584,27 @@ def direction_auto_login():
             conn.close()
             return jsonify({"success": False, "error": "Employé non trouvé"}), 404
         
-        role_hierarchy = {
+        print(f"👤 Employé trouvé: category = '{employe['category']}'")
+        
+        # Hiérarchie des catégories
+        category_hierarchy = {
             'Mecanicien': 0,
             'Supervision': 1,
             'Direction': 2,
         }
         
-        role_level = role_hierarchy.get(employe['role'].lower(), 0)
-        if role_level <= role_hierarchy.get('mecanicien', 1):
+        category_level = category_hierarchy.get(employe['category'], 0)
+        required_level = category_hierarchy.get('Mecanicien', 0)
+        
+        print(f"📊 Niveau catégorie: {category_level}, requis: > {required_level}")
+        
+        if category_level <= required_level:
             cur.close()
             conn.close()
-            return jsonify({"success": False, "error": "Droits insuffisants pour accéder à la direction"}), 403
+            return jsonify({
+                "success": False, 
+                "error": f"Droits insuffisants. La catégorie '{employe['category']}' ne peut pas accéder à la direction"
+            }), 403
         
         # Récupérer le compte direction
         cur.execute(
@@ -1602,26 +1615,28 @@ def direction_auto_login():
         cur.close()
         conn.close()
         
-        if direction_user:
-            # Créer la session direction
-            session.permanent = True
-            session['direction_id'] = direction_user['id']
-            # Garder aussi une trace de l'employé original pour le switch back
-            session['original_employe_id'] = employe_id
-            session['direction_from_employe'] = True
-            
-            print(f"✅ Session direction créée pour {username}")
-            
+        if not direction_user:
             return jsonify({
-                "success": True,
-                "user": {
-                    "id": direction_user['id'],
-                    "displayName": direction_user['display_name'],
-                    "role": direction_user['role']
-                }
-            })
-        else:
-            return jsonify({"success": False, "error": "Aucun compte direction associé à cet employé"})
+                "success": False, 
+                "error": f"Aucun compte direction associé à '{username}'. Contactez l'administrateur."
+            }), 404
+        
+        # Créer la session direction
+        session.permanent = True
+        session['direction_id'] = direction_user['id']
+        session['original_employe_id'] = employe_id
+        session['direction_from_employe'] = True
+        
+        print(f"✅ Session direction créée pour {username} (ID: {direction_user['id']})")
+        
+        return jsonify({
+            "success": True,
+            "user": {
+                "id": direction_user['id'],
+                "displayName": direction_user['display_name'],
+                "role": direction_user['role']
+            }
+        })
             
     except Exception as e:
         print(f"❌ Erreur auto-login direction: {e}")
