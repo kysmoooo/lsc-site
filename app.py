@@ -1520,6 +1520,7 @@ def direction_login():
                 session['original_employe_id'] = staff['id']
                 session['direction_from_employe'] = False
                 session['employe_id'] = staff['id']
+                session.modified = True
             cur.close()
             conn.close()
 
@@ -1662,6 +1663,7 @@ def direction_auto_login():
         session['original_employe_id'] = employe_id
         session['direction_from_employe'] = True
         session['employe_id'] = employe_id
+        session.modified = True
         
         print(f"✅ Session direction créée pour {username} (ID: {direction_user['id']})")
         
@@ -1713,6 +1715,7 @@ def direction_switch_back_to_employe():
             session['employe_id'] = staff['id']
 
         session.permanent = True
+        session.modified = True
         # Supprimer la session direction
         session.pop('direction_id', None)
         session.pop('original_employe_id', None)
