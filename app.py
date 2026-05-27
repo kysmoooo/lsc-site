@@ -616,7 +616,7 @@ def employe_login():
     
     cur = conn.cursor(dictionary=True)
     cur.execute(
-        "SELECT id, username, name as display_name, role FROM staff_profiles WHERE username=%s AND password_hash=%s AND active=1",
+        "SELECT id, username, name as display_name, role, category FROM staff_profiles WHERE username=%s AND password_hash=%s AND active=1",
         (username, password)
     )
     user = cur.fetchone()
@@ -629,7 +629,7 @@ def employe_login():
         return jsonify({
             "success": True,
             "user": {"id": user['id'], "username": user['username'],
-                    "displayName": user['display_name'], "role": user['role']}
+                    "displayName": user['display_name'], "role": user['role'], "category": user['category']}
         })
     return jsonify({"success": False}), 401
 
