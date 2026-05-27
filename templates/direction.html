@@ -1091,11 +1091,26 @@
 
         async function checkDirectionAuth() {
             try {
+                // On vérifie d'abord si on vient de la page employé ou si on a une session active
+                const sessionRes = await fetch('/direction/session-info', { credentials: 'include' });
+                const sessionData = await sessionRes.json();
+                
+                // Si on est déjà connecté en direction ET qu'on a demandé un retour employé
+                // ou si on veut simplement vérifier l'auth
                 const response = await fetch('/direction/me', { credentials: 'include' });
                 const data = await response.json();
                 
                 if (data.user) {
                     currentDirectionUser = data.user;
+                    
+                    // Si l'URL contient un paramètre indiquant qu'on veut aller côté employé
+                    // ou si une logique spécifique doit s'appliquer au chargement
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('action') === 'return_to_employe') {
+                        switchBackToEmploye();
+                        return;
+                    }
+                    
                     showDirectionPanel();
                 } else {
                     showDirectionLogin();
@@ -1183,10 +1198,10 @@
                             <p class="direction-hint">Panel Administratif</p>
                         </div>
                         <div style="display:flex; gap:0.75rem;">
-                            <button class="ghost" id="direction-logout">Se déconnecter</button>
-                            ${canSwitchBack ? `<button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>` : ''}
-                        </div>
-                    </div>
+	                            <button class="ghost" id="direction-logout">Se déconnecter</button>
+	                            ${canSwitchBack ? `<button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>` : ''}
+	                        </div>
+	                    </div>
                     <div class="direction-tabs">
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature">📋 Candidatures</button>
                         <button type="button" class="tab ${currentTab === 'sanctions' ? 'active' : ''}" data-tab="sanctions">⚠️ Sanctions</button>
@@ -1204,29 +1219,13 @@
             // ✅ Attacher les events APRÈS injection du HTML
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
 
-            // ✅ Le bouton retour existe maintenant dans le DOM, on peut l'attacher
-            if (canSwitchBack) {
-                const backBtn = document.getElementById('btn-back-to-employe');
-                if (backBtn) {
-                    backBtn.addEventListener('click', async () => {
-                        try {
-                            const res = await fetch('/direction/switch-back-to-employe', {
-                                method: 'POST',
-                                credentials: 'include'
-                            });
-                            const data = await res.json();
-                            console.log('🔄 Switch back:', data);
-                            if (data.success) {
-                                window.location.href = data.redirect;
-                            } else {
-                                alert('Erreur : ' + (data.error || 'inconnue'));
-                            }
-                        } catch (err) {
-                            console.error('❌ Erreur retour employé:', err);
-                        }
-                    });
-                }
-            }
+	            // ✅ Le bouton retour existe maintenant dans le DOM, on peut l'attacher
+	            if (canSwitchBack) {
+	                const backBtn = document.getElementById('btn-back-to-employe');
+	                if (backBtn) {
+	                    backBtn.addEventListener('click', switchBackToEmploye);
+	                }
+	            }
 
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1265,7 +1264,9 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    window.location.href = data.redirect;
+                    // On redirige vers la page employé. Si le serveur renvoie une URL spécifique, on l'utilise.
+                    // Sinon, on force vers /employe (ou l'URL correspondante à employe_page)
+                    window.location.href = data.redirect || '/employe';
                 } else {
                     alert('Impossible de revenir en mode employé : ' + (data.error || ''));
                 }
