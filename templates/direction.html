@@ -1189,11 +1189,17 @@
             }
         }
 
-        function showDirectionPanel() {
+        async function showDirectionPanel() {
             const panel = document.getElementById('direction-panel');
             if (!panel) return;
-            
-            const showBackBtn = session?.direction_from_employe;
+
+            // Vérifier si on vient de l'espace employé
+            let fromEmploye = false;
+            try {
+                const res = await fetch('/direction/session-info', { credentials: 'include' });
+                const info = await res.json();
+                fromEmploye = info.from_employe || false;
+            } catch {}
 
             panel.innerHTML = `
                 <div class="direction-panel">
@@ -1202,29 +1208,46 @@
                             <p class="direction-user">👑 ${currentDirectionUser?.displayName || 'Direction'}</p>
                             <p class="direction-hint">Panel Administratif</p>
                         </div>
-                        <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
-                        <button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>
+                        <div style="display:flex; gap:0.75rem;">
+                            <button class="ghost" id="direction-logout">Se déconnecter</button>
+                            ${fromEmploye ? `<button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>` : ''}
+                        </div>
                     </div>
                     <div class="direction-tabs">
-                        <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
-                        <button type="button" class="tab ${currentTab === 'sanctions' ? 'active' : ''}" data-tab="sanctions" data-key="direction.sanctions">⚠️ Sanctions</button>
-                        <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences" data-key="direction.absences">📅 Absences</button>
-                        <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces" data-key="direction.annonces">📢 Annonces</button>
-                        <button type="button" class="tab" data-tab="employes" data-key="direction.employes">👥 Employés</button>
-                        <button type="button" class="tab" data-tab="inscriptions">📬 Inscriptions</button>
+                        <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature">📋 Candidatures</button>
+                        <button type="button" class="tab ${currentTab === 'sanctions' ? 'active' : ''}" data-tab="sanctions">⚠️ Sanctions</button>
+                        <button type="button" class="tab ${currentTab === 'absences' ? 'active' : ''}" data-tab="absences">📅 Absences</button>
+                        <button type="button" class="tab ${currentTab === 'annonces' ? 'active' : ''}" data-tab="annonces">📢 Annonces</button>
+                        <button type="button" class="tab ${currentTab === 'employes' ? 'active' : ''}" data-tab="employes">👥 Employés</button>
+                        <button type="button" class="tab ${currentTab === 'inscriptions' ? 'active' : ''}" data-tab="inscriptions">📬 Inscriptions</button>
                     </div>
                     <div id="direction-content">
                         <div class="loader">⏳ Chargement...</div>
                     </div>
                 </div>
             `;
-            
-            updatePageText();
-            
-            document.getElementById('btn-back-to-employe').addEventListener('click', switchBackToEmploye);
+
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
-    
-            // Dans les écouteurs d'onglets :
+
+            if (fromEmploye) {
+                document.getElementById('btn-back-to-employe')?.addEventListener('click', async () => {
+                    try {
+                        const res = await fetch('/direction/switch-back-to-employe', {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.href = data.redirect;
+                        } else {
+                            console.error('Erreur retour employé:', data.error);
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                    }
+                });
+            }
+
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     currentTab = tab.dataset.tab;
@@ -1240,21 +1263,13 @@
                     else if (currentTab === 'inscriptions') loadInscriptions();
                 });
             });
-            
-            if (currentTab === 'candidature') {
-                loadApplications();
-            } else if (currentTab === 'sanctions') {
-                loadSanctions();
-            } else if (currentTab === 'absences') {
-                loadAbsences();
-            } else if (currentTab === 'annonces') {
-                loadAnnonces();
-            } else if (currentTab === 'employes') {
-                loadEmployesSection(); 
-            } else if (currentTab === 'inscriptions') {
-                loadInscriptions();
-            }
-            
+
+            if (currentTab === 'candidature') loadApplications();
+            else if (currentTab === 'sanctions') loadSanctions();
+            else if (currentTab === 'absences') loadAbsences();
+            else if (currentTab === 'annonces') loadAnnonces();
+            else if (currentTab === 'employes') loadEmployesSection();
+            else if (currentTab === 'inscriptions') loadInscriptions();
         }
 
         async function handleDirectionLogout() {

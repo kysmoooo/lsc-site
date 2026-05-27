@@ -1455,6 +1455,15 @@ def auth_logout():
     return jsonify({"success": True})
 
 # ========== API DIRECTION ==========
+
+@app.route("/direction/session-info")
+@require_direction
+def direction_session_info():
+    return jsonify({
+        "from_employe": session.get('direction_from_employe', False),
+        "original_employe_id": session.get('original_employe_id', None)
+    })
+
 @app.route("/direction/me")
 def direction_me():
     if 'direction_id' in session:
