@@ -1106,32 +1106,6 @@
             }
         }
 
-        function addBackToEmployeButton() {
-            const headerActions = document.querySelector('.header-actions');
-            if (headerActions && !document.getElementById('btn-back-to-employe')) {
-                const backBtn = document.createElement('button');
-                backBtn.id = 'btn-back-to-employe';
-                backBtn.className = 'btn-ghost';
-                backBtn.style.fontSize = '0.8rem';
-                backBtn.innerHTML = '🔄 Retour mode employé';
-                backBtn.onclick = async () => {
-                    try {
-                        const res = await fetch('/direction/switch-back-to-employe', {
-                            method: 'POST',
-                            credentials: 'include'
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            window.location.href = data.redirect;
-                        }
-                    } catch (error) {
-                        console.error('Erreur retour employé:', error);
-                    }
-                };
-                headerActions.appendChild(backBtn);
-            }
-        }
-
         function showDirectionLogin() {
             const panel = document.getElementById('direction-panel');
             if (!panel) return;
@@ -1193,7 +1167,6 @@
             const panel = document.getElementById('direction-panel');
             if (!panel) return;
 
-            // Vérifier si on vient de l'espace employé
             let fromEmploye = false;
             try {
                 const res = await fetch('/direction/session-info', { credentials: 'include' });
@@ -1227,7 +1200,32 @@
                 </div>
             `;
 
+            // ✅ Attacher les events APRÈS injection du HTML
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
+
+            // ✅ Le bouton retour existe maintenant dans le DOM, on peut l'attacher
+            if (fromEmploye) {
+                const backBtn = document.getElementById('btn-back-to-employe');
+                if (backBtn) {
+                    backBtn.addEventListener('click', async () => {
+                        try {
+                            const res = await fetch('/direction/switch-back-to-employe', {
+                                method: 'POST',
+                                credentials: 'include'
+                            });
+                            const data = await res.json();
+                            console.log('🔄 Switch back:', data);
+                            if (data.success) {
+                                window.location.href = data.redirect;
+                            } else {
+                                alert('Erreur : ' + (data.error || 'inconnue'));
+                            }
+                        } catch (err) {
+                            console.error('❌ Erreur retour employé:', err);
+                        }
+                    });
+                }
+            }
 
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -2181,7 +2179,6 @@
             initLangToggle();
             updatePageText();
             checkDirectionAuth();
-            addBackToEmployeButton();
         });
     </script>
 </body>
