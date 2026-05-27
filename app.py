@@ -1681,7 +1681,7 @@ def direction_auto_login():
         print(f"❌ Erreur auto-login direction: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route("/direction/switch-back-to-employe", methods=["POST"])
+@app.route("/direction/switch-back-to-employe", methods=["GET", "POST"])
 @require_direction
 def direction_switch_back_to_employe():
     """Permet de revenir en mode employé depuis la direction"""
@@ -1723,6 +1723,8 @@ def direction_switch_back_to_employe():
 
         conn.close()
 
+        if request.method == 'GET':
+            return redirect('/employe.html')
         return jsonify({"success": True, "redirect": "/employe.html"})
     except Exception as e:
         print(f"❌ Erreur switch back to employe: {e}")
