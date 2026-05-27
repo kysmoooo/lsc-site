@@ -1471,11 +1471,23 @@ def direction_me():
             cur = conn.cursor(dictionary=True)
             cur.execute("SELECT id, username, display_name, role FROM direction_users WHERE id=%s", (session['direction_id'],))
             user = cur.fetchone()
+            if user:
+                cur.execute("SELECT id FROM staff_profiles WHERE username=%s AND active=1 LIMIT 1", (user['username'],))
+                staff = cur.fetchone()
+                can_switch = bool(staff)
+                cur.close()
+                conn.close()
+                return jsonify({
+                    "user": {
+                        "id": user['id'],
+                        "displayName": user['display_name'],
+                        "role": user['role']
+                    },
+                    "canSwitchToEmploye": can_switch
+                })
             cur.close()
             conn.close()
-            if user:
-                return jsonify({"user": {"id": user['id'], "displayName": user['display_name'], "role": user['role']}})
-    return jsonify({"user": None})
+    return jsonify({"user": None, "canSwitchToEmploye": False})
 
 @app.route("/direction/login", methods=["POST"])
 def direction_login():
@@ -1653,17 +1665,48 @@ def direction_auto_login():
 @require_direction
 def direction_switch_back_to_employe():
     """Permet de revenir en mode employé depuis la direction"""
-    if session.get('direction_from_employe') and session.get('original_employe_id'):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"success": False, "error": "Erreur DB"}), 500
+
+    try:
         original_employe_id = session.get('original_employe_id')
-        
-        # Restaurer la session employé
-        session['employe_id'] = original_employe_id
+        if original_employe_id:
+            session['employe_id'] = original_employe_id
+        else:
+            cur = conn.cursor(dictionary=True)
+            cur.execute("SELECT username FROM direction_users WHERE id=%s", (session['direction_id'],))
+            direction_user = cur.fetchone()
+            if not direction_user:
+                cur.close()
+                conn.close()
+                return jsonify({"success": False, "error": "Compte direction introuvable."}), 404
+
+            cur.execute(
+                "SELECT id FROM staff_profiles WHERE username = %s AND active = 1 LIMIT 1",
+                (direction_user['username'],)
+            )
+            staff = cur.fetchone()
+            cur.close()
+            if not staff:
+                conn.close()
+                return jsonify({"success": False, "error": "Aucun compte employé associé à ce compte direction."}), 404
+
+            session['employe_id'] = staff['id']
+
         # Supprimer la session direction
         session.pop('direction_id', None)
-        
+        session.pop('original_employe_id', None)
+        session.pop('direction_from_employe', None)
+
+        conn.close()
+
         return jsonify({"success": True, "redirect": "/employe.html"})
-    
-    return jsonify({"success": False, "error": "Impossible de revenir en mode employé"})
+    except Exception as e:
+        print(f"❌ Erreur switch back to employe: {e}")
+        if conn:
+            conn.close()
+        return jsonify({"success": False, "error": "Impossible de revenir en mode employé"}), 500
 
 # ========== API CLICK & COLLECT ==========
 @app.route("/api/submit_order", methods=["POST"])

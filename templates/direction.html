@@ -1174,6 +1174,7 @@
                 fromEmploye = info.from_employe || false;
             } catch {}
 
+            const canSwitchBack = fromEmploye || currentDirectionUser?.canSwitchToEmploye;
             panel.innerHTML = `
                 <div class="direction-panel">
                     <div class="direction-header">
@@ -1183,7 +1184,7 @@
                         </div>
                         <div style="display:flex; gap:0.75rem;">
                             <button class="ghost" id="direction-logout">Se déconnecter</button>
-                            ${fromEmploye ? `<button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>` : ''}
+                            ${canSwitchBack ? `<button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>` : ''}
                         </div>
                     </div>
                     <div class="direction-tabs">
@@ -1204,7 +1205,7 @@
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
 
             // ✅ Le bouton retour existe maintenant dans le DOM, on peut l'attacher
-            if (fromEmploye) {
+            if (canSwitchBack) {
                 const backBtn = document.getElementById('btn-back-to-employe');
                 if (backBtn) {
                     backBtn.addEventListener('click', async () => {
