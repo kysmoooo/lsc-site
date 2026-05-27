@@ -1509,16 +1509,13 @@ def direction_check_by_username():
     
     # Vérifier le rôle (sécurité côté serveur aussi)
     role_hierarchy = {
-        'employe': 0,
-        'mecanicien': 1,
-        'chef atelier': 2,
-        'manager': 3,
-        'direction': 4,
-        'admin': 5
+        'Mecanicien': 1,
+        'Supervision': 2,
+        'Direction': 3
     }
     
     role_level = role_hierarchy.get(role, 0)
-    if role_level <= role_hierarchy.get('mecanicien', 1):
+    if role_level <= role_hierarchy.get('Mecanicien', 1):
         return jsonify({"exists": False, "error": "Droits insuffisants"}), 403
     
     conn = get_db_connection()
@@ -1575,16 +1572,13 @@ def direction_auto_login():
             return jsonify({"success": False, "error": "Employé non trouvé"}), 404
         
         role_hierarchy = {
-            'employe': 0,
-            'mecanicien': 1,
-            'chef atelier': 2,
-            'manager': 3,
-            'direction': 4,
-            'admin': 5
+            'Mecanicien': 1,
+            'Supervision': 2,
+            'Direction': 3
         }
         
         role_level = role_hierarchy.get(employe['role'].lower(), 0)
-        if role_level <= role_hierarchy.get('mecanicien', 1):
+        if role_level <= role_hierarchy.get('Mecanicien', 1):
             cur.close()
             conn.close()
             return jsonify({"success": False, "error": "Droits insuffisants pour accéder à la direction"}), 403
