@@ -990,6 +990,7 @@
         let currentTab = 'candidature';
         let absences = [];
         let annonces = [];
+        let currentDirection = null;
 
         // Afficher un message
         function showMessage(elementId, message, type) {
@@ -1090,18 +1091,58 @@
 
         async function checkDirectionAuth() {
             try {
-                const response = await fetch(`${API_BASE}/direction/me`, { credentials: 'include' });
+                const response = await fetch('/direction/me', {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 
                 if (data.user) {
-                    currentDirectionUser = data.user;
-                    showDirectionPanel();
+                    currentDirection = data.user;
+                    // Cacher le formulaire de login et afficher le panel direction
+                    document.getElementById('direction-login').style.display = 'none';
+                    document.getElementById('direction-panel').style.display = 'block';
+                    
+                    // Mettre à jour l'affichage du nom
+                    document.getElementById('dir-display-name').textContent = currentDirection.displayName;
+                    document.getElementById('dir-display-role').textContent = currentDirection.role;
+                    
+                    // Charger les données de la direction
+                    loadDirectionData();
                 } else {
-                    showDirectionLogin();
+                    // Afficher le formulaire de login
+                    document.getElementById('direction-login').style.display = 'block';
+                    document.getElementById('direction-panel').style.display = 'none';
                 }
             } catch (error) {
-                console.error('Error checking direction auth:', error);
-                showDirectionLogin();
+                console.error('Erreur vérification auth direction:', error);
+                document.getElementById('direction-login').style.display = 'block';
+                document.getElementById('direction-panel').style.display = 'none';
+            }
+        }
+
+        function addBackToEmployeButton() {
+            const headerActions = document.querySelector('.header-actions');
+            if (headerActions && !document.getElementById('btn-back-to-employe')) {
+                const backBtn = document.createElement('button');
+                backBtn.id = 'btn-back-to-employe';
+                backBtn.className = 'btn-ghost';
+                backBtn.style.fontSize = '0.8rem';
+                backBtn.innerHTML = '🔄 Retour mode employé';
+                backBtn.onclick = async () => {
+                    try {
+                        const res = await fetch('/direction/switch-back-to-employe', {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.href = data.redirect;
+                        }
+                    } catch (error) {
+                        console.error('Erreur retour employé:', error);
+                    }
+                };
+                headerActions.appendChild(backBtn);
             }
         }
 
@@ -1174,7 +1215,7 @@
                             <p class="direction-hint">Panel Administratif</p>
                         </div>
                         <button class="ghost" id="direction-logout" data-key="direction.logout">Se déconnecter</button>
-                        <button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour mode employé</button>
+                        <button class="ghost" id="btn-back-to-employe" style="font-size:0.8rem;">🔄 Retour employé</button>
                     </div>
                     <div class="direction-tabs">
                         <button type="button" class="tab ${currentTab === 'candidature' ? 'active' : ''}" data-tab="candidature" data-key="direction.candidature">📋 Candidatures</button>
@@ -2155,6 +2196,8 @@
             initLangToggle();
             updatePageText();
             checkDirectionAuth();
+            checkDirectionAuth();
+            addBackToEmployeButton();
         });
     </script>
 </body>
