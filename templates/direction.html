@@ -1091,32 +1091,18 @@
 
         async function checkDirectionAuth() {
             try {
-                const response = await fetch('/direction/me', {
-                    credentials: 'include'
-                });
+                const response = await fetch('/direction/me', { credentials: 'include' });
                 const data = await response.json();
                 
                 if (data.user) {
-                    currentDirection = data.user;
-                    // Cacher le formulaire de login et afficher le panel direction
-                    document.getElementById('direction-login').style.display = 'none';
-                    document.getElementById('direction-panel').style.display = 'block';
-                    
-                    // Mettre à jour l'affichage du nom
-                    document.getElementById('dir-display-name').textContent = currentDirection.displayName;
-                    document.getElementById('dir-display-role').textContent = currentDirection.role;
-                    
-                    // Charger les données de la direction
-                    loadDirectionData();
+                    currentDirectionUser = data.user;
+                    showDirectionPanel();
                 } else {
-                    // Afficher le formulaire de login
-                    document.getElementById('direction-login').style.display = 'block';
-                    document.getElementById('direction-panel').style.display = 'none';
+                    showDirectionLogin();
                 }
             } catch (error) {
                 console.error('Erreur vérification auth direction:', error);
-                document.getElementById('direction-login').style.display = 'block';
-                document.getElementById('direction-panel').style.display = 'none';
+                showDirectionLogin();
             }
         }
 
@@ -1207,6 +1193,8 @@
             const panel = document.getElementById('direction-panel');
             if (!panel) return;
             
+            const showBackBtn = session?.direction_from_employe;
+
             panel.innerHTML = `
                 <div class="direction-panel">
                     <div class="direction-header">
@@ -1233,8 +1221,9 @@
             
             updatePageText();
             
+            document.getElementById('btn-back-to-employe').addEventListener('click', switchBackToEmploye);
             document.getElementById('direction-logout').addEventListener('click', handleDirectionLogout);
-            
+    
             // Dans les écouteurs d'onglets :
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1273,7 +1262,7 @@
             window.location.reload();
         }
 
-        document.getElementById('btn-back-to-employe')?.addEventListener('click', async () => {
+        async function switchBackToEmploye() {
             try {
                 const res = await fetch('/direction/switch-back-to-employe', {
                     method: 'POST',
@@ -1283,12 +1272,12 @@
                 if (data.success) {
                     window.location.href = data.redirect;
                 } else {
-                    console.error('Erreur retour employé:', data.error);
+                    alert('Impossible de revenir en mode employé : ' + (data.error || ''));
                 }
             } catch (error) {
                 console.error('Erreur:', error);
             }
-        });
+        }
 
         // ========== GESTION DES CANDIDATURES ==========
         async function loadApplications() {
@@ -2195,7 +2184,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             initLangToggle();
             updatePageText();
-            checkDirectionAuth();
             checkDirectionAuth();
             addBackToEmployeButton();
         });
